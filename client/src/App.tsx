@@ -1,0 +1,95 @@
+import { Switch, Route, Redirect } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider, useAuth } from "./lib/auth-context";
+import { OfflineIndicator } from "./components/offline-indicator";
+import NotFound from "@/pages/not-found";
+import Login from "@/pages/login";
+import Dashboard from "@/pages/dashboard";
+import Campo from "@/pages/campo";
+import Transporte from "@/pages/transporte";
+import Algodoeira from "@/pages/algodoeira";
+import BaleDetails from "@/pages/bale-details";
+import MapPage from "@/pages/map";
+import Etiqueta from "@/pages/etiqueta";
+import SettingsPage from "@/pages/settings";
+import TalhaoStats from "@/pages/talhao-stats";
+
+function ProtectedRoute({ component: Component, allowedRoles }: { 
+  component: () => JSX.Element; 
+  allowedRoles?: string[] 
+}) {
+  const { isAuthenticated, role } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Redirect to="/" />;
+  }
+
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    return <Redirect to="/" />;
+  }
+
+  return <Component />;
+}
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={Login} />
+      
+      <Route path="/dashboard">
+        <ProtectedRoute component={Dashboard} />
+      </Route>
+      
+      <Route path="/campo">
+        <ProtectedRoute component={Campo} allowedRoles={["campo", "admin"]} />
+      </Route>
+      
+      <Route path="/etiqueta">
+        <ProtectedRoute component={Etiqueta} allowedRoles={["campo", "admin"]} />
+      </Route>
+      
+      <Route path="/transporte">
+        <ProtectedRoute component={Transporte} allowedRoles={["transporte", "admin"]} />
+      </Route>
+      
+      <Route path="/algodoeira">
+        <ProtectedRoute component={Algodoeira} allowedRoles={["algodoeira", "admin"]} />
+      </Route>
+      
+      <Route path="/bale/:id">
+        <ProtectedRoute component={BaleDetails} />
+      </Route>
+      
+      <Route path="/map">
+        <ProtectedRoute component={MapPage} allowedRoles={["admin"]} />
+      </Route>
+      
+      <Route path="/settings">
+        <ProtectedRoute component={SettingsPage} allowedRoles={["admin"]} />
+      </Route>
+      
+      <Route path="/talhao-stats">
+        <ProtectedRoute component={TalhaoStats} allowedRoles={["admin"]} />
+      </Route>
+      
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <Router />
+          <OfflineIndicator />
+        </AuthProvider>
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
