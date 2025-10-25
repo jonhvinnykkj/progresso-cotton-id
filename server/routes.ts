@@ -3,11 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import {
   loginSchema,
-  insertBaleSchema,
+  batchCreateBalesSchema,
   updateBaleStatusSchema,
-  initBaleSchema,
-  completeBaleSchema,
-  createBaleSchema,
   updateDefaultSafraSchema,
 } from "@shared/schema";
 import { z } from "zod";
@@ -21,14 +18,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.getUserByUsername(username);
       
-      // Simple auth for MVP - in production, use proper password hashing
       if (!user || user.password !== password) {
         return res.status(401).json({
           error: "Credenciais inválidas",
         });
       }
 
-      // Don't send password to client
       const { password: _, ...userWithoutPassword } = user;
 
       res.json(userWithoutPassword);
@@ -47,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Bale routes
   
-  // Get bale statistics (MUST be before :id route)
+  // Get bale statistics
   app.get("/api/bales/stats", async (req, res) => {
     try {
       const stats = await storage.getBaleStats();
@@ -69,6 +64,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching stats by talhao:", error);
       res.status(500).json({
         error: "Erro ao buscar estatísticas por talhão",
+      });
+    }
+  });
+
+  // Get bale stats by safra
+  app.get("/api/bales/stats-by-safra", async (req, res) => {
+    try {
+      const stats = await storage.getStatsBySafra();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching stats by safra:", error);
+      res.status(500).json({
+        error: "Erro ao buscar estatísticas por safra",
       });
     }
   });
@@ -106,65 +114,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Initialize bale (generate label - only ID + QR)
-  app.post("/api/bales/init", async (req, res) => {
+  // Create bales in batch (NEW)
+  app.post("/api/bales/batch", async (req, res) => {
     try {
-      const data = initBaleSchema.parse(req.body);
-
-      // Check if QR code already exists
-      const existingBale = await storage.getBaleByQRCode(data.qrCode);
-      if (existingBale) {
-        return res.status(409).json({
-          error: "QR Code já cadastrado no sistema",
-          bale: existingBale,
-        });
-      }
-
-      const bale = await storage.initBale(data);
-
-      res.status(201).json(bale);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: "Dados inválidos",
-          details: error.errors,
-        });
-      }
-      console.error("Error initializing bale:", error);
-      res.status(500).json({
-        error: "Erro ao inicializar fardo",
-      });
-    }
-  });
-
-  // Complete bale registration (campo phase - scan and add details)
-  app.patch("/api/bales/:qrCode/complete", async (req, res) => {
-    try {
-      const data = completeBaleSchema.parse(req.body);
-      const { qrCode } = req.params;
-
-      // Check if bale exists
-      const existingBale = await storage.getBaleByQRCode(qrCode);
-      if (!existingBale) {
-        return res.status(404).json({
-          error: "Fardo não encontrado",
-        });
-      }
-
-      // Check if already completed
-      if (existingBale.talhao && existingBale.numero) {
-        return res.status(409).json({
-          error: "Fardo já cadastrado completamente",
-          bale: existingBale,
-        });
-      }
+      const data = batchCreateBalesSchema.parse(req.body);
 
       // For MVP, using a generic user ID - in production, get from session
       const userId = "campo-user";
 
-      const bale = await storage.completeBale(qrCode, data, userId);
+      const bales = await storage.batchCreateBales(data, userId);
 
-      res.json(bale);
+      res.status(201).json(bales);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
@@ -172,70 +132,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: error.errors,
         });
       }
-      console.error("Error completing bale:", error);
+      console.error("Error creating bales:", error);
       res.status(500).json({
-        error: "Erro ao completar cadastro do fardo",
+        error: "Erro ao cadastrar fardos",
       });
     }
   });
 
-  // Create complete bale (Campo - with all data including talhao and numero)
-  app.post("/api/bales", async (req, res) => {
-    try {
-      const data = createBaleSchema.parse(req.body);
-
-      // Check if QR code already exists
-      const existingBale = await storage.getBaleByQRCode(data.qrCode);
-      if (existingBale) {
-        return res.status(409).json({
-          error: "QR Code já cadastrado no sistema",
-          bale: existingBale,
-        });
-      }
-
-      // SECURITY: Always get safra from admin settings, ignore client-sent value
-      const safraConfig = await storage.getSetting("default_safra");
-      const safraValue = safraConfig?.value;
-
-      // Override safra with server-side value (security measure)
-      const secureData = {
-        ...data,
-        safra: safraValue,
-      };
-
-      // For MVP, using a generic user ID - in production, get from session
-      const userId = "campo-user";
-
-      const bale = await storage.createCompleteBale(secureData, userId);
-
-      res.status(201).json(bale);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: "Dados inválidos",
-          details: error.errors,
-        });
-      }
-      console.error("Error creating bale:", error);
-      res.status(500).json({
-        error: "Erro ao cadastrar fardo",
-      });
-    }
-  });
-
-  // Update bale status
+  // Update bale status (SEM GPS)
   app.patch("/api/bales/:id/status", async (req, res) => {
     try {
-      const { status, latitude, longitude } = updateBaleStatusSchema.parse(req.body);
+      const { status } = updateBaleStatusSchema.parse(req.body);
 
-      // For MVP, using a generic user ID - in production, get from session
+      // For MVP, using a generic user ID
       const userId = `${status}-user`;
 
       const bale = await storage.updateBaleStatus(
         req.params.id,
         status,
-        latitude,
-        longitude,
         userId
       );
 
@@ -248,7 +162,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if it's a business logic error from storage
       if (error instanceof Error) {
         return res.status(400).json({
           error: error.message,
@@ -265,8 +178,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete all bales (admin only)
   app.delete("/api/bales/all", async (req, res) => {
     try {
-      // TODO: Add proper session-based auth check when implementing full auth system
-      // For now, require explicit confirmation parameter to prevent accidental deletion
       const { confirm } = req.body;
       
       if (confirm !== "DELETE_ALL_BALES") {
@@ -289,15 +200,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
   // Settings endpoints
-  // Get default safra setting
   app.get("/api/settings/default-safra", async (req, res) => {
     try {
       const setting = await storage.getSetting("default_safra");
       
       if (!setting) {
-        return res.json({ value: "" }); // Return empty if not set
+        return res.json({ value: "" });
       }
 
       res.json({ value: setting.value });
@@ -309,10 +218,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update default safra setting (admin only)
   app.put("/api/settings/default-safra", async (req, res) => {
     try {
-      // TODO: Add proper auth check - should only allow admin role
       const { value } = updateDefaultSafraSchema.parse(req.body);
 
       const setting = await storage.updateSetting("default_safra", value);

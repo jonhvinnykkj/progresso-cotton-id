@@ -18,13 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentPosition } from "@/lib/geolocation";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
   ScanLine,
   Building,
   LogOut,
-  MapPin,
   Loader2,
   CheckCircle,
   Wheat,
@@ -43,11 +41,6 @@ export default function Algodoeira() {
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualBaleId, setManualBaleId] = useState("");
   const [scannedBale, setScannedBale] = useState<Bale | null>(null);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{
-    latitude: string;
-    longitude: string;
-  } | null>(null);
 
   const { data: bales = [] } = useQuery<Bale[]>({
     queryKey: ["/api/bales"],
@@ -65,7 +58,6 @@ export default function Algodoeira() {
         description: "Fardo marcado como beneficiado com sucesso.",
       });
       setScannedBale(null);
-      setCurrentLocation(null);
     },
     onError: (error: Error) => {
       toast({
@@ -98,25 +90,6 @@ export default function Algodoeira() {
     }
 
     setScannedBale(bale);
-
-    // Get GPS location
-    setIsGettingLocation(true);
-    try {
-      const location = await getCurrentPosition();
-      setCurrentLocation(location);
-      toast({
-        title: "Localização capturada",
-        description: "Coordenadas GPS registradas com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao obter localização",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
-      });
-    } finally {
-      setIsGettingLocation(false);
-    }
   };
 
   const handleScan = async (qrCode: string) => {
@@ -140,14 +113,12 @@ export default function Algodoeira() {
   };
 
   const handleConfirmBeneficiamento = () => {
-    if (!scannedBale || !currentLocation) return;
+    if (!scannedBale) return;
 
     updateStatusMutation.mutate({
       id: scannedBale.id,
       data: {
         status: "beneficiado",
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
       },
     });
   };
@@ -282,27 +253,6 @@ export default function Algodoeira() {
                     </div>
                   </div>
 
-                  {isGettingLocation ? (
-                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                      <Loader2 className="w-5 h-5 text-muted-foreground animate-spin shrink-0" />
-                      <p className="text-sm text-muted-foreground">
-                        Capturando localização GPS...
-                      </p>
-                    </div>
-                  ) : currentLocation ? (
-                    <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-                      <MapPin className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <p className="text-xs font-medium text-blue-700 dark:text-blue-400">
-                          Localização de Beneficiamento
-                        </p>
-                        <p className="text-xs font-mono text-muted-foreground break-all leading-snug">
-                          {currentLocation.latitude}, {currentLocation.longitude}
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
-
                   <Alert className="border-primary/20 bg-primary/5">
                     <CheckCircle className="h-4 w-4 text-primary shrink-0" />
                     <AlertDescription className="text-sm leading-snug">
@@ -315,10 +265,7 @@ export default function Algodoeira() {
                 <div className="flex gap-3 pt-2">
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      setScannedBale(null);
-                      setCurrentLocation(null);
-                    }}
+                    onClick={() => setScannedBale(null)}
                     className="flex-1 h-11"
                     data-testid="button-cancel"
                   >
@@ -326,7 +273,7 @@ export default function Algodoeira() {
                   </Button>
                   <Button
                     onClick={handleConfirmBeneficiamento}
-                    disabled={!currentLocation || updateStatusMutation.isPending}
+                    disabled={updateStatusMutation.isPending}
                     className="flex-1 h-11 shadow"
                     data-testid="button-confirm-beneficiamento"
                   >
@@ -354,7 +301,6 @@ export default function Algodoeira() {
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside leading-snug">
                 <li>Escaneie o QR Code do fardo a ser beneficiado</li>
                 <li>Verifique os dados do fardo exibidos</li>
-                <li>Aguarde a captura da localização GPS da algodoeira</li>
                 <li>Clique em "Confirmar" para finalizar</li>
               </ol>
             </CardContent>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -12,30 +12,38 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentPosition } from "@/lib/geolocation";
-import { Package, LogOut, QrCode, MapPin, Loader2 } from "lucide-react";
+import { Package, LogOut, QrCode, Loader2, CheckCircle } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
-import { nanoid } from "nanoid";
+import type { Bale } from "@shared/schema";
+import { TALHOES_INFO } from "@shared/talhoes";
 
-// Schema para criação completa do fardo
-const createBaleSchema = z.object({
+const batchCreateSchema = z.object({
   talhao: z.string().min(1, "Talhão é obrigatório"),
-  numero: z.string().min(1, "Número é obrigatório"),
-  safra: z.string().optional(),
+  quantidade: z.number().min(1, "Quantidade deve ser maior que 0").max(1000, "Máximo 1000 fardos por vez"),
 });
 
-type CreateBaleForm = z.infer<typeof createBaleSchema>;
+type BatchCreateForm = z.infer<typeof batchCreateSchema>;
 
 export default function Campo() {
   const [, setLocation] = useLocation();
   const { logout, user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
+  const [createdBales, setCreatedBales] = useState<Bale[]>([]);
 
   // Buscar safra padrão das configurações
   const { data: defaultSafraData } = useQuery<{ value: string }>({
@@ -44,96 +52,79 @@ export default function Campo() {
 
   const defaultSafra = defaultSafraData?.value || "";
 
-  const form = useForm<CreateBaleForm>({
-    resolver: zodResolver(createBaleSchema),
+  const form = useForm<BatchCreateForm>({
+    resolver: zodResolver(batchCreateSchema),
     defaultValues: {
       talhao: "",
-      numero: "",
-      safra: "",
+      quantidade: 1,
     },
   });
 
-  // Atualizar campo safra quando safra padrão for carregada
-  useEffect(() => {
-    if (defaultSafra) {
-      form.setValue("safra", defaultSafra);
-    }
-  }, [defaultSafra, form]);
-
-  const handleCreateBale = async (data: CreateBaleForm) => {
+  const handleCreateBatch = async (data: BatchCreateForm) => {
     setIsCreating(true);
+    setCreatedBales([]);
+    
+    // Validar se há safra configurada
+    if (!defaultSafra) {
+      toast({
+        variant: "destructive",
+        title: "Safra não configurada",
+        description: "O administrador precisa configurar a safra padrão nas configurações.",
+      });
+      setIsCreating(false);
+      return;
+    }
     
     try {
-      // Gerar ID único para o fardo
-      const baleId = nanoid(12);
-      
-      // Tentar capturar localização GPS com timeout de 2 segundos
-      let location = { latitude: "", longitude: "" };
-      try {
-        const gpsPromise = getCurrentPosition();
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error("GPS timeout")), 2000)
-        );
-        location = await Promise.race([gpsPromise, timeoutPromise]);
-        console.log("GPS capturado:", location);
-      } catch (gpsError) {
-        console.warn("GPS não disponível, continuando sem localização:", gpsError);
-        // Continua sem GPS - não é crítico
-      }
-      
-      // Criar fardo completo no backend (com safra do formulário)
-      console.log("Enviando requisição para criar fardo...");
-      const response = await fetch("/api/bales", {
+      // Incluir safra automaticamente do settings
+      const payload = {
+        ...data,
+        safra: defaultSafra,
+      };
+
+      const response = await fetch("/api/bales/batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: baleId,
-          qrCode: baleId,
-          safra: data.safra || undefined,
-          talhao: data.talhao,
-          numero: data.numero,
-          latitude: location.latitude || undefined,
-          longitude: location.longitude || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
-
-      console.log("Resposta recebida:", response.status);
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || error.message || "Erro ao criar fardo");
+        throw new Error(error.error || error.message || "Erro ao criar fardos");
       }
 
-      const createdBale = await response.json();
-      console.log("Fardo criado:", createdBale);
+      const bales = await response.json();
+      setCreatedBales(bales);
+
+      // Invalidar cache para garantir que a página de etiquetas veja os novos fardos
+      await queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
 
       toast({
-        title: "Fardo criado com sucesso",
-        description: `Talhão: ${data.talhao}, Número: ${data.numero}`,
+        title: "Fardos criados com sucesso",
+        description: `${bales.length} fardo(s) criado(s) no talhão ${data.talhao}`,
       });
 
-      // Resetar formulário mantendo safra padrão
-      form.reset({
-        talhao: "",
-        numero: "",
-        safra: defaultSafra,
-      });
+      // Resetar apenas quantidade
+      form.setValue("quantidade", 1);
 
-      // Redirecionar para página de impressão da etiqueta
-      console.log("Redirecionando para:", `/etiqueta?baleId=${baleId}`);
-      setLocation(`/etiqueta?baleId=${baleId}`);
     } catch (error) {
-      console.error("Erro ao criar fardo:", error);
+      console.error("Erro ao criar fardos:", error);
       toast({
         variant: "destructive",
-        title: "Erro ao criar fardo",
+        title: "Erro ao criar fardos",
         description: error instanceof Error ? error.message : "Tente novamente.",
       });
     } finally {
-      // Sempre resetar isCreating, mesmo após redirecionamento bem-sucedido
-      // (importante caso o usuário volte via navegação do navegador)
       setIsCreating(false);
     }
+  };
+
+  const handlePrintLabels = () => {
+    if (createdBales.length === 0) return;
+    
+    // Redirecionar para página de impressão em lote
+    const baleIds = createdBales.map(b => b.id).join(',');
+    setLocation(`/etiqueta?baleIds=${baleIds}`);
   };
 
   const handleLogout = () => {
@@ -154,7 +145,7 @@ export default function Campo() {
                 className="h-8 sm:h-10 w-auto shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-xl font-semibold truncate">Cadastro de Fardo</h1>
+                <h1 className="text-base sm:text-xl font-semibold truncate">Cadastro de Fardos</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   Operador: {user?.username}
                 </p>
@@ -178,35 +169,60 @@ export default function Campo() {
       <main className="mobile-content">
         <div className="container mx-auto px-4 py-6 max-w-2xl space-y-5">
           
-          {/* Formulário de Cadastro */}
+          {/* Formulário de Cadastro em Lote */}
           <Card className="shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Package className="w-5 h-5 text-primary shrink-0" />
-                Novo Fardo
+                Criar Fardos em Lote
               </CardTitle>
               <CardDescription className="text-sm">
-                Preencha as informações do fardo para gerar a etiqueta QR
+                Gere múltiplos fardos de uma vez com numeração sequencial automática
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Exibir safra atual (somente leitura) */}
+              {defaultSafra && (
+                <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Safra Atual</p>
+                  <p className="text-sm font-semibold text-primary">{defaultSafra}</p>
+                </div>
+              )}
+              
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleCreateBale)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleCreateBatch)} className="space-y-4">
                   <FormField
                     control={form.control}
                     name="talhao"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium">Talhão</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: T-01"
-                            {...field}
-                            disabled={isCreating}
-                            data-testid="input-talhao"
-                            className="h-11"
-                          />
-                        </FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={isCreating}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-11" data-testid="select-talhao">
+                              <SelectValue placeholder="Selecione o talhão" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TALHOES_INFO.map((talhao) => (
+                              <SelectItem key={talhao.id} value={talhao.nome}>
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="font-medium">{talhao.nome}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {talhao.hectares} ha
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          A numeração continuará de onde parou neste talhão
+                        </FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )}
@@ -214,71 +230,46 @@ export default function Campo() {
 
                   <FormField
                     control={form.control}
-                    name="numero"
+                    name="quantidade"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Número do Fardo</FormLabel>
+                        <FormLabel className="text-sm font-medium">Quantidade</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Ex: 001"
+                            type="number"
+                            min="1"
+                            max="1000"
+                            placeholder="Ex: 50"
                             {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                             disabled={isCreating}
-                            data-testid="input-numero"
+                            data-testid="input-quantidade"
                             className="h-11"
                           />
                         </FormControl>
+                        <FormDescription>
+                          Quantos fardos deseja criar? (máximo: 1000)
+                        </FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="safra"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Safra {defaultSafra && <span className="text-xs text-muted-foreground ml-1">(configurado pelo admin)</span>}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Não configurado"
-                            {...field}
-                            disabled={true}
-                            readOnly
-                            data-testid="input-safra"
-                            className="h-11 bg-muted cursor-not-allowed"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                      <div className="text-sm text-muted-foreground">
-                        A localização GPS será capturada automaticamente ao gerar a etiqueta
-                      </div>
-                    </div>
-                  </div>
 
                   <Button
                     type="submit"
                     className="w-full h-11 shadow"
                     disabled={isCreating}
-                    data-testid="button-create-bale"
+                    data-testid="button-create-batch"
                   >
                     {isCreating ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Criando fardo e gerando etiqueta...
+                        Criando {form.watch("quantidade")} fardo(s)...
                       </>
                     ) : (
                       <>
                         <QrCode className="w-4 h-4 mr-2" />
-                        Gerar Etiqueta QR
+                        Gerar Etiquetas QR
                       </>
                     )}
                   </Button>
@@ -287,6 +278,57 @@ export default function Campo() {
             </CardContent>
           </Card>
 
+          {/* Resultado da criação */}
+          {createdBales.length > 0 && (
+            <Card className="shadow-md border-primary/20">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CheckCircle className="w-5 h-5 text-primary shrink-0" />
+                  Fardos Criados com Sucesso
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-primary/10 rounded-lg p-4">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{createdBales.length}</p>
+                      <p className="text-xs text-muted-foreground">Fardos Criados</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{createdBales[0].talhao}</p>
+                      <p className="text-xs text-muted-foreground">Talhão</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <p className="text-sm font-medium">Numeração gerada:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {createdBales.slice(0, 10).map((bale) => (
+                      <span key={bale.id} className="px-2 py-1 bg-background rounded text-xs font-mono">
+                        {bale.numero}
+                      </span>
+                    ))}
+                    {createdBales.length > 10 && (
+                      <span className="px-2 py-1 bg-background rounded text-xs font-mono text-muted-foreground">
+                        +{createdBales.length - 10} mais
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handlePrintLabels}
+                  className="w-full h-11 shadow"
+                  data-testid="button-print-labels"
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  Imprimir Todas as Etiquetas
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Card de Instruções */}
           <Card className="bg-muted/50 border-muted">
             <CardHeader className="pb-3">
@@ -294,11 +336,11 @@ export default function Campo() {
             </CardHeader>
             <CardContent>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Preencha o talhão e número do fardo</li>
-                <li>Clique em "Gerar Etiqueta QR"</li>
-                <li>O sistema capturará a localização GPS automaticamente</li>
-                <li>Imprima a etiqueta na impressora móvel</li>
-                <li>Cole a etiqueta no fardo físico</li>
+                <li>Digite o código do talhão (ex: T-01)</li>
+                <li>Informe quantos fardos deseja criar</li>
+                <li>Os números serão gerados automaticamente: 00001, 00002, 00003...</li>
+                <li>A numeração continua de onde parou em cada talhão</li>
+                <li>Imprima todas as etiquetas de uma vez</li>
               </ol>
             </CardContent>
           </Card>

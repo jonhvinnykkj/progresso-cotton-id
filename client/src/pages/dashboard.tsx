@@ -17,7 +17,6 @@ import {
   LogOut,
   Filter,
   BarChart3,
-  Map,
   Settings,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +48,7 @@ export default function Dashboard() {
 
   const filteredBales = bales.filter((bale) => {
     const matchesSearch =
+      bale.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (bale.numero && bale.numero.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (bale.talhao && bale.talhao.toLowerCase().includes(searchQuery.toLowerCase())) ||
       bale.qrCode.toLowerCase().includes(searchQuery.toLowerCase());
@@ -57,6 +57,21 @@ export default function Dashboard() {
 
     return matchesSearch && matchesStatus;
   });
+
+  // Calcular estatísticas adicionais
+  const uniqueTalhoesCount = new Set(bales.map(b => b.talhao)).size;
+  const uniqueSafrasCount = new Set(bales.map(b => b.safra)).size;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const balesToday = bales.filter(b => {
+    const baleDate = new Date(b.createdAt);
+    baleDate.setHours(0, 0, 0, 0);
+    return baleDate.getTime() === today.getTime();
+  }).length;
+
+  const progressPercent = stats?.total ? ((stats.beneficiado / stats.total) * 100).toFixed(1) : "0";
+
 
   const statusCards = [
     {
@@ -129,16 +144,6 @@ export default function Dashboard() {
                   </Button>
                 </>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation("/map")}
-                data-testid="button-view-map"
-                className="h-9 w-9 p-0 hidden sm:flex items-center justify-center"
-                title="Ver Mapa"
-              >
-                <Map className="w-4 h-4" />
-              </Button>
               <div className="hidden sm:block">
                 <NotificationsSettings />
               </div>
@@ -196,14 +201,28 @@ export default function Dashboard() {
           {/* Total Stats Card - Destaque com gradiente */}
           <Card className="brand-gradient text-white shadow-md">
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-              <CardTitle className="text-base">Total de Fardos</CardTitle>
+              <CardTitle className="text-base">Resumo Geral</CardTitle>
               <BarChart3 className="w-5 h-5 shrink-0" />
             </CardHeader>
-            <CardContent className="space-y-1">
-              <div className="text-3xl sm:text-4xl font-bold">{stats?.total || 0}</div>
-              <p className="text-sm text-white/90">
-                Fardos cadastrados no sistema
-              </p>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <p className="text-xs text-white/80 mb-1">Total de Fardos</p>
+                  <p className="text-2xl font-bold">{stats?.total || 0}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/80 mb-1">Talhões Ativos</p>
+                  <p className="text-2xl font-bold">{uniqueTalhoesCount}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/80 mb-1">Criados Hoje</p>
+                  <p className="text-2xl font-bold">{balesToday}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-white/80 mb-1">Beneficiados</p>
+                  <p className="text-2xl font-bold">{progressPercent}%</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -212,7 +231,7 @@ export default function Dashboard() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <Input
-                placeholder="Buscar por número, talhão ou QR..."
+                placeholder="Buscar por ID, número, talhão ou QR..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-11"
@@ -282,7 +301,7 @@ export default function Dashboard() {
                 <BaleCard
                   key={bale.id}
                   bale={bale}
-                  onClick={() => setLocation(`/bale/${bale.id}`)}
+                  onClick={() => setLocation(`/bale/${encodeURIComponent(bale.id)}`)}
                 />
               ))}
             </div>

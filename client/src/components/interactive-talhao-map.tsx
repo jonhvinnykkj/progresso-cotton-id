@@ -1,0 +1,859 @@
+import { useState, useMemo } from 'react';
+import { MapContainer, TileLayer, GeoJSON, useMap, Marker } from 'react-leaflet';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import L from 'leaflet';
+import { cottonTalhoes, otherTalhoes } from '@/data/talhoes-geojson';
+import { useTalhaoStats } from '@/hooks/use-talhao-stats';
+import { useSettings } from '@/hooks/use-settings';
+import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
+// Fix for default marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+type ViewMode = 'normal' | 'heatmap' | 'status';
+type FilterStatus = 'all' | 'em_colheita' | 'concluido' | 'nao_iniciado';
+
+interface InteractiveTalhaoMapProps {
+  selectedTalhao?: string;
+  onTalhaoClick?: (talhao: string) => void;
+}
+
+// Componente para fazer zoom em um talhão específico
+function ZoomToTalhao({ talhao }: { talhao: string | null }) {
+  const map = useMap();
+  
+  if (talhao) {
+    // Aqui você poderia calcular o centro do polígono do talhão
+    // Por enquanto, apenas zoom out para mostrar todos
+    map.setView([-7.49, -44.20], 12);
+  }
+  
+  return null;
+}
+
+export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: InteractiveTalhaoMapProps) {
+  const { data: settings } = useSettings();
+  const safra = settings?.defaultSafra || '2526';
+  const { data: statsMap } = useTalhaoStats(safra);
+  
+  const [viewMode, setViewMode] = useState<ViewMode>('normal');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showOtherCultures, setShowOtherCultures] = useState(true);
+  const [showLabels, setShowLabels] = useState(true);
+  const [showAlerts, setShowAlerts] = useState(true);
+  const [productivityThreshold, setProductivityThreshold] = useState([0]);
+  const [zoomToTalhao, setZoomToTalhao] = useState<string | null>(null);
+  const [compareSafras, setCompareSafras] = useState(false);
+  const [isPlayingTimeline, setIsPlayingTimeline] = useState(false);
+  const [timelineDate, setTimelineDate] = useState<Date>(new Date());
+  
+  // Calcular estatísticas gerais
+  const overallStats = useMemo(() => {
+    if (!statsMap) return null;
+    
+    const stats = Object.values(statsMap);
+    const totalFardos = stats.reduce((sum, s: any) => sum + s.totalFardos, 0);
+    const totalArea = stats.reduce((sum, s: any) => sum + s.area, 0);
+    const produtividadeMedia = totalArea > 0 ? totalFardos / totalArea : 0;
+    
+    return {
+      totalFardos,
+      totalArea,
+      produtividadeMedia: Math.round(produtividadeMedia * 100) / 100,
+      talhoes: stats.length
+    };
+  }, [statsMap]);
+  
+  // Função para determinar cor baseada em produtividade (heatmap)
+  const getHeatmapColor = (produtividade: number, maxProd: number) => {
+    if (maxProd === 0) return '#9ca3af';
+    
+    const ratio = produtividade / maxProd;
+    
+    if (ratio > 0.75) return '#059669'; // Verde escuro - alta
+    if (ratio > 0.5) return '#10b981';  // Verde médio
+    if (ratio > 0.25) return '#fbbf24'; // Amarelo - média
+    return '#ef4444'; // Vermelho - baixa
+  };
+  
+  // Função para determinar cor baseada em status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'em_colheita': return '#3b82f6'; // Azul
+      case 'concluido': return '#10b981';   // Verde
+      case 'nao_iniciado': return '#9ca3af'; // Cinza
+      default: return '#9ca3af';
+    }
+  };
+  
+  // Calcular produtividade máxima para heatmap
+  const maxProdutividade = useMemo(() => {
+    if (!statsMap) return 0;
+    return Math.max(...Object.values(statsMap).map((s: any) => s.produtividade || 0));
+  }, [statsMap]);
+  
+  // Identificar talhões com alertas
+  const talhoesComAlerta = useMemo(() => {
+    if (!statsMap) return [];
+    
+    const alertas: any[] = [];
+    const produtividadeMediaGeral = overallStats?.produtividadeMedia || 0;
+    
+    Object.values(statsMap).forEach((stats: any) => {
+      const problemas: string[] = [];
+      
+      // Baixa produtividade (< 50% da média)
+      if (stats.produtividade < produtividadeMediaGeral * 0.5 && stats.totalFardos > 0) {
+        problemas.push('Produtividade abaixo da média');
+      }
+      
+      // Sem atividade há 7+ dias
+      if (stats.ultimoFardo) {
+        const diasDesdeUltimo = (Date.now() - new Date(stats.ultimoFardo.data).getTime()) / (1000 * 60 * 60 * 24);
+        if (diasDesdeUltimo > 7 && stats.status === 'em_colheita') {
+          problemas.push('Sem atividade há mais de 7 dias');
+        }
+      }
+      
+      // Não iniciado (sem fardos)
+      if (stats.totalFardos === 0) {
+        problemas.push('Colheita não iniciada');
+      }
+      
+      if (problemas.length > 0) {
+        alertas.push({
+          talhao: stats.talhao,
+          problemas
+        });
+      }
+    });
+    
+    return alertas;
+  }, [statsMap, overallStats]);
+  
+  // Função para exportar relatório em PDF
+  const handleExportPDF = async () => {
+    try {
+      const mapElement = document.querySelector('.leaflet-container') as HTMLElement;
+      if (!mapElement) return;
+      
+      const canvas = await html2canvas(mapElement);
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Título
+      pdf.setFontSize(18);
+      pdf.text(`Relatório de Talhões - Safra ${safra}`, 15, 15);
+      
+      // Data
+      pdf.setFontSize(10);
+      pdf.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 15, 22);
+      
+      // Estatísticas gerais
+      if (overallStats) {
+        pdf.setFontSize(12);
+        pdf.text('Estatísticas Gerais:', 15, 32);
+        pdf.setFontSize(10);
+        pdf.text(`Total de Fardos: ${overallStats.totalFardos}`, 20, 38);
+        pdf.text(`Área Total: ${overallStats.totalArea.toFixed(2)} ha`, 20, 43);
+        pdf.text(`Produtividade Média: ${overallStats.produtividadeMedia.toFixed(2)} fardos/ha`, 20, 48);
+        pdf.text(`Talhões: ${overallStats.talhoes}`, 20, 53);
+      }
+      
+      // Mapa
+      const imgWidth = pdfWidth - 30;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const yPosition = 60;
+      
+      pdf.addImage(imgData, 'PNG', 15, yPosition, imgWidth, Math.min(imgHeight, pdfHeight - yPosition - 10));
+      
+      // Alertas em nova página se houver
+      if (talhoesComAlerta.length > 0) {
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.text('Alertas e Avisos', 15, 15);
+        
+        let y = 25;
+        talhoesComAlerta.forEach((alerta: any, index: number) => {
+          if (y > 280) {
+            pdf.addPage();
+            y = 15;
+          }
+          
+          pdf.setFontSize(12);
+          pdf.setTextColor(220, 38, 38); // Vermelho
+          pdf.text(`⚠ Talhão ${alerta.talhao}:`, 20, y);
+          pdf.setTextColor(0, 0, 0);
+          pdf.setFontSize(10);
+          
+          alerta.problemas.forEach((problema: string, i: number) => {
+            y += 5;
+            pdf.text(`  • ${problema}`, 25, y);
+          });
+          
+          y += 8;
+        });
+      }
+      
+      pdf.save(`relatorio-talhoes-safra-${safra}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      alert('Erro ao gerar PDF. Tente novamente.');
+    }
+  };
+  
+  // Timeline: simular progresso ao longo do tempo
+  const handleTimelinePlay = () => {
+    if (isPlayingTimeline) {
+      setIsPlayingTimeline(false);
+      return;
+    }
+    
+    setIsPlayingTimeline(true);
+    // Aqui você pode implementar lógica para avançar o timelineDate
+    // Por enquanto, apenas toggle do estado
+  };
+  
+  // Calcular centroide de um polígono para posicionar marcadores
+  const getPolygonCenter = (coordinates: any[]): [number, number] => {
+    const points = coordinates[0];
+    let sumLat = 0;
+    let sumLng = 0;
+    
+    points.forEach((point: number[]) => {
+      sumLng += point[0];
+      sumLat += point[1];
+    });
+    
+    return [sumLat / points.length, sumLng / points.length];
+  };
+  
+  // Criar ícone personalizado para alertas
+  const createAlertIcon = () => {
+    return L.divIcon({
+      className: 'custom-alert-icon',
+      html: `
+        <div style="
+          background: #f97316;
+          border: 2px solid white;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+      `,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+  };
+  
+  // Estilo dinâmico para talhões de algodão
+  const getCottonStyle = (feature: any) => {
+    const talhao = feature.properties.nome;
+    const stats = statsMap?.[talhao];
+    
+    if (!stats) {
+      return {
+        fillColor: '#9ca3af',
+        weight: 2,
+        opacity: 0.5,
+        color: '#6b7280',
+        fillOpacity: 0.3
+      };
+    }
+    
+    let fillColor = '#22c55e';
+    
+    if (viewMode === 'heatmap') {
+      fillColor = getHeatmapColor(stats.produtividade, maxProdutividade);
+    } else if (viewMode === 'status') {
+      fillColor = getStatusColor(stats.status);
+    }
+    
+    return {
+      fillColor,
+      weight: 2,
+      opacity: 1,
+      color: '#16a34a',
+      dashArray: '',
+      fillOpacity: 0.7
+    };
+  };
+  
+  // Estilo para outros talhões
+  const otherStyle = () => ({
+    fillColor: '#9ca3af',
+    weight: 1,
+    opacity: 0.3,
+    color: '#6b7280',
+    dashArray: '',
+    fillOpacity: 0.15
+  });
+  
+  // Handler para features de algodão
+  const onEachCottonFeature = (feature: any, layer: L.Layer) => {
+    if (feature.properties) {
+      const { nome, area } = feature.properties;
+      const stats = statsMap?.[nome];
+      
+      // Tooltip para hover (informações rápidas)
+      let tooltipContent = `
+        <div class="p-2">
+          <h3 class="font-bold text-base text-green-700">Talhão ${nome}</h3>
+          <p class="text-sm"><b>Área:</b> ${area?.toFixed(2)} ha</p>
+      `;
+      
+      if (stats) {
+        tooltipContent += `
+          <p class="text-sm"><b>Fardos:</b> ${stats.totalFardos}</p>
+          <p class="text-sm"><b>Produtividade:</b> ${stats.produtividade.toFixed(2)} fardos/ha</p>
+        `;
+      }
+      
+      tooltipContent += `<p class="text-xs text-gray-500 mt-1">Clique para mais detalhes</p></div>`;
+      
+      // Bind tooltip para aparecer no hover
+      layer.bindTooltip(tooltipContent, {
+        permanent: false,
+        sticky: true,
+        className: 'custom-tooltip',
+        direction: 'top'
+      });
+      
+      layer.on({
+        click: (e: L.LeafletMouseEvent) => {
+          // Prevenir propagação
+          L.DomEvent.stopPropagation(e);
+          
+          // Abrir o dialog com informações completas
+          if (onTalhaoClick) {
+            onTalhaoClick(nome);
+          }
+        },
+        mouseover: (e: L.LeafletMouseEvent) => {
+          const target = e.target;
+          target.setStyle({
+            weight: 3,
+            fillOpacity: 0.9
+          });
+        },
+        mouseout: (e: L.LeafletMouseEvent) => {
+          const target = e.target;
+          target.setStyle(getCottonStyle(feature));
+        }
+      });
+    }
+  };
+  
+  // Handler para outras culturas
+  const onEachOtherFeature = (feature: any, layer: L.Layer) => {
+    if (feature.properties) {
+      const { nome, area, cultura } = feature.properties;
+      
+      layer.bindPopup(`
+        <div class="p-2 opacity-70">
+          <h3 class="font-bold text-sm mb-1">Talhão ${nome}</h3>
+          <p class="text-xs"><b>Cultura:</b> ${cultura}</p>
+          <p class="text-xs"><b>Área:</b> ${area?.toFixed(2)} ha</p>
+        </div>
+      `);
+    }
+  };
+  
+  // Filtrar talhões baseado na busca e filtros
+  const filteredCottonFeatures = useMemo(() => {
+    let features = cottonTalhoes.features;
+    
+    // Filtro de busca
+    if (searchQuery) {
+      features = features.filter((f: any) => 
+        f.properties.nome.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Filtro de status
+    if (filterStatus !== 'all' && statsMap) {
+      features = features.filter((f: any) => {
+        const stats = statsMap[f.properties.nome];
+        return stats?.status === filterStatus;
+      });
+    }
+    
+    // Filtro de produtividade
+    if (productivityThreshold[0] > 0 && statsMap) {
+      features = features.filter((f: any) => {
+        const stats = statsMap[f.properties.nome];
+        return (stats?.produtividade || 0) >= productivityThreshold[0];
+      });
+    }
+    
+    return { ...cottonTalhoes, features };
+  }, [searchQuery, filterStatus, productivityThreshold, statsMap]);
+  
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              Mapa Interativo - Safra {safra}
+              <Badge variant="outline">{filteredCottonFeatures.features.length} talhões</Badge>
+              {talhoesComAlerta.length > 0 && (
+                <Badge variant="destructive" className="flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  {talhoesComAlerta.length} alertas
+                </Badge>
+              )}
+            </CardTitle>
+            {overallStats && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {overallStats.totalFardos} fardos • {overallStats.produtividadeMedia.toFixed(2)} fardos/ha • {overallStats.totalArea.toFixed(0)} ha
+              </p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportPDF}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar PDF
+            </Button>
+            <Button 
+              variant={compareSafras ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setCompareSafras(!compareSafras)}
+            >
+              <CalendarIcon className="h-4 w-4 mr-2" />
+              Comparar Safras
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {/* Controles */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+          {/* Busca */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold">Buscar Talhão</Label>
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Ex: 1B, 2A..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+          </div>
+          
+          {/* Modo de visualização */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              Visualização
+            </Label>
+            <Select value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="heatmap">Heatmap Produtividade</SelectItem>
+                <SelectItem value="status">Por Status</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Filtro de status */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold">Filtrar por Status</Label>
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FilterStatus)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="em_colheita">Em Colheita</SelectItem>
+                <SelectItem value="concluido">Concluído</SelectItem>
+                <SelectItem value="nao_iniciado">Não Iniciado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Camadas */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+              Camadas & Alertas
+            </Label>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="other-cultures"
+                  checked={showOtherCultures}
+                  onCheckedChange={setShowOtherCultures}
+                />
+                <Label htmlFor="other-cultures" className="text-xs cursor-pointer">
+                  Outras culturas
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="show-alerts"
+                  checked={showAlerts}
+                  onCheckedChange={setShowAlerts}
+                />
+                <Label htmlFor="show-alerts" className="text-xs cursor-pointer flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3 text-orange-500" />
+                  Alertas ({talhoesComAlerta.length})
+                </Label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Timeline Control */}
+        {isPlayingTimeline && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Timeline: {format(timelineDate, "dd/MM/yyyy", { locale: ptBR })}
+              </Label>
+              <Button size="sm" variant="ghost" onClick={() => setIsPlayingTimeline(false)}>
+                <Pause className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Visualizando dados históricos até esta data
+            </p>
+          </div>
+        )}
+        
+        {/* Alertas Summary */}
+        {showAlerts && talhoesComAlerta.length > 0 && (
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <h3 className="font-semibold text-sm">Alertas Detectados ({talhoesComAlerta.length})</h3>
+            </div>
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {talhoesComAlerta.map((alerta: any, idx: number) => (
+                <div key={idx} className="text-xs bg-white p-2 rounded border border-orange-100">
+                  <span className="font-semibold text-orange-700">Talhão {alerta.talhao}:</span>
+                  <ul className="ml-3 mt-1 space-y-0.5">
+                    {alerta.problemas.map((problema: string, i: number) => (
+                      <li key={i} className="text-gray-600">• {problema}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Slider de produtividade */}
+        {viewMode === 'heatmap' && (
+          <div className="p-4 bg-muted rounded-lg">
+            <Label className="text-xs font-semibold mb-2 block">
+              Produtividade Mínima: {productivityThreshold[0].toFixed(1)} fardos/ha
+            </Label>
+            <Slider
+              value={productivityThreshold}
+              onValueChange={setProductivityThreshold}
+              max={maxProdutividade}
+              step={0.1}
+              className="w-full"
+            />
+          </div>
+        )}
+        
+        {/* Mapa */}
+        <div className="relative">
+          {/* Estatísticas flutuantes sobre o mapa */}
+          <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2 max-w-xs">
+            {/* Card de resumo geral */}
+            <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-primary/20">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 border-b pb-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <h3 className="font-bold text-sm">Resumo da Safra {safra}</h3>
+                  </div>
+                  
+                  {overallStats && (
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <p className="text-muted-foreground">Talhões</p>
+                        <p className="text-lg font-bold text-primary">{filteredCottonFeatures.features.length}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-muted-foreground">Área Total</p>
+                        <p className="text-lg font-bold text-blue-600">{overallStats.totalArea.toFixed(0)} ha</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-muted-foreground">Fardos</p>
+                        <p className="text-lg font-bold text-purple-600">{overallStats.totalFardos}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-muted-foreground">Média</p>
+                        <p className="text-lg font-bold text-orange-600">{overallStats.produtividadeMedia.toFixed(1)} f/ha</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {statsMap && (
+                    <div className="pt-2 border-t space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">🟦 Em Colheita</span>
+                        <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'em_colheita').length}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">🟩 Concluído</span>
+                        <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'concluido').length}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">⬜ Não Iniciado</span>
+                        <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'nao_iniciado').length}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Ranking de produtividade */}
+            {statsMap && Object.keys(statsMap).length > 0 && (
+              <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-orange-500/20">
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 border-b pb-2">
+                      <TrendingUp className="h-3 w-3 text-orange-500" />
+                      <h3 className="font-bold text-sm">Top Produtividade</h3>
+                    </div>
+                    {Object.values(statsMap)
+                      .sort((a: any, b: any) => b.produtividade - a.produtividade)
+                      .slice(0, 3)
+                      .map((stat: any, index: number) => (
+                        <div key={stat.talhao} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-bold ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-400'}`}>
+                              {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                            </span>
+                            <span className="font-semibold">T{stat.talhao}</span>
+                          </div>
+                          <span className="font-bold text-orange-600">{stat.produtividade.toFixed(2)} f/ha</span>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+          
+          <div style={{ height: '600px', width: '100%' }} className="rounded-lg overflow-hidden border-2 border-muted shadow-xl">
+            <MapContainer
+              center={[-7.49, -44.20]}
+              zoom={12}
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              />
+              
+              {/* Outros talhões */}
+              {showOtherCultures && (
+                <GeoJSON 
+                  data={otherTalhoes} 
+                  style={otherStyle}
+                  onEachFeature={onEachOtherFeature}
+                />
+              )}
+              
+              {/* Talhões de algodão filtrados */}
+              <GeoJSON 
+                key={`cotton-${viewMode}-${filterStatus}-${searchQuery}-${productivityThreshold[0]}`}
+                data={filteredCottonFeatures} 
+                style={getCottonStyle}
+                onEachFeature={onEachCottonFeature}
+              />
+              
+              {/* Marcadores de Alerta */}
+              {showAlerts && talhoesComAlerta.map((alerta: any) => {
+                const feature = cottonTalhoes.features.find((f: any) => f.properties.nome === alerta.talhao);
+                if (!feature) return null;
+                
+                const center = getPolygonCenter(feature.geometry.coordinates);
+                
+                return (
+                  <Marker
+                    key={`alert-${alerta.talhao}`}
+                    position={center}
+                    icon={createAlertIcon()}
+                  >
+                    {/* Popup será mostrado ao clicar no marcador */}
+                  </Marker>
+                );
+              })}
+              
+              <ZoomToTalhao talhao={zoomToTalhao} />
+            </MapContainer>
+          </div>
+        </div>
+        
+        {/* Legenda melhorada */}
+        <Card className="bg-gradient-to-r from-primary/5 to-blue-50 border-2 border-primary/10">
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 border-b pb-2">
+                <Info className="h-4 w-4 text-primary" />
+                <h3 className="font-bold">Legenda - Modo: {viewMode === 'normal' ? 'Normal' : viewMode === 'heatmap' ? 'Heatmap Produtividade' : 'Por Status'}</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                {viewMode === 'normal' && (
+                  <>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded bg-green-500 border border-green-600"></div>
+                      <span className="font-medium">Algodão ({filteredCottonFeatures.features.length})</span>
+                    </div>
+                    {showOtherCultures && (
+                      <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                        <div className="w-4 h-4 rounded bg-gray-400 opacity-30 border"></div>
+                        <span className="font-medium">Outras culturas ({otherTalhoes.features.length})</span>
+                      </div>
+                    )}
+                    {showAlerts && (
+                      <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                        <AlertTriangle className="w-4 h-4 text-orange-500" />
+                        <span className="font-medium">Alertas ({talhoesComAlerta.length})</span>
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {viewMode === 'heatmap' && (
+                  <>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#059669'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">Muito Alta</span>
+                        <span className="text-xs text-muted-foreground">&gt;75% da média</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#10b981'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">Alta</span>
+                        <span className="text-xs text-muted-foreground">50-75%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#fbbf24'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">Média</span>
+                        <span className="text-xs text-muted-foreground">25-50%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#ef4444'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">Baixa</span>
+                        <span className="text-xs text-muted-foreground">&lt;25%</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {viewMode === 'status' && (
+                  <>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#3b82f6'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">🟦 Em Colheita</span>
+                        <span className="text-xs text-muted-foreground">Ativo &lt;7 dias</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#10b981'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">🟩 Concluído</span>
+                        <span className="text-xs text-muted-foreground">Inativo &gt;7 dias</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                      <div className="w-4 h-4 rounded border" style={{backgroundColor: '#9ca3af'}}></div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">⬜ Não Iniciado</span>
+                        <span className="text-xs text-muted-foreground">Sem fardos</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              <div className="pt-2 border-t text-xs text-muted-foreground">
+                💡 Dica: Passe o mouse sobre um talhão para ver informações rápidas, clique para detalhes completos
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </CardContent>
+      
+      {/* Estilos customizados para tooltip */}
+      <style>{`
+        .custom-tooltip {
+          background: white !important;
+          border: 2px solid #16a34a !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+          padding: 0 !important;
+        }
+        .custom-tooltip::before {
+          border-top-color: #16a34a !important;
+        }
+        .leaflet-tooltip-top:before {
+          border-top-color: #16a34a !important;
+        }
+        .leaflet-tooltip-bottom:before {
+          border-bottom-color: #16a34a !important;
+        }
+        .leaflet-tooltip-left:before {
+          border-left-color: #16a34a !important;
+        }
+        .leaflet-tooltip-right:before {
+          border-right-color: #16a34a !important;
+        }
+      `}</style>
+    </Card>
+  );
+}

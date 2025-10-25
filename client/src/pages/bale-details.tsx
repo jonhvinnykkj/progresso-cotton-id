@@ -12,12 +12,12 @@ import { ptBR } from "date-fns/locale";
 export default function BaleDetails() {
   const [, params] = useRoute("/bale/:id");
   const [, setLocation] = useLocation();
-  const baleId = params?.id;
+  const baleId = params?.id ? decodeURIComponent(params.id) : undefined;
 
   const { data: bale, isLoading } = useQuery<Bale>({
     queryKey: ["/api/bales", baleId],
     queryFn: async () => {
-      const response = await fetch(`/api/bales/${baleId}`);
+      const response = await fetch(`/api/bales/${encodeURIComponent(baleId!)}`);
       if (!response.ok) {
         throw new Error("Fardo não encontrado");
       }

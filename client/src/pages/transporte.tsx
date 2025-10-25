@@ -18,13 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentPosition } from "@/lib/geolocation";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
   ScanLine,
   Truck,
   LogOut,
-  MapPin,
   Loader2,
   Package,
   AlertCircle,
@@ -44,11 +42,6 @@ export default function Transporte() {
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualBaleId, setManualBaleId] = useState("");
   const [scannedBale, setScannedBale] = useState<Bale | null>(null);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{
-    latitude: string;
-    longitude: string;
-  } | null>(null);
 
   const { data: bales = [] } = useQuery<Bale[]>({
     queryKey: ["/api/bales"],
@@ -66,7 +59,6 @@ export default function Transporte() {
         description: "Fardo movido para o pátio com sucesso.",
       });
       setScannedBale(null);
-      setCurrentLocation(null);
     },
     onError: (error: Error) => {
       toast({
@@ -99,25 +91,6 @@ export default function Transporte() {
     }
 
     setScannedBale(bale);
-
-    // Get GPS location
-    setIsGettingLocation(true);
-    try {
-      const location = await getCurrentPosition();
-      setCurrentLocation(location);
-      toast({
-        title: "Localização capturada",
-        description: "Coordenadas GPS registradas com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao obter localização",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
-      });
-    } finally {
-      setIsGettingLocation(false);
-    }
   };
 
   const handleScan = async (qrCode: string) => {
@@ -141,14 +114,12 @@ export default function Transporte() {
   };
 
   const handleConfirmTransport = () => {
-    if (!scannedBale || !currentLocation) return;
+    if (!scannedBale) return;
 
     updateStatusMutation.mutate({
       id: scannedBale.id,
       data: {
         status: "patio",
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
       },
     });
   };
@@ -283,27 +254,6 @@ export default function Transporte() {
                     </div>
                   </div>
 
-                  {isGettingLocation ? (
-                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                      <Loader2 className="w-5 h-5 text-muted-foreground animate-spin shrink-0" />
-                      <p className="text-sm text-muted-foreground">
-                        Capturando localização GPS...
-                      </p>
-                    </div>
-                  ) : currentLocation ? (
-                    <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg">
-                      <MapPin className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <p className="text-xs font-medium text-green-700 dark:text-green-400">
-                          Localização de Transporte
-                        </p>
-                        <p className="text-xs font-mono text-muted-foreground break-all leading-snug">
-                          {currentLocation.latitude}, {currentLocation.longitude}
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
-
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <AlertDescription className="text-sm leading-snug">
@@ -316,10 +266,7 @@ export default function Transporte() {
                 <div className="flex gap-3 pt-2">
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      setScannedBale(null);
-                      setCurrentLocation(null);
-                    }}
+                    onClick={() => setScannedBale(null)}
                     className="flex-1 h-11"
                     data-testid="button-cancel"
                   >
@@ -327,7 +274,7 @@ export default function Transporte() {
                   </Button>
                   <Button
                     onClick={handleConfirmTransport}
-                    disabled={!currentLocation || updateStatusMutation.isPending}
+                    disabled={updateStatusMutation.isPending}
                     className="flex-1 h-11 shadow"
                     data-testid="button-confirm-transport"
                   >
@@ -355,7 +302,6 @@ export default function Transporte() {
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside leading-snug">
                 <li>Escaneie o QR Code do fardo a ser transportado</li>
                 <li>Verifique os dados do fardo exibidos</li>
-                <li>Aguarde a captura da localização GPS</li>
                 <li>Clique em "Confirmar" para atualizar o status</li>
               </ol>
             </CardContent>

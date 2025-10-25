@@ -141,14 +141,8 @@ export function generateExcel(bales: Bale[], filters: ReportFilters): Buffer {
     "Status": bale.status,
     "Data Cadastro": format(bale.createdAt, "dd/MM/yyyy HH:mm", { locale: ptBR }),
     "Campo - Data": bale.campoTimestamp ? format(bale.campoTimestamp, "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
-    "Campo - Lat": bale.campoLatitude || "-",
-    "Campo - Long": bale.campoLongitude || "-",
     "Pátio - Data": bale.patioTimestamp ? format(bale.patioTimestamp, "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
-    "Pátio - Lat": bale.patioLatitude || "-",
-    "Pátio - Long": bale.patioLongitude || "-",
     "Beneficiado - Data": bale.beneficiadoTimestamp ? format(bale.beneficiadoTimestamp, "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
-    "Beneficiado - Lat": bale.beneficiadoLatitude || "-",
-    "Beneficiado - Long": bale.beneficiadoLongitude || "-",
   }));
   
   const balesSheet = XLSX.utils.json_to_sheet(balesData);

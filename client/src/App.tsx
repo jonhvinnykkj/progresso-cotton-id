@@ -12,7 +12,6 @@ import Campo from "@/pages/campo";
 import Transporte from "@/pages/transporte";
 import Algodoeira from "@/pages/algodoeira";
 import BaleDetails from "@/pages/bale-details";
-import MapPage from "@/pages/map";
 import Etiqueta from "@/pages/etiqueta";
 import SettingsPage from "@/pages/settings";
 import TalhaoStats from "@/pages/talhao-stats";
@@ -61,10 +60,6 @@ function Router() {
       
       <Route path="/bale/:id">
         <ProtectedRoute component={BaleDetails} />
-      </Route>
-      
-      <Route path="/map">
-        <ProtectedRoute component={MapPage} allowedRoles={["admin"]} />
       </Route>
       
       <Route path="/settings">

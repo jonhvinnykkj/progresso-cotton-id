@@ -1,9 +1,8 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Clock, User, Package, Truck, CheckCircle } from "lucide-react";
+import { Clock, User, Package, Truck, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Bale } from "@shared/schema";
-import { formatCoordinates } from "@/lib/geolocation";
 
 interface BaleTimelineProps {
   bale: Bale;
@@ -16,8 +15,6 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
       label: "Registrado no Campo",
       icon: Package,
       timestamp: bale.campoTimestamp,
-      latitude: bale.campoLatitude,
-      longitude: bale.campoLongitude,
       completed: true,
       color: "text-bale-campo",
       bgColor: "bg-bale-campo",
@@ -27,8 +24,6 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
       label: "Transportado para Pátio",
       icon: Truck,
       timestamp: bale.patioTimestamp,
-      latitude: bale.patioLatitude,
-      longitude: bale.patioLongitude,
       completed: bale.status === "patio" || bale.status === "beneficiado",
       color: "text-bale-patio",
       bgColor: "bg-bale-patio",
@@ -38,8 +33,6 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
       label: "Beneficiado",
       icon: CheckCircle,
       timestamp: bale.beneficiadoTimestamp,
-      latitude: bale.beneficiadoLatitude,
-      longitude: bale.beneficiadoLongitude,
       completed: bale.status === "beneficiado",
       color: "text-bale-beneficiado",
       bgColor: "bg-bale-beneficiado",
@@ -84,25 +77,14 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
                   <h3 className="font-semibold">{step.label}</h3>
 
                   {step.timestamp ? (
-                    <>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        <span>
-                          {format(new Date(step.timestamp), "dd/MM/yyyy 'às' HH:mm", {
-                            locale: ptBR,
-                          })}
-                        </span>
-                      </div>
-
-                      {step.latitude && step.longitude && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          <span className="font-mono text-xs">
-                            {formatCoordinates(step.latitude, step.longitude)}
-                          </span>
-                        </div>
-                      )}
-                    </>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      <span>
+                        {format(new Date(step.timestamp), "dd/MM/yyyy 'às' HH:mm", {
+                          locale: ptBR,
+                        })}
+                      </span>
+                    </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       Aguardando processamento
