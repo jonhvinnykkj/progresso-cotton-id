@@ -37,6 +37,12 @@ export function QRScanner({ onScan, onClose }: QRScannerProps) {
         { facingMode: "environment" },
         config,
         (decodedText) => {
+          console.log('📷 QR Code escaneado:', {
+            texto: decodedText,
+            length: decodedText.length,
+            trimmed: decodedText.trim(),
+            chars: decodedText.split('').map(c => `${c}(${c.charCodeAt(0)})`).join(' ')
+          });
           onScan(decodedText);
           stopScanning();
         },

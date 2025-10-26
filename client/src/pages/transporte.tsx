@@ -73,17 +73,48 @@ export default function Transporte() {
 
   const processBaleId = async (baleId: string) => {
     // Remove espaços em branco e normaliza o ID
-    const normalizedId = baleId.trim();
+    const normalizedId = baleId.trim().toUpperCase();
     
-    console.log('🔍 Procurando fardo:', normalizedId);
+    console.log('🔍 DEBUG TRANSPORTE - ID do QR Code:', {
+      original: baleId,
+      normalizado: normalizedId,
+      length: normalizedId.length,
+      chars: normalizedId.split('').map(c => `${c}(${c.charCodeAt(0)})`).join(' ')
+    });
     console.log('📦 Total de fardos disponíveis:', bales.length);
-    console.log('📋 IDs disponíveis:', bales.map(b => b.id).slice(0, 5)); // Mostra primeiros 5
+    console.log('📋 Primeiros 10 IDs no sistema:', bales.map(b => b.id).slice(0, 10));
+    console.log('📋 Status dos fardos:', bales.map(b => ({ id: b.id, status: b.status })).slice(0, 5));
     
-    // Busca pelo ID (que é o próprio QR Code)
-    const bale = bales.find((b) => b.id === normalizedId);
+    // Busca pelo ID (que é o próprio QR Code) - case insensitive
+    const bale = bales.find((b) => b.id.toUpperCase() === normalizedId);
 
     if (!bale) {
-      console.error('❌ Fardo não encontrado! ID buscado:', normalizedId);
+      console.error('❌ FARDO NÃO ENCONTRADO!');
+      console.error('ID buscado:', normalizedId);
+      console.error('Todos os IDs no sistema:', bales.map(b => b.id));
+      
+      // Tenta buscar direto na API como fallback
+      try {
+        const encodedId = encodeURIComponent(normalizedId);
+        const response = await fetch(`/api/bales/${encodedId}`);
+        if (response.ok) {
+          const apiBale = await response.json();
+          console.log('✅ Fardo encontrado direto na API:', apiBale);
+          if (apiBale.status !== "campo") {
+            toast({
+              variant: "destructive",
+              title: "Fardo não disponível",
+              description: `Este fardo já está com status "${apiBale.status}". Apenas fardos no campo podem ser transportados.`,
+            });
+            return;
+          }
+          setScannedBale(apiBale);
+          return;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar fardo na API:', error);
+      }
+      
       toast({
         variant: "destructive",
         title: "Fardo não encontrado",
