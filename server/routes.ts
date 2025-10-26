@@ -318,7 +318,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete all bales (admin only)
   app.delete("/api/bales/all", async (req, res) => {
     try {
-      const { confirm } = req.body;
+      // Aceita confirmação tanto via query param quanto via body
+      const confirm = req.query.confirm || req.body.confirm;
+      
+      console.log("DELETE /api/bales/all - Query:", req.query, "Body:", req.body, "Confirm:", confirm);
       
       if (confirm !== "DELETE_ALL_BALES") {
         return res.status(400).json({
@@ -327,6 +330,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const result = await storage.deleteAllBales();
+      
+      console.log("Deleted bales:", result.deletedCount);
       
       res.json({
         message: `${result.deletedCount} fardo(s) deletado(s) com sucesso`,
