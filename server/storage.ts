@@ -188,63 +188,72 @@ export class PostgresStorage implements IStorage {
     // Gerar números sequenciais (zera a cada nova safra)
     const numbers = await this.getNextBaleNumbers(safra, talhao, quantidade);
 
-    const createdBales: Bale[] = [];
+    // Gerar todos os IDs que seriam criados
+    const allIds = numbers.map(numero => `S${safra}-T${talhao}-${numero}`);
+
+    // Buscar quais IDs já existem no banco (em uma única query)
+    const existingBales = await db
+      .select({ id: balesTable.id })
+      .from(balesTable)
+      .where(sql`${balesTable.id} = ANY(${allIds})`);
+    
+    const existingIds = new Set(existingBales.map(b => b.id));
     const skippedIds: string[] = [];
 
-    // Inserir fardos um por um, pulando os que já existem
-    for (const numero of numbers) {
-      const id = `S${safra}-T${talhao}-${numero}`;
-      
-      // Verificar se já existe
-      const existing = await this.getBale(id);
-      if (existing) {
-        skippedIds.push(id);
-        console.log(`Fardo ${id} já existe, pulando...`);
-        continue;
-      }
-
-      const baleData = {
-        id: id,
-        safra: safra,
-        talhao,
-        numero: parseInt(numero),
-        status: "campo" as BaleStatus,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      try {
-        const result = await db.insert(balesTable).values(baleData).returning();
-        createdBales.push(result[0]);
-      } catch (error: any) {
-        // Se a coluna status_history não existir, tenta inserir sem ela
-        if (error.code === '42703') {
-          const result = await db.insert(balesTable).values(baleData).returning({
-            id: balesTable.id,
-            safra: balesTable.safra,
-            talhao: balesTable.talhao,
-            numero: balesTable.numero,
-            status: balesTable.status,
-            createdAt: balesTable.createdAt,
-            updatedAt: balesTable.updatedAt,
-          });
-          createdBales.push({ ...result[0], statusHistory: null });
-        } else if (error.code === '23505') {
-          // Duplicate key - pular
+    // Filtrar apenas os números que NÃO existem
+    const balesData = numbers
+      .map(numero => {
+        const id = `S${safra}-T${talhao}-${numero}`;
+        
+        if (existingIds.has(id)) {
           skippedIds.push(id);
-          console.log(`Fardo ${id} duplicado (race condition), pulando...`);
-          continue;
-        } else {
-          throw error;
+          return null;
         }
-      }
-    }
+
+        return {
+          id: id,
+          safra: safra,
+          talhao,
+          numero: parseInt(numero),
+          status: "campo" as BaleStatus,
+          createdAt: now,
+          updatedAt: now,
+        };
+      })
+      .filter((bale): bale is NonNullable<typeof bale> => bale !== null);
 
     if (skippedIds.length > 0) {
-      console.log(`Total de fardos pulados: ${skippedIds.length}`, skippedIds);
+      console.log(`⚠️ Pulando ${skippedIds.length} fardo(s) que já existem:`, skippedIds);
     }
 
-    return createdBales;
+    // Se não há nada para criar, retornar array vazio
+    if (balesData.length === 0) {
+      console.log('✅ Nenhum fardo novo para criar (todos já existem)');
+      return [];
+    }
+
+    // Inserir todos de uma vez (batch insert)
+    try {
+      const result = await db.insert(balesTable).values(balesData).returning();
+      console.log(`✅ ${result.length} fardo(s) criado(s) com sucesso`);
+      return result;
+    } catch (error: any) {
+      // Se a coluna status_history não existir, tenta inserir sem ela
+      if (error.code === '42703') {
+        const result = await db.insert(balesTable).values(balesData).returning({
+          id: balesTable.id,
+          safra: balesTable.safra,
+          talhao: balesTable.talhao,
+          numero: balesTable.numero,
+          status: balesTable.status,
+          createdAt: balesTable.createdAt,
+          updatedAt: balesTable.updatedAt,
+        });
+        console.log(`✅ ${result.length} fardo(s) criado(s) com sucesso (sem status_history)`);
+        return result.map(b => ({ ...b, statusHistory: null }));
+      }
+      throw error;
+    }
   }
 
   async createSingleBale(id: string, safra: string, talhao: string, numero: string, userId: string): Promise<Bale> {
