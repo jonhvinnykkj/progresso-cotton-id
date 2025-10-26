@@ -70,7 +70,8 @@ export default function Transporte() {
   });
 
   const processBaleId = async (baleId: string) => {
-    const bale = bales.find((b) => b.id === baleId || b.qrCode === baleId);
+    // Busca pelo ID (que é o próprio QR Code)
+    const bale = bales.find((b) => b.id === baleId);
 
     if (!bale) {
       toast({
@@ -247,9 +248,9 @@ export default function Transporte() {
                   <div className="flex items-start gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
                     <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0 space-y-1">
-                      <p className="text-xs font-medium text-primary">QR Code</p>
+                      <p className="text-xs font-medium text-primary">QR Code / ID</p>
                       <p className="text-xs font-mono text-muted-foreground break-all leading-snug">
-                        {scannedBale.qrCode}
+                        {scannedBale.id}
                       </p>
                     </div>
                   </div>
