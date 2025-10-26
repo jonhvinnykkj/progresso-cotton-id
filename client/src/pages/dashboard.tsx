@@ -133,7 +133,7 @@ export default function Dashboard() {
                     size="sm"
                     onClick={() => setLocation("/talhao-stats")}
                     data-testid="button-talhao-stats"
-                    className="h-9 w-9 p-0 hidden sm:flex items-center justify-center"
+                    className="h-9 w-9 p-0 flex items-center justify-center"
                     title="Dashboard por Talhão"
                   >
                     <BarChart3 className="w-4 h-4" />

@@ -24,18 +24,25 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { Package, LogOut, QrCode, Loader2, CheckCircle } from "lucide-react";
+import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
 import type { Bale } from "@shared/schema";
 import { TALHOES_INFO } from "@shared/talhoes";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const batchCreateSchema = z.object({
   talhao: z.string().min(1, "Talhão é obrigatório"),
   quantidade: z.number().min(1, "Quantidade deve ser maior que 0").max(1000, "Máximo 1000 fardos por vez"),
 });
 
+const singleCreateSchema = z.object({
+  talhao: z.string().min(1, "Talhão é obrigatório"),
+  numero: z.string().min(1, "Número é obrigatório").regex(/^\d{5}$/, "Número deve ter 5 dígitos"),
+});
+
 type BatchCreateForm = z.infer<typeof batchCreateSchema>;
+type SingleCreateForm = z.infer<typeof singleCreateSchema>;
 
 export default function Campo() {
   const [, setLocation] = useLocation();
@@ -59,6 +66,75 @@ export default function Campo() {
       quantidade: 1,
     },
   });
+
+  const singleForm = useForm<SingleCreateForm>({
+    resolver: zodResolver(singleCreateSchema),
+    defaultValues: {
+      talhao: "",
+      numero: "",
+    },
+  });
+
+  const handleCreateSingle = async (data: SingleCreateForm) => {
+    setIsCreating(true);
+    setCreatedBales([]);
+    
+    if (!defaultSafra) {
+      toast({
+        variant: "destructive",
+        title: "Safra não configurada",
+        description: "O administrador precisa configurar a safra padrão nas configurações.",
+      });
+      setIsCreating(false);
+      return;
+    }
+    
+    try {
+      const baleId = `S${defaultSafra}-T${data.talhao}-${data.numero}`;
+      
+      const payload = {
+        id: baleId,
+        qrCode: baleId,
+        safra: defaultSafra,
+        talhao: data.talhao,
+        numero: data.numero,
+      };
+
+      const response = await fetch("/api/bales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || error.message || "Erro ao criar fardo");
+      }
+
+      const bale = await response.json();
+      setCreatedBales([bale]);
+
+      await queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
+
+      toast({
+        title: "Fardo criado com sucesso",
+        description: `Fardo ${baleId} criado no talhão ${data.talhao}`,
+      });
+
+      // Resetar form
+      singleForm.reset();
+
+    } catch (error) {
+      console.error("Erro ao criar fardo:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar fardo",
+        description: error instanceof Error ? error.message : "Tente novamente.",
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleCreateBatch = async (data: BatchCreateForm) => {
     setIsCreating(true);
@@ -169,15 +245,15 @@ export default function Campo() {
       <main className="mobile-content">
         <div className="container mx-auto px-4 py-6 max-w-2xl space-y-5">
           
-          {/* Formulário de Cadastro em Lote */}
+          {/* Formulário de Cadastro */}
           <Card className="shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Package className="w-5 h-5 text-primary shrink-0" />
-                Criar Fardos em Lote
+                Criar Fardos
               </CardTitle>
               <CardDescription className="text-sm">
-                Gere múltiplos fardos de uma vez com numeração sequencial automática
+                Escolha entre criar múltiplos fardos ou um único fardo
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -188,6 +264,21 @@ export default function Campo() {
                   <p className="text-sm font-semibold text-primary">{defaultSafra}</p>
                 </div>
               )}
+
+              <Tabs defaultValue="lote" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="lote">
+                    <Package className="w-4 h-4 mr-2" />
+                    Em Lote
+                  </TabsTrigger>
+                  <TabsTrigger value="individual">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Individual
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Tab: Criar em Lote */}
+                <TabsContent value="lote">
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleCreateBatch)} className="space-y-4">
@@ -275,6 +366,91 @@ export default function Campo() {
                   </Button>
                 </form>
               </Form>
+              </TabsContent>
+
+              {/* Tab: Criar Individual */}
+              <TabsContent value="individual">
+                <Form {...singleForm}>
+                  <form onSubmit={singleForm.handleSubmit(handleCreateSingle)} className="space-y-4">
+                    <FormField
+                      control={singleForm.control}
+                      name="talhao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Talhão</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isCreating}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-11">
+                                <SelectValue placeholder="Selecione o talhão" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {TALHOES_INFO.map((talhao) => (
+                                <SelectItem key={talhao.id} value={talhao.nome}>
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="font-medium">{talhao.nome}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {talhao.hectares} ha
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={singleForm.control}
+                      name="numero"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Número do Fardo</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Ex: 00001"
+                              maxLength={5}
+                              {...field}
+                              disabled={isCreating}
+                              className="h-11"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Digite o número de 5 dígitos (Ex: 00001, 00042)
+                          </FormDescription>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button
+                      type="submit"
+                      className="w-full h-11 shadow"
+                      disabled={isCreating}
+                    >
+                      {isCreating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Criando fardo...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Criar Fardo Individual
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+            </Tabs>
             </CardContent>
           </Card>
 
