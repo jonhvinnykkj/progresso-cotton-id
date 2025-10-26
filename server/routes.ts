@@ -172,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create single bale
   app.post("/api/bales", async (req, res) => {
     try {
-      const { id, safra, talhao, numero } = req.body;
+      const { id, safra, talhao, numero, userId } = req.body;
 
       if (!id || !safra || !talhao || !numero) {
         return res.status(400).json({
@@ -188,9 +188,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create single bale
-      const userId = "campo-user";
-      const bale = await storage.createSingleBale(id, safra, talhao, numero, userId);
+      // Create single bale with userId from request or fallback
+      const finalUserId = userId || "campo-user";
+      const bale = await storage.createSingleBale(id, safra, talhao, numero, finalUserId);
 
       res.status(201).json(bale);
     } catch (error) {
@@ -204,18 +204,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create bales in batch (NEW)
   app.post("/api/bales/batch", async (req, res) => {
     try {
-      const data = batchCreateBalesSchema.parse(req.body);
+      const { userId, ...data } = req.body;
+      const validatedData = batchCreateBalesSchema.parse(data);
 
-      // For MVP, using a generic user ID - in production, get from session
-      const userId = "campo-user";
+      // Use userId from request or fallback to generic user
+      const finalUserId = userId || "campo-user";
 
-      const bales = await storage.batchCreateBales(data, userId);
+      const bales = await storage.batchCreateBales(validatedData, finalUserId);
 
       // Retornar informações sobre quantos foram criados vs quantos foram solicitados
       const response = {
         created: bales.length,
-        requested: data.quantidade,
-        skipped: data.quantidade - bales.length,
+        requested: validatedData.quantidade,
+        skipped: validatedData.quantidade - bales.length,
         bales: bales,
       };
 
