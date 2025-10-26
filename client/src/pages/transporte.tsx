@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { Bale, UpdateBaleStatus } from "@shared/schema";
+import type { Bale } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useOfflineBales } from "@/lib/use-offline-bales";
 import {
   ScanLine,
   Truck,
@@ -30,6 +29,9 @@ import {
   Hash,
   CheckCircle2,
   Keyboard,
+  WifiOff,
+  Wifi,
+  RefreshCw,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import logoProgresso from "/favicon.png";
@@ -43,33 +45,15 @@ export default function Transporte() {
   const [manualBaleId, setManualBaleId] = useState("");
   const [scannedBale, setScannedBale] = useState<Bale | null>(null);
 
-  const { data: bales = [] } = useQuery<Bale[]>({
-    queryKey: ["/api/bales"],
-  });
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateBaleStatus }) => {
-      // Encode ID para URL (IDs têm barras como S25/26-T2B-00001)
-      const encodedId = encodeURIComponent(id);
-      return apiRequest("PATCH", `/api/bales/${encodedId}/status`, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/bales/stats"] });
-      toast({
-        title: "Status atualizado",
-        description: "Fardo movido para o pátio com sucesso.",
-      });
-      setScannedBale(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao atualizar status",
-        description: error.message || "Tente novamente.",
-      });
-    },
-  });
+  const {
+    bales,
+    isLoading,
+    isOnline,
+    syncInProgress,
+    updateStatus,
+    isUpdating,
+    syncPendingUpdates,
+  } = useOfflineBales();
 
   const processBaleId = async (baleId: string) => {
     // Remove espaços em branco e normaliza o ID
@@ -160,12 +144,21 @@ export default function Transporte() {
   const handleConfirmTransport = () => {
     if (!scannedBale) return;
 
-    updateStatusMutation.mutate({
+    updateStatus({
       id: scannedBale.id,
       data: {
         status: "patio",
       },
     });
+    
+    toast({
+      title: isOnline ? "Status atualizado" : "Atualização salva",
+      description: isOnline 
+        ? "Fardo movido para o pátio com sucesso."
+        : "Será sincronizada quando você voltar online.",
+    });
+    
+    setScannedBale(null);
   };
 
   const handleLogout = () => {
@@ -187,9 +180,23 @@ export default function Transporte() {
               />
               <div className="min-w-0 flex-1">
                 <h1 className="text-base font-semibold truncate">Transporte</h1>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user?.username}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user?.username}
+                  </p>
+                  {!isOnline && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                      <WifiOff className="w-3 h-3 mr-1" />
+                      Offline
+                    </Badge>
+                  )}
+                  {syncInProgress && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                      <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                      Sync
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             <Button
@@ -208,6 +215,18 @@ export default function Transporte() {
       {/* Conteúdo principal mobile-first */}
       <main className="mobile-content">
         <div className="container mx-auto px-4 py-6 max-w-2xl space-y-5">
+          
+          {/* Alerta de modo offline */}
+          {!isOnline && (
+            <Alert className="border-amber-500/50 bg-amber-500/10">
+              <WifiOff className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-sm">
+                <strong>Modo Offline:</strong> Trabalhando com dados salvos localmente. 
+                As atualizações serão sincronizadas quando você voltar online.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {!scannedBale ? (
             <Card className="shadow-md">
               <CardHeader className="pb-4">
@@ -318,14 +337,14 @@ export default function Transporte() {
                   </Button>
                   <Button
                     onClick={handleConfirmTransport}
-                    disabled={updateStatusMutation.isPending}
+                    disabled={isUpdating}
                     className="flex-1 h-11 shadow"
                     data-testid="button-confirm-transport"
                   >
-                    {updateStatusMutation.isPending ? (
+                    {isUpdating ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Atualizando...
+                        {isOnline ? "Atualizando..." : "Salvando..."}
                       </>
                     ) : (
                       <>
