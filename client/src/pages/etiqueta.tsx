@@ -51,14 +51,93 @@ export default function Etiqueta() {
     
     for (const bale of bales) {
       try {
+        // Gerar QR Code base
         const qrDataURL = await QRCode.toDataURL(bale.id, {
           width: 800,
           margin: 1,
-          errorCorrectionLevel: "H",
+          errorCorrectionLevel: "H", // High error correction para suportar o logo no centro
+          color: {
+            dark: "#106A44", // Verde escuro do Grupo Progresso
+            light: "#FFFFFF" // Fundo branco
+          }
         });
-        newQrDataUrls.set(bale.id, qrDataURL);
+        
+        // Criar canvas para adicionar o logo
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          newQrDataUrls.set(bale.id, qrDataURL);
+          continue;
+        }
+        
+        // Carregar QR Code no canvas
+        const qrImage = new Image();
+        await new Promise((resolve, reject) => {
+          qrImage.onload = resolve;
+          qrImage.onerror = reject;
+          qrImage.src = qrDataURL;
+        });
+        
+        canvas.width = qrImage.width;
+        canvas.height = qrImage.height;
+        ctx.drawImage(qrImage, 0, 0);
+        
+        // Carregar e desenhar logo no centro
+        const logo = new Image();
+        await new Promise((resolve, reject) => {
+          logo.onload = resolve;
+          logo.onerror = reject;
+          logo.src = logoProgresso;
+        });
+        
+        // Tamanho do logo (20% do QR Code)
+        const logoSize = canvas.width * 0.20;
+        const logoX = (canvas.width - logoSize) / 2;
+        const logoY = (canvas.height - logoSize) / 2;
+        
+        // Desenhar fundo branco com borda para o logo
+        const padding = 8;
+        const bgSize = logoSize + padding * 2;
+        const bgX = (canvas.width - bgSize) / 2;
+        const bgY = (canvas.height - bgSize) / 2;
+        
+        // Fundo branco com sombra
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(bgX, bgY, bgSize, bgSize, 12);
+        ctx.fill();
+        
+        // Borda verde/amarela
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = '#EAB308'; // Amarelo
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Desenhar logo
+        ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+        
+        // Converter canvas para data URL
+        const finalQrCode = canvas.toDataURL('image/png');
+        newQrDataUrls.set(bale.id, finalQrCode);
       } catch (error) {
         console.error(`Error generating QR for bale ${bale.id}:`, error);
+        // Fallback para QR Code simples em caso de erro
+        try {
+          const fallbackQR = await QRCode.toDataURL(bale.id, {
+            width: 800,
+            margin: 1,
+            errorCorrectionLevel: "H",
+          });
+          newQrDataUrls.set(bale.id, fallbackQR);
+        } catch (fallbackError) {
+          console.error(`Fallback QR generation failed for ${bale.id}:`, fallbackError);
+        }
       }
     }
     
