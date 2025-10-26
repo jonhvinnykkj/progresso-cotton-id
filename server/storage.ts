@@ -201,8 +201,26 @@ export class PostgresStorage implements IStorage {
       };
     });
 
-    const result = await db.insert(balesTable).values(balesData).returning();
-    return result;
+    try {
+      const result = await db.insert(balesTable).values(balesData).returning();
+      return result;
+    } catch (error: any) {
+      // Se a coluna status_history não existir, tenta inserir sem ela
+      if (error.code === '42703') {
+        // Remove status_history do schema temporariamente
+        const result = await db.insert(balesTable).values(balesData).returning({
+          id: balesTable.id,
+          safra: balesTable.safra,
+          talhao: balesTable.talhao,
+          numero: balesTable.numero,
+          status: balesTable.status,
+          createdAt: balesTable.createdAt,
+          updatedAt: balesTable.updatedAt,
+        });
+        return result.map(b => ({ ...b, statusHistory: null }));
+      }
+      throw error;
+    }
   }
 
   async updateBaleStatus(id: string, newStatus: BaleStatus, userId: string): Promise<Bale> {
@@ -243,8 +261,29 @@ export class PostgresStorage implements IStorage {
       updatedAt: now,
     };
 
-    const result = await db.update(balesTable).set(updates).where(eq(balesTable.id, id)).returning();
-    return result[0];
+    try {
+      const result = await db.update(balesTable).set(updates).where(eq(balesTable.id, id)).returning();
+      return result[0];
+    } catch (error: any) {
+      // Se a coluna status_history não existir, atualiza sem ela
+      if (error.code === '42703') {
+        const simpleUpdates = {
+          status: newStatus,
+          updatedAt: now,
+        };
+        const result = await db.update(balesTable).set(simpleUpdates).where(eq(balesTable.id, id)).returning({
+          id: balesTable.id,
+          safra: balesTable.safra,
+          talhao: balesTable.talhao,
+          numero: balesTable.numero,
+          status: balesTable.status,
+          createdAt: balesTable.createdAt,
+          updatedAt: balesTable.updatedAt,
+        });
+        return { ...result[0], statusHistory: null };
+      }
+      throw error;
+    }
   }
 
   async getBaleStats(): Promise<{
