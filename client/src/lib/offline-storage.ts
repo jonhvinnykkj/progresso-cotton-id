@@ -34,32 +34,74 @@ class OfflineStorage {
     if (!this.db) await this.init();
     if (!this.db) throw new Error("Database not initialized");
 
+    console.log(`💾 Iniciando salvamento de ${bales.length} fardos no IndexedDB...`);
+
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], "readwrite");
       const store = transaction.objectStore(STORE_NAME);
 
       // Clear existing data
-      store.clear();
-
-      // Add all bales
-      bales.forEach((bale) => {
-        store.add({
-          ...bale,
-          _cachedAt: new Date().toISOString(),
+      const clearRequest = store.clear();
+      
+      clearRequest.onsuccess = () => {
+        console.log(`🗑️ Cache anterior limpo`);
+        
+        // Add all bales one by one to catch errors
+        let addedCount = 0;
+        let errorCount = 0;
+        
+        bales.forEach((bale, index) => {
+          try {
+            const addRequest = store.add({
+              ...bale,
+              _cachedAt: new Date().toISOString(),
+            });
+            
+            addRequest.onsuccess = () => {
+              addedCount++;
+              if (index === 0 || index === bales.length - 1 || index % 50 === 0) {
+                console.log(`✅ Fardo ${index + 1}/${bales.length} salvo: ${bale.id}`);
+              }
+            };
+            
+            addRequest.onerror = (event) => {
+              errorCount++;
+              console.error(`❌ Erro ao salvar fardo ${bale.id}:`, (event.target as any)?.error);
+            };
+          } catch (error) {
+            errorCount++;
+            console.error(`❌ Exceção ao adicionar fardo ${bale.id}:`, error);
+          }
         });
-      });
+      };
+      
+      clearRequest.onerror = () => {
+        console.error(`❌ Erro ao limpar cache:`, clearRequest.error);
+        reject(clearRequest.error);
+      };
 
       transaction.oncomplete = () => {
-        console.log(`💾 ${bales.length} fardos salvos no cache offline`);
+        console.log(`💾 ✅ ${bales.length} fardos salvos no cache offline com sucesso`);
         resolve();
       };
-      transaction.onerror = () => reject(transaction.error);
+      
+      transaction.onerror = () => {
+        console.error(`❌ Erro na transação:`, transaction.error);
+        reject(transaction.error);
+      };
+      
+      transaction.onabort = () => {
+        console.error(`❌ Transação abortada:`, transaction.error);
+        reject(new Error("Transaction aborted"));
+      };
     });
   }
 
   async getAllBales(): Promise<Bale[]> {
     if (!this.db) await this.init();
     if (!this.db) throw new Error("Database not initialized");
+
+    console.log(`📦 Buscando fardos do cache IndexedDB...`);
 
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], "readonly");
@@ -68,10 +110,17 @@ class OfflineStorage {
 
       request.onsuccess = () => {
         const bales = request.result as Bale[];
-        console.log(`📦 ${bales.length} fardos carregados do cache offline`);
+        console.log(`📦 ✅ ${bales.length} fardos carregados do cache offline`);
+        if (bales.length > 0) {
+          console.log(`   Primeiro fardo: ${bales[0].id}`);
+          console.log(`   Último fardo: ${bales[bales.length - 1].id}`);
+        }
         resolve(bales);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        console.error(`❌ Erro ao buscar fardos do cache:`, request.error);
+        reject(request.error);
+      };
     });
   }
 

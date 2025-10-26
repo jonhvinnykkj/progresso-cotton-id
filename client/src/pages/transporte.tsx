@@ -144,21 +144,20 @@ export default function Transporte() {
   const handleConfirmTransport = () => {
     if (!scannedBale) return;
 
-    updateStatus({
-      id: scannedBale.id,
-      data: {
-        status: "patio",
+    updateStatus(
+      {
+        id: scannedBale.id,
+        data: {
+          status: "patio",
+        },
       },
-    });
-    
-    toast({
-      title: isOnline ? "Status atualizado" : "Atualização salva",
-      description: isOnline 
-        ? "Fardo movido para o pátio com sucesso."
-        : "Será sincronizada quando você voltar online.",
-    });
-    
-    setScannedBale(null);
+      {
+        onSuccess: () => {
+          // Close modal after successful update
+          setScannedBale(null);
+        },
+      }
+    );
   };
 
   const handleLogout = () => {

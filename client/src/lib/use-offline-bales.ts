@@ -44,25 +44,33 @@ export function useOfflineBales() {
       if (!isOnline) {
         // Load from offline storage
         console.log("📴 Offline - carregando do cache");
-        return await offlineStorage.getAllBales();
+        const cachedBales = await offlineStorage.getAllBales();
+        console.log(`📴 Retornando ${cachedBales.length} fardos do cache`);
+        return cachedBales;
       }
 
       try {
         // Try to fetch from API
+        console.log("🌐 Online - buscando dados da API...");
         const response = await fetch("/api/bales");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log(`🌐 Recebidos ${data.length} fardos da API`);
         
         // Save to offline storage for future offline use
+        console.log(`💾 Salvando ${data.length} fardos no cache offline...`);
         await offlineStorage.saveBales(data);
+        console.log(`💾 ✅ Cache atualizado com sucesso`);
         
         return data;
       } catch (error) {
         console.error("❌ Erro ao buscar dados online, usando cache:", error);
         // Fallback to offline storage
-        return await offlineStorage.getAllBales();
+        const cachedBales = await offlineStorage.getAllBales();
+        console.log(`📴 Fallback: retornando ${cachedBales.length} fardos do cache`);
+        return cachedBales;
       }
     },
     staleTime: isOnline ? 30000 : Infinity, // 30s when online, never stale offline
@@ -80,9 +88,13 @@ export function useOfflineBales() {
         console.log(`📴 Offline - salvando atualização localmente: ${id} → ${data.status}`);
         await offlineStorage.updateBaleStatus(id, data.status);
         
-        toast({
-          title: "Atualização salva localmente",
-          description: "Será sincronizada quando você voltar online.",
+        // Update local query cache immediately
+        queryClient.setQueryData(["/api/bales"], (old: Bale[] = []) => {
+          return old.map((bale) =>
+            bale.id === id
+              ? { ...bale, status: data.status }
+              : bale
+          );
         });
         
         return { id, ...data, _offlineUpdate: true } as any;
@@ -94,19 +106,28 @@ export function useOfflineBales() {
     },
     onSuccess: (data, variables) => {
       if ((data as any)._offlineUpdate) {
-        // Offline update - update local cache
-        queryClient.setQueryData(["/api/bales"], (old: Bale[] = []) => {
-          return old.map((bale) =>
-            bale.id === variables.id
-              ? { ...bale, status: variables.data.status }
-              : bale
-          );
+        // Offline update - show toast
+        toast({
+          title: "Atualização salva localmente",
+          description: "Será sincronizada quando você voltar online.",
         });
       } else {
         // Online update successful
         queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
         queryClient.invalidateQueries({ queryKey: ["/api/bales/stats"] });
+        toast({
+          title: "Status atualizado",
+          description: "Fardo atualizado com sucesso.",
+        });
       }
+    },
+    onError: (error: any) => {
+      console.error("❌ Erro ao atualizar status:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar",
+        description: error.message || "Tente novamente.",
+      });
     },
   });
 
