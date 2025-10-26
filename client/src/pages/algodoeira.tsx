@@ -71,17 +71,27 @@ export default function Algodoeira() {
   });
 
   const processBaleId = async (baleId: string) => {
+    // Remove espaços em branco e normaliza o ID
+    const normalizedId = baleId.trim();
+    
+    console.log('🔍 Procurando fardo:', normalizedId);
+    console.log('📦 Total de fardos disponíveis:', bales.length);
+    console.log('📋 IDs disponíveis:', bales.map(b => b.id).slice(0, 5)); // Mostra primeiros 5
+    
     // Busca pelo ID (que é o próprio QR Code)
-    const bale = bales.find((b) => b.id === baleId);
+    const bale = bales.find((b) => b.id === normalizedId);
 
     if (!bale) {
+      console.error('❌ Fardo não encontrado! ID buscado:', normalizedId);
       toast({
         variant: "destructive",
         title: "Fardo não encontrado",
-        description: "Este ID não está cadastrado no sistema.",
+        description: `ID "${normalizedId}" não está cadastrado no sistema.`,
       });
       return;
     }
+
+    console.log('✅ Fardo encontrado:', bale);
 
     if (bale.status !== "patio") {
       toast({
