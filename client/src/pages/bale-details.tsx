@@ -26,6 +26,27 @@ export default function BaleDetails() {
     enabled: !!baleId,
   });
 
+  // Fetch users to map IDs to display names
+  const { data: users = [] } = useQuery<Array<{ id: string; displayName: string }>>({
+    queryKey: ["/api/users"],
+    queryFn: async () => {
+      const response = await fetch("/api/users", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        return [];
+      }
+      return response.json();
+    },
+  });
+
+  // Helper function to get user display name by ID
+  const getUserDisplayName = (userId: string | null | undefined): string => {
+    if (!userId) return "Não identificado";
+    const user = users.find(u => u.id === userId);
+    return user?.displayName || userId;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -167,11 +188,7 @@ export default function BaleDetails() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">Criado por</p>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {bale.createdBy ? (
-                    <span className="font-mono">{bale.createdBy}</span>
-                  ) : (
-                    <span className="italic">Informação não disponível</span>
-                  )}
+                  <span className="font-medium">{getUserDisplayName(bale.createdBy)}</span>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(bale.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
@@ -188,11 +205,7 @@ export default function BaleDetails() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">Transportado por</p>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {bale.transportedBy ? (
-                      <span className="font-mono">{bale.transportedBy}</span>
-                    ) : (
-                      <span className="italic">Aguardando processamento</span>
-                    )}
+                    <span className="font-medium">{getUserDisplayName(bale.transportedBy)}</span>
                   </p>
                   {bale.transportedAt && (
                     <p className="text-xs text-muted-foreground mt-1">
@@ -212,11 +225,7 @@ export default function BaleDetails() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">Processado por</p>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {bale.processedBy ? (
-                      <span className="font-mono">{bale.processedBy}</span>
-                    ) : (
-                      <span className="italic">Aguardando processamento</span>
-                    )}
+                    <span className="font-medium">{getUserDisplayName(bale.processedBy)}</span>
                   </p>
                   {bale.processedAt && (
                     <p className="text-xs text-muted-foreground mt-1">
@@ -231,7 +240,7 @@ export default function BaleDetails() {
             {bale.updatedBy && (
               <div className="pt-3 border-t">
                 <p className="text-xs text-muted-foreground">
-                  Última atualização por: <span className="font-mono">{bale.updatedBy}</span>
+                  Última atualização por: <span className="font-medium">{getUserDisplayName(bale.updatedBy)}</span>
                 </p>
               </div>
             )}
