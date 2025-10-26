@@ -188,11 +188,23 @@ export class PostgresStorage implements IStorage {
     // Gerar números sequenciais (zera a cada nova safra)
     const numbers = await this.getNextBaleNumbers(safra, talhao, quantidade);
 
-    // Criar fardos em lote com novo formato de ID: S{safra}-T{talhao}-{numero}
-    const balesData = numbers.map(numero => {
-      const id = `S${safra}-T${talhao}-${numero}`; // Ex: S25/26-T2B-00001
-      return {
-        id: id, // ID serve como QR Code
+    const createdBales: Bale[] = [];
+    const skippedIds: string[] = [];
+
+    // Inserir fardos um por um, pulando os que já existem
+    for (const numero of numbers) {
+      const id = `S${safra}-T${talhao}-${numero}`;
+      
+      // Verificar se já existe
+      const existing = await this.getBale(id);
+      if (existing) {
+        skippedIds.push(id);
+        console.log(`Fardo ${id} já existe, pulando...`);
+        continue;
+      }
+
+      const baleData = {
+        id: id,
         safra: safra,
         talhao,
         numero: parseInt(numero),
@@ -200,28 +212,39 @@ export class PostgresStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
       };
-    });
 
-    try {
-      const result = await db.insert(balesTable).values(balesData).returning();
-      return result;
-    } catch (error: any) {
-      // Se a coluna status_history não existir, tenta inserir sem ela
-      if (error.code === '42703') {
-        // Remove status_history do schema temporariamente
-        const result = await db.insert(balesTable).values(balesData).returning({
-          id: balesTable.id,
-          safra: balesTable.safra,
-          talhao: balesTable.talhao,
-          numero: balesTable.numero,
-          status: balesTable.status,
-          createdAt: balesTable.createdAt,
-          updatedAt: balesTable.updatedAt,
-        });
-        return result.map(b => ({ ...b, statusHistory: null }));
+      try {
+        const result = await db.insert(balesTable).values(baleData).returning();
+        createdBales.push(result[0]);
+      } catch (error: any) {
+        // Se a coluna status_history não existir, tenta inserir sem ela
+        if (error.code === '42703') {
+          const result = await db.insert(balesTable).values(baleData).returning({
+            id: balesTable.id,
+            safra: balesTable.safra,
+            talhao: balesTable.talhao,
+            numero: balesTable.numero,
+            status: balesTable.status,
+            createdAt: balesTable.createdAt,
+            updatedAt: balesTable.updatedAt,
+          });
+          createdBales.push({ ...result[0], statusHistory: null });
+        } else if (error.code === '23505') {
+          // Duplicate key - pular
+          skippedIds.push(id);
+          console.log(`Fardo ${id} duplicado (race condition), pulando...`);
+          continue;
+        } else {
+          throw error;
+        }
       }
-      throw error;
     }
+
+    if (skippedIds.length > 0) {
+      console.log(`Total de fardos pulados: ${skippedIds.length}`, skippedIds);
+    }
+
+    return createdBales;
   }
 
   async createSingleBale(id: string, safra: string, talhao: string, numero: string, userId: string): Promise<Bale> {

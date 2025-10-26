@@ -169,16 +169,30 @@ export default function Campo() {
         throw new Error(error.error || error.message || "Erro ao criar fardos");
       }
 
-      const bales = await response.json();
+      const result = await response.json();
+      
+      // A resposta agora contém: { created, requested, skipped, bales }
+      const bales = result.bales || result; // Compatibilidade com resposta antiga
+      const created = result.created || bales.length;
+      const skipped = result.skipped || 0;
+      
       setCreatedBales(bales);
 
       // Invalidar cache para garantir que a página de etiquetas veja os novos fardos
       await queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
 
-      toast({
-        title: "Fardos criados com sucesso",
-        description: `${bales.length} fardo(s) criado(s) no talhão ${data.talhao}`,
-      });
+      // Mensagem diferenciada se houver fardos pulados
+      if (skipped > 0) {
+        toast({
+          title: "Fardos criados com avisos",
+          description: `${created} fardo(s) criado(s), ${skipped} pulado(s) (já existiam) no talhão ${data.talhao}`,
+        });
+      } else {
+        toast({
+          title: "Fardos criados com sucesso",
+          description: `${created} fardo(s) criado(s) no talhão ${data.talhao}`,
+        });
+      }
 
       // Resetar apenas quantidade
       form.setValue("quantidade", 1);

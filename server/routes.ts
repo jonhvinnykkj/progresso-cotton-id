@@ -156,7 +156,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const bales = await storage.batchCreateBales(data, userId);
 
-      res.status(201).json(bales);
+      // Retornar informações sobre quantos foram criados vs quantos foram solicitados
+      const response = {
+        created: bales.length,
+        requested: data.quantidade,
+        skipped: data.quantidade - bales.length,
+        bales: bales,
+      };
+
+      res.status(201).json(response);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
