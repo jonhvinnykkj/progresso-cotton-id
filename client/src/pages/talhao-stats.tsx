@@ -60,7 +60,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TalhaoMap } from "@/components/talhao-map";
 import { InteractiveTalhaoMap } from "@/components/interactive-talhao-map";
 
 interface TalhaoStats {
