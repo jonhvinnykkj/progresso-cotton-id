@@ -102,11 +102,16 @@ export default function SettingsPage() {
   const handleDeleteAllBales = async () => {
     setIsDeleting(true);
     try {
+      console.log("🗑️ Iniciando deleção de todos os fardos...");
+      console.log("Enviando confirmação: DELETE_ALL_BALES");
+      
       const response = await apiRequest("DELETE", "/api/bales/all", {
         confirm: "DELETE_ALL_BALES",
       });
 
+      console.log("Response status:", response.status);
       const data = await response.json() as { message?: string; deletedCount: number };
+      console.log("Response data:", data);
 
       toast({
         title: "Fardos deletados",
@@ -120,6 +125,7 @@ export default function SettingsPage() {
 
       setShowDeleteDialog(false);
     } catch (error) {
+      console.error("❌ Erro ao deletar fardos:", error);
       toast({
         variant: "destructive",
         title: "Erro ao deletar fardos",
@@ -349,17 +355,19 @@ export default function SettingsPage() {
               </div>
               Confirmar Exclusão
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3 text-base pt-2">
-              <p className="font-semibold text-foreground">
-                Você está prestes a deletar TODOS os fardos do banco de dados de produção.
-              </p>
-              <p>Esta ação é <strong className="text-destructive">PERMANENTE</strong> e <strong className="text-destructive">IRREVERSÍVEL</strong>.</p>
-              <p>Todos os fardos cadastrados serão perdidos.</p>
-              <div className="p-4 bg-destructive/10 border-2 border-destructive/30 rounded-xl mt-3">
-                <p className="text-destructive font-bold flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  Tem certeza que deseja continuar?
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-base pt-2">
+                <p className="font-semibold text-foreground">
+                  Você está prestes a deletar TODOS os fardos do banco de dados de produção.
                 </p>
+                <p>Esta ação é <strong className="text-destructive">PERMANENTE</strong> e <strong className="text-destructive">IRREVERSÍVEL</strong>.</p>
+                <p>Todos os fardos cadastrados serão perdidos.</p>
+                <div className="p-4 bg-destructive/10 border-2 border-destructive/30 rounded-xl mt-3">
+                  <p className="text-destructive font-bold flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    Tem certeza que deseja continuar?
+                  </p>
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>

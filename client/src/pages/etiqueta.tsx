@@ -149,7 +149,7 @@ export default function Etiqueta() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background print:hidden">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background print:hidden pb-20 lg:pb-0">
         {/* Header modernizado */}
         <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-sm">
           <div className="container mx-auto px-4">

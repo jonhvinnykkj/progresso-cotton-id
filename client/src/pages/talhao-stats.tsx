@@ -24,6 +24,7 @@ import {
   Filter,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { NavSidebar } from "@/components/nav-sidebar";
 import {
   BarChart,
   Bar,
@@ -218,67 +219,65 @@ export default function TalhaoStats() {
     : "0";
 
   return (
-    <div className="mobile-page">
-      {/* Header modernizado */}
-      <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-wrap items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation("/dashboard")}
-                data-testid="button-back"
-                className="h-9 shrink-0 hover:scale-105 transition-transform duration-300"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <img 
-                src={logoProgresso} 
-                alt="Grupo Progresso" 
-                className="h-10 sm:h-12 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
-              />
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent" data-testid="text-page-title">
-                  Fardos por Talhão
-                </h1>
-                <p className="text-xs text-muted-foreground truncate" data-testid="text-username">
-                  {user?.username}
-                </p>
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800">
+      <NavSidebar />
+      
+      <div className="flex-1 lg:ml-64 flex flex-col">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8">
+          {/* Header modernizado */}
+          <div className="mb-6 sm:mb-8 animate-fade-in-up">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+                <img 
+                  src={logoProgresso} 
+                  alt="Grupo Progresso" 
+                  className="h-8 w-8 sm:h-10 sm:w-10 transition-transform hover:scale-110 duration-300"
+                />
+                Estatísticas por Talhão
+              </h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/dashboard")}
+                  className="hidden sm:flex transition-all hover:scale-110 duration-300"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Voltar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="shrink-0 transition-all hover:scale-110 duration-300"
+                >
+                  <LogOut className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Sair</span>
+                </Button>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              data-testid="button-logout"
-              className="h-9 shrink-0 hover:scale-105 transition-transform duration-300"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Análise detalhada da produção por talhão de algodão
+            </p>
           </div>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="mobile-content bg-gradient-to-br from-background via-muted/10 to-background">
-        <div className="container mx-auto px-4 py-6 max-w-7xl space-y-5">
-          {/* Card de Produtividade - DESTAQUE */}
-          <Card className="bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl border-0 rounded-2xl overflow-hidden animate-fade-in-up">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
-            </div>
-            <CardContent className="pt-8 pb-8 relative">
-              <div className="text-center space-y-3">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl w-fit mx-auto">
-                  <TrendingUp className="w-8 h-8 text-white" />
-                </div>
-                <p className="text-sm font-semibold text-emerald-50 uppercase tracking-wide">Produtividade Média Total</p>
-                <div className="flex items-baseline justify-center gap-2">
-                  <p className="text-6xl sm:text-7xl font-bold">{avgArrobasPorHectare}</p>
-                  <p className="text-3xl font-bold text-emerald-50">@/ha</p>
-                </div>
+          <div className="space-y-6">
+            {/* Card de Produtividade - DESTAQUE */}
+            <Card className="bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl border-0 rounded-2xl overflow-hidden animate-fade-in-up">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+              </div>
+              <CardContent className="pt-8 pb-8 relative">
+                <div className="text-center space-y-3">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl w-fit mx-auto">
+                    <TrendingUp className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-50 uppercase tracking-wide">Produtividade Média Total</p>
+                  <div className="flex items-baseline justify-center gap-2">
+                    <p className="text-6xl sm:text-7xl font-bold">{avgArrobasPorHectare}</p>
+                    <p className="text-3xl font-bold text-emerald-50">@/ha</p>
+                  </div>
                 <div className="flex items-center justify-center gap-4 text-sm text-emerald-50 font-semibold">
                   <span className="flex items-center gap-1">
                     <Layers className="w-4 h-4" />
@@ -1066,7 +1065,7 @@ export default function TalhaoStats() {
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
+          </div>
       </main>
 
       {/* Modal de Detalhes do Talhão */}
@@ -1235,9 +1234,9 @@ export default function TalhaoStats() {
           z-index: 9999 !important;
         }
       `}</style>
-
-      {/* Footer */}
-      <Footer />
+        
+        <Footer />
+      </div>
     </div>
   );
 }

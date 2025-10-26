@@ -168,7 +168,7 @@ export default function Transporte() {
   };
 
   return (
-    <div className="mobile-page">
+    <div className="mobile-page pb-20 lg:pb-0">
       {/* Header moderno com gradiente */}
       <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 max-w-7xl">

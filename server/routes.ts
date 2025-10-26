@@ -1,6 +1,7 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import type { User as SchemaUser } from "@shared/schema";
 import {
   loginSchema,
   createUserSchema,
@@ -8,6 +9,21 @@ import {
   updateBaleStatusSchema,
   updateDefaultSafraSchema,
 } from "@shared/schema";
+
+// Estender Request do Express com métodos do Passport
+declare global {
+  namespace Express {
+    // Usar o tipo User do schema
+    type User = SchemaUser;
+  }
+}
+
+declare module "express-serve-static-core" {
+  interface Request {
+    isAuthenticated(): boolean;
+    user?: Express.User;
+  }
+}
 import { z } from "zod";
 import { generatePDF, generateExcel } from "./reports";
 
@@ -112,11 +128,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user (superadmin only)
   app.delete("/api/users/:id", async (req, res) => {
     try {
       const { id } = req.params;
+      
+      console.log(`Deleting user: ${id}`);
       await storage.deleteUser(id);
-      res.json({ success: true });
+      
+      res.json({ success: true, message: "Usuário excluído com sucesso" });
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({
@@ -301,46 +321,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete single bale (superadmin only)
-  app.delete("/api/bales/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      await storage.deleteBale(decodeURIComponent(id));
-      res.json({ success: true, message: "Fardo excluído com sucesso" });
-    } catch (error) {
-      console.error("Error deleting bale:", error);
-      res.status(500).json({
-        error: "Erro ao excluir fardo",
-      });
-    }
-  });
-
-  // Delete all bales (admin only)
+  // Delete all bales (superadmin only) - DEVE VIR ANTES DO DELETE BY ID
   app.delete("/api/bales/all", async (req, res) => {
     try {
-      // Aceita confirmação tanto via query param quanto via body
-      const confirm = req.query.confirm || req.body.confirm;
+      console.log("=== DELETE /api/bales/all ===");
+      console.log("Body:", req.body);
       
-      console.log("DELETE /api/bales/all - Query:", req.query, "Body:", req.body, "Confirm:", confirm);
+      // Aceita confirmação via body
+      const confirm = req.body?.confirm;
+      
+      console.log("Confirm value:", confirm);
       
       if (confirm !== "DELETE_ALL_BALES") {
+        console.log("❌ Invalid confirmation. Expected 'DELETE_ALL_BALES', got:", confirm);
         return res.status(400).json({
-          error: "Confirmação inválida. Operação bloqueada.",
+          error: `Confirmação inválida. Operação bloqueada. Recebido: ${confirm}`,
         });
       }
 
+      console.log("✅ Confirmation valid. Deleting all bales...");
       const result = await storage.deleteAllBales();
       
-      console.log("Deleted bales:", result.deletedCount);
+      console.log(`✅ Deleted ${result.deletedCount} bales`);
       
       res.json({
         message: `${result.deletedCount} fardo(s) deletado(s) com sucesso`,
         deletedCount: result.deletedCount,
       });
     } catch (error) {
-      console.error("Error deleting all bales:", error);
+      console.error("❌ Error deleting all bales:", error);
       res.status(500).json({
-        error: "Erro ao deletar fardos",
+        error: "Erro ao deletar todos os fardos",
+      });
+    }
+  });
+
+  // Delete single bale (admin or superadmin only)
+  app.delete("/api/bales/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log(`Deleting bale: ${id}`);
+      
+      await storage.deleteBale(decodeURIComponent(id));
+      
+      res.json({ success: true, message: "Fardo excluído com sucesso" });
+    } catch (error) {
+      console.error("Error deleting bale:", error);
+      res.status(500).json({
+        error: "Erro ao excluir fardo individual",
       });
     }
   });
@@ -393,8 +421,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filters = {
         startDate: req.query.startDate as string | undefined,
         endDate: req.query.endDate as string | undefined,
-        status: req.query.status as string | undefined,
-        talhao: req.query.talhao as string | undefined,
+        status: req.query.status ? (req.query.status as string).split(',') : undefined,
+        talhao: req.query.talhao ? (req.query.talhao as string).split(',') : undefined,
       };
       
       const pdfBuffer = generatePDF(bales, filters);
@@ -417,8 +445,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filters = {
         startDate: req.query.startDate as string | undefined,
         endDate: req.query.endDate as string | undefined,
-        status: req.query.status as string | undefined,
-        talhao: req.query.talhao as string | undefined,
+        status: req.query.status ? (req.query.status as string).split(',') : undefined,
+        talhao: req.query.talhao ? (req.query.talhao as string).split(',') : undefined,
       };
       
       const excelBuffer = generateExcel(bales, filters);

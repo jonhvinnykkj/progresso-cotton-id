@@ -226,7 +226,7 @@ export default function Campo() {
   };
 
   return (
-    <div className="mobile-page">
+    <div className="mobile-page pb-20 lg:pb-0">
       {/* Header */}
       <header className="mobile-header backdrop-blur-md bg-background/95 border-b">
         <div className="container mx-auto px-4 max-w-7xl">

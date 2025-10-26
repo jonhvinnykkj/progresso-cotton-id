@@ -41,7 +41,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/footer";
-import { ShieldCheck, User, Package, Truck, Building, Loader2, Lock, Wheat } from "lucide-react";
+import { ShieldCheck, User, Package, Truck, Building, Loader2, Lock } from "lucide-react";
 import logoProgresso from "/favicon2.png";
 import fazendaBg from "/fazenda.jpeg";
 
@@ -258,72 +258,16 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Layout de duas colunas (Desktop) / Empilhado (Mobile) */}
-      <div className="relative min-h-screen flex flex-col lg:flex-row">
+      {/* Layout centralizado */}
+      <div className="relative min-h-screen flex items-center justify-center">
         
-        {/* Lado Esquerdo - Informações */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-          <div className="max-w-lg text-white space-y-6 lg:space-y-8 animate-fade-in-up">
+        {/* Formulário de Login */}
+        <div className="w-full max-w-md p-6 lg:p-12">
+          <div className="w-full space-y-6 animate-slide-up-bounce">
             
-            {/* Título e Descrição */}
-            <div className="space-y-3 lg:space-y-4 text-center lg:text-left" style={{ animationDelay: '0.1s' }}>
-              <h1 className="text-3xl lg:text-5xl font-bold drop-shadow-2xl leading-tight">
-                Cotton
-                <span className="block text-yellow-400">Management</span>
-              </h1>
-              
-              <p className="text-base lg:text-lg text-white/95 font-medium drop-shadow-lg flex items-center justify-center lg:justify-start gap-2">
-                🌱 <span>Rastreabilidade completa do campo ao beneficiamento</span>
-              </p>
-              
-              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-green-400 mx-auto lg:mx-0 rounded-full"></div>
-            </div>
-            
-            {/* Features */}
-            <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <div className="flex items-center gap-3 text-white/95 justify-center lg:justify-start">
-                <div className="w-12 h-12 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
-                  <Wheat className="w-6 h-6" />
-                </div>
-                <span className="font-semibold text-base lg:text-lg">Gestão de Talhões e Safras</span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-white/95 justify-center lg:justify-start">
-                <div className="w-12 h-12 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
-                  <Package className="w-6 h-6" />
-                </div>
-                <span className="font-semibold text-base lg:text-lg">Controle de Fardos em Tempo Real</span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-white/95 justify-center lg:justify-start">
-                <div className="w-12 h-12 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
-                  <Truck className="w-6 h-6" />
-                </div>
-                <span className="font-semibold text-base lg:text-lg">Rastreamento de Transporte</span>
-              </div>
-            </div>
-            
-            {/* Badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <div className="flex items-center gap-2 px-5 py-2.5 bg-white/15 backdrop-blur-sm rounded-full text-sm font-bold border border-white/25 shadow-lg">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                <span>Sistema Ativo</span>
-              </div>
-              <div className="flex items-center gap-2 px-5 py-2.5 bg-yellow-400/20 backdrop-blur-sm rounded-full text-sm font-bold border border-yellow-300/30 shadow-lg">
-                <span>⚡</span>
-                <span>100% Digital</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lado Direito - Formulário de Login */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-          <div className="w-full max-w-md space-y-6 animate-slide-up-bounce">
-            
-            {/* Logo acima do card */}
+            {/* Logo acima do card com borda amarela */}
             <div className="flex justify-center">
-              <div className="relative bg-white p-4 lg:p-5 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center">
+              <div className="relative bg-white p-4 lg:p-5 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center border-4 border-yellow-400">
                 <img
                   src={logoProgresso}
                   alt="Grupo Progresso"
@@ -333,25 +277,25 @@ export default function Login() {
             </div>
 
             {/* Card de Login */}
-            <Card className="w-full shadow-2xl border-2 border-white/20 backdrop-blur-xl bg-white/98 dark:bg-gray-900/95 rounded-3xl overflow-hidden">
+            <Card className="w-full shadow-2xl border-0 backdrop-blur-xl bg-white/98 dark:bg-gray-900/95 rounded-3xl overflow-hidden ring-4 ring-yellow-400/50">
             
-            <CardHeader className="space-y-3 pb-6 pt-10 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 border-b-2 border-green-100 dark:border-gray-700">
+            <CardHeader className="space-y-3 pb-6 pt-10 bg-gradient-to-br from-green-700 via-green-600 to-emerald-600 border-b-4 border-yellow-400">
               <div className="flex justify-center">
-                <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
-                  <Lock className="w-8 h-8 text-white" />
+                <div className="p-4 bg-yellow-400 rounded-2xl shadow-lg ring-4 ring-white/30">
+                  <Lock className="w-8 h-8 text-green-800" />
                 </div>
               </div>
               
-              <CardTitle className="text-2xl text-center font-bold text-gray-800 dark:text-white">
-                Login de Usuário
+              <CardTitle className="text-2xl text-center font-bold text-white drop-shadow-lg">
+                Acesso ao Sistema
               </CardTitle>
               
-              <CardDescription className="text-center text-gray-600 dark:text-gray-400">
-                Entre com suas credenciais para acessar o sistema
+              <CardDescription className="text-center text-yellow-100 font-medium drop-shadow">
+                Entre com suas credenciais para continuar
               </CardDescription>
             </CardHeader>
             
-            <CardContent className="space-y-5 p-6 lg:p-8">
+            <CardContent className="space-y-5 p-6 lg:p-8 bg-gradient-to-b from-white to-gray-50">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -362,16 +306,17 @@ export default function Login() {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-bold text-white dark:text-white drop-shadow-lg">
+                        <FormLabel className="text-base font-bold text-green-800 flex items-center gap-2">
+                          <User className="w-4 h-4" />
                           Usuário
                         </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="usuario"
+                          placeholder="Digite seu usuário"
                           {...field}
                           disabled={isLoading}
                           data-testid="input-username"
-                          className="h-12 rounded-xl border-2 border-white/40 focus:border-white/60 transition-all bg-white/20 backdrop-blur-sm text-white placeholder:text-white/70 font-medium"
+                          className="h-12 rounded-xl border-2 border-green-300 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all bg-white text-gray-800 placeholder:text-gray-400 font-medium shadow-sm"
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -384,17 +329,18 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-bold text-white dark:text-white drop-shadow-lg">
+                      <FormLabel className="text-base font-bold text-green-800 flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
                         Senha
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="••••••••"
+                          placeholder="Digite sua senha"
                           {...field}
                           disabled={isLoading}
                           data-testid="input-password"
-                          className="h-12 rounded-xl border-2 border-white/40 focus:border-white/60 transition-all bg-white/20 backdrop-blur-sm text-white placeholder:text-white/70 font-medium"
+                          className="h-12 rounded-xl border-2 border-green-300 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all bg-white text-gray-800 placeholder:text-gray-400 font-medium shadow-sm"
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -404,17 +350,21 @@ export default function Login() {
 
                 <Button
                   type="submit"
-                  className="w-full mt-6 h-12 text-base font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-green-600 hover:bg-green-700 text-white uppercase"
+                  className="w-full mt-6 h-12 text-base font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white uppercase border-2 border-yellow-400 hover:border-yellow-300 relative overflow-hidden group"
                   disabled={isLoading}
                   data-testid="submit-login"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/0 via-yellow-400/20 to-yellow-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Entrando...
                     </>
                   ) : (
-                    "ENTRAR"
+                    <span className="flex items-center justify-center gap-2">
+                      ENTRAR
+                      <ShieldCheck className="w-5 h-5" />
+                    </span>
                   )}
                 </Button>
               </form>
@@ -427,15 +377,15 @@ export default function Login() {
 
       {/* Dialog de Seleção de Papel */}
       <Dialog open={showRoleSelector} onOpenChange={setShowRoleSelector}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-2">
+        <DialogContent className="sm:max-w-md rounded-2xl border-4 border-yellow-400 bg-gradient-to-b from-white to-gray-50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <ShieldCheck className="w-5 h-5 text-green-600 dark:text-green-500" />
+              <div className="p-2 bg-gradient-to-br from-green-600 to-green-700 rounded-lg">
+                <ShieldCheck className="w-5 h-5 text-yellow-400" />
               </div>
-              Selecione seu Papel
+              <span className="text-green-800">Selecione seu Papel</span>
             </DialogTitle>
-            <DialogDescription className="font-medium">
+            <DialogDescription className="font-medium text-gray-600">
               Você tem acesso a múltiplos papéis. Escolha como deseja acessar o sistema.
             </DialogDescription>
           </DialogHeader>
@@ -450,16 +400,16 @@ export default function Login() {
                 <Button
                   key={roleValue}
                   variant="outline"
-                  className="h-auto p-4 justify-start border-2 rounded-xl hover:scale-[1.02] hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950 hover:shadow-lg transition-all"
+                  className="h-auto p-4 justify-start border-2 border-green-300 rounded-xl hover:scale-[1.02] hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 dark:hover:bg-green-950 hover:shadow-lg transition-all"
                   onClick={() => handleRoleSelect(roleValue)}
                 >
                   <div className="flex items-center gap-3 w-full">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-foreground" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center shadow-md">
+                      <Icon className="w-6 h-6 text-yellow-300" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-bold text-base">{roleInfo.label}</p>
-                      <p className="text-xs text-muted-foreground font-medium">{roleInfo.description}</p>
+                      <p className="font-bold text-base text-green-800">{roleInfo.label}</p>
+                      <p className="text-xs text-gray-600 font-medium">{roleInfo.description}</p>
                     </div>
                   </div>
                 </Button>
