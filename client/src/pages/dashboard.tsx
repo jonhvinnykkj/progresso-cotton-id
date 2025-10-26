@@ -166,7 +166,7 @@ export default function Dashboard() {
                   </Button>
                 </>
               )}
-              {selectedRole === "admin" && (
+              {(selectedRole === "admin" || selectedRole === "superadmin") && (
                 <>
                   <Button
                     variant="outline"

@@ -20,6 +20,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   createUser(user: Omit<InsertUser, 'roles'> & { createdBy?: string; roles: string[] | UserRole[] }): Promise<User>;
+  updateUserRoles(id: string, roles: string[] | UserRole[]): Promise<void>;
   deleteUser(id: string): Promise<void>;
 
   // Bale methods
@@ -49,6 +50,7 @@ export interface IStorage {
     beneficiado: number;
     total: number;
   }[]>;
+  deleteBale(id: string): Promise<void>;
   deleteAllBales(): Promise<{ deletedCount: number }>;
 
   // Talhao counter methods (contador único por safra)
@@ -86,6 +88,12 @@ export class PostgresStorage implements IStorage {
   async getAllUsers(): Promise<User[]> {
     const result = await db.select().from(usersTable);
     return result;
+  }
+
+  async updateUserRoles(id: string, roles: string[] | UserRole[]): Promise<void> {
+    await db.update(usersTable)
+      .set({ roles: JSON.stringify(roles) })
+      .where(eq(usersTable.id, id));
   }
 
   async deleteUser(id: string): Promise<void> {
@@ -522,6 +530,10 @@ export class PostgresStorage implements IStorage {
       if (b.safra === "Sem Safra") return -1;
       return b.safra.localeCompare(a.safra); // Mais recente primeiro
     });
+  }
+
+  async deleteBale(id: string): Promise<void> {
+    await db.delete(balesTable).where(eq(balesTable.id, id));
   }
 
   async deleteAllBales(): Promise<{ deletedCount: number }> {

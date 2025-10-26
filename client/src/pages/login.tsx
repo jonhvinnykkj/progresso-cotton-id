@@ -161,8 +161,8 @@ export default function Login() {
 
       const user = await response.json();
 
-      // Se o usuário tem múltiplos papéis, mostrar dialog de seleção
-      if (user.availableRoles && user.availableRoles.length > 1) {
+      // Sempre mostrar dialog de seleção de papel
+      if (user.availableRoles && user.availableRoles.length > 0) {
         setPendingUser(user);
         setAvailableRoles(user.availableRoles);
         setShowRoleSelector(true);
@@ -170,9 +170,13 @@ export default function Login() {
         return;
       }
 
-      // Se tem apenas um papel, fazer login direto
-      const selectedRole = user.availableRoles?.[0];
-      completeLogin(user, selectedRole);
+      // Fallback se não tiver papéis (não deveria acontecer)
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Usuário sem papéis definidos. Contate o administrador.",
+      });
+      setIsLoading(false);
       
     } catch (error) {
       toast({

@@ -46,8 +46,8 @@ export default function SettingsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Verificar se é admin
-  if (selectedRole !== "admin") {
+  // Verificar se é admin ou superadmin
+  if (selectedRole !== "admin" && selectedRole !== "superadmin") {
     return <Redirect to="/dashboard" />;
   }
 

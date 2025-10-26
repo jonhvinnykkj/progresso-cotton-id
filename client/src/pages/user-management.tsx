@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, UserPlus, Users } from "lucide-react";
+import { Trash2, UserPlus, Users, Edit } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type UserRole = "admin" | "campo" | "transporte" | "algodoeira";
 
@@ -19,7 +20,7 @@ interface User {
   id: string;
   username: string;
   displayName: string;
-  role: UserRole;
+  roles: string; // JSON array de papéis
   createdAt: string;
   createdBy?: string;
 }
@@ -34,6 +35,8 @@ export default function UserManagement() {
   const [password, setPassword] = useState("");
   const [selectedRoles, setSelectedRoles] = useState<UserRole[]>(["campo"]);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [editRoles, setEditRoles] = useState<UserRole[]>([]);
 
   const toggleRole = (roleToToggle: UserRole) => {
     setSelectedRoles(prev => {
@@ -45,6 +48,28 @@ export default function UserManagement() {
         return [...prev, roleToToggle];
       }
     });
+  };
+
+  const toggleEditRole = (roleToToggle: UserRole) => {
+    setEditRoles(prev => {
+      if (prev.includes(roleToToggle)) {
+        // Não permitir desmarcar se for o último
+        if (prev.length === 1) return prev;
+        return prev.filter(r => r !== roleToToggle);
+      } else {
+        return [...prev, roleToToggle];
+      }
+    });
+  };
+
+  const openEditDialog = (user: User) => {
+    setUserToEdit(user);
+    try {
+      const roles = JSON.parse(user.roles) as UserRole[];
+      setEditRoles(roles);
+    } catch {
+      setEditRoles(["campo"]);
+    }
   };
 
   // Verificar se é superadmin
@@ -107,6 +132,38 @@ export default function UserManagement() {
     onError: (error: Error) => {
       toast({
         title: "Erro ao criar usuário",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Atualizar papéis do usuário
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ userId, roles }: { userId: string; roles: UserRole[] }) => {
+      const response = await fetch(`/api/users/${userId}/roles`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ roles }),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || "Erro ao atualizar papéis");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast({
+        title: "Papéis atualizados!",
+        description: "Os papéis do usuário foram atualizados com sucesso.",
+      });
+      setUserToEdit(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar papéis",
         description: error.message,
         variant: "destructive",
       });
@@ -184,6 +241,21 @@ export default function UserManagement() {
         {roleLabels[role] || role}
       </Badge>
     );
+  };
+
+  const getRolesBadges = (rolesJson: string) => {
+    try {
+      const roles = JSON.parse(rolesJson) as UserRole[];
+      return (
+        <div className="flex gap-1 flex-wrap">
+          {roles.map((role) => (
+            <span key={role}>{getRoleBadge(role)}</span>
+          ))}
+        </div>
+      );
+    } catch {
+      return <Badge className="bg-gray-500">Erro</Badge>;
+    }
   };
 
   return (
@@ -305,20 +377,30 @@ export default function UserManagement() {
                   <TableRow key={u.id}>
                     <TableCell className="font-medium">{u.displayName}</TableCell>
                     <TableCell className="text-muted-foreground">{u.username}</TableCell>
-                    <TableCell>{getRoleBadge(u.role)}</TableCell>
+                    <TableCell>{getRolesBadges(u.roles)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell className="text-right">
                       {u.id !== user?.id && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setUserToDelete(u)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(u)}
+                            className="text-blue-500 hover:text-blue-700"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setUserToDelete(u)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -328,6 +410,59 @@ export default function UserManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog de Edição de Papéis */}
+      <Dialog open={!!userToEdit} onOpenChange={(open) => !open && setUserToEdit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Papéis do Usuário</DialogTitle>
+            <DialogDescription>
+              Altere os papéis de acesso de <strong>{userToEdit?.displayName}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <Label>Papéis de Acesso (selecione um ou mais)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: "admin" as UserRole, label: "Administrador" },
+                  { value: "campo" as UserRole, label: "Campo" },
+                  { value: "transporte" as UserRole, label: "Transporte" },
+                  { value: "algodoeira" as UserRole, label: "Algodoeira" }
+                ].map(role => (
+                  <div key={role.value} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-accent">
+                    <Checkbox 
+                      id={`edit-${role.value}`}
+                      checked={editRoles.includes(role.value)}
+                      onCheckedChange={() => toggleEditRole(role.value)}
+                    />
+                    <Label 
+                      htmlFor={`edit-${role.value}`} 
+                      className="cursor-pointer flex-1"
+                    >
+                      {role.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setUserToEdit(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => userToEdit && updateUserMutation.mutate({ userId: userToEdit.id, roles: editRoles })}
+                disabled={updateUserMutation.isPending || editRoles.length === 0}
+              >
+                {updateUserMutation.isPending ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog de Confirmação de Exclusão */}
       <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>

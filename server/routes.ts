@@ -91,6 +91,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/users/:id/roles", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { roles } = req.body;
+
+      if (!roles || !Array.isArray(roles) || roles.length === 0) {
+        return res.status(400).json({
+          error: "Roles inválidos. Deve ser um array com pelo menos um papel.",
+        });
+      }
+
+      await storage.updateUserRoles(id, roles);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating user roles:", error);
+      res.status(500).json({
+        error: "Erro ao atualizar papéis do usuário",
+      });
+    }
+  });
+
   app.delete("/api/users/:id", async (req, res) => {
     try {
       const { id } = req.params;
@@ -276,6 +297,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error updating bale status:", error);
       res.status(500).json({
         error: "Erro ao atualizar status do fardo",
+      });
+    }
+  });
+
+  // Delete single bale (superadmin only)
+  app.delete("/api/bales/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteBale(decodeURIComponent(id));
+      res.json({ success: true, message: "Fardo excluído com sucesso" });
+    } catch (error) {
+      console.error("Error deleting bale:", error);
+      res.status(500).json({
+        error: "Erro ao excluir fardo",
       });
     }
   });

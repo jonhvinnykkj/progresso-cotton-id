@@ -1,18 +1,26 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { BaleTimeline } from "@/components/bale-timeline";
 import type { Bale } from "@shared/schema";
-import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users } from "lucide-react";
+import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Footer } from "@/components/footer";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export default function BaleDetails() {
   const [, params] = useRoute("/bale/:id");
   const [, setLocation] = useLocation();
+  const { selectedRole } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const baleId = params?.id ? decodeURIComponent(params.id) : undefined;
 
   const { data: bale, isLoading } = useQuery<Bale>({
@@ -47,6 +55,34 @@ export default function BaleDetails() {
     const user = users.find(u => String(u.id) === String(userId));
     return user?.displayName || `Usuário #${userId}`;
   };
+
+  // Mutation para excluir fardo
+  const deleteBaleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/bales/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Erro ao excluir fardo");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
+      toast({
+        title: "Fardo excluído!",
+        description: "O fardo foi removido do sistema com sucesso.",
+      });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao excluir fardo",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (isLoading) {
     return (
@@ -102,7 +138,19 @@ export default function BaleDetails() {
                 Rastreabilidade completa
               </p>
             </div>
-            <StatusBadge status={bale.status} size="lg" />
+            <div className="flex items-center gap-2">
+              <StatusBadge status={bale.status} size="lg" />
+              {selectedRole === "superadmin" && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -188,6 +236,29 @@ export default function BaleDetails() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Dialog de Confirmação de Exclusão */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o fardo <strong>{bale.id}</strong>? 
+              Esta ação não pode ser desfeita e todos os dados do fardo serão permanentemente removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteBaleMutation.mutate(bale.id)}
+              className="bg-red-500 hover:bg-red-600"
+              disabled={deleteBaleMutation.isPending}
+            >
+              {deleteBaleMutation.isPending ? "Excluindo..." : "Excluir Fardo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
