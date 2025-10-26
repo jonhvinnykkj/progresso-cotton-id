@@ -35,7 +35,7 @@ export default function Etiqueta() {
     console.log("Etiqueta - IDs procurados:", baleIds);
     console.log("Etiqueta - Total fardos no sistema:", allBales.length);
     console.log("Etiqueta - Fardos encontrados:", bales.length);
-    console.log("Etiqueta - Fardos encontrados (detalhes):", bales.map(b => ({ id: b.id, qrCode: b.qrCode })));
+    console.log("Etiqueta - Fardos encontrados (detalhes):", bales.map(b => ({ id: b.id })));
   }, [baleIds, allBales, bales]);
 
   // Gerar QR Codes quando os fardos forem carregados
@@ -50,7 +50,7 @@ export default function Etiqueta() {
     
     for (const bale of bales) {
       try {
-        const qrDataURL = await QRCode.toDataURL(bale.qrCode, {
+        const qrDataURL = await QRCode.toDataURL(bale.id, {
           width: 800,
           margin: 1,
           errorCorrectionLevel: "H",

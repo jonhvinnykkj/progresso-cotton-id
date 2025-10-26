@@ -49,9 +49,8 @@ export default function Dashboard() {
   const filteredBales = bales.filter((bale) => {
     const matchesSearch =
       bale.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (bale.numero && bale.numero.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (bale.talhao && bale.talhao.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      bale.qrCode.toLowerCase().includes(searchQuery.toLowerCase());
+      (bale.numero && bale.numero.toString().includes(searchQuery)) ||
+      (bale.talhao && bale.talhao.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesStatus = statusFilter === "all" || bale.status === statusFilter;
 

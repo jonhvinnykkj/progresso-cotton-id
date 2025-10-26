@@ -116,10 +116,10 @@ export default function BaleDetails() {
             <div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <QrCode className="w-4 h-4" />
-                QR Code
+                ID / QR Code
               </div>
               <p className="font-mono text-sm bg-muted p-3 rounded-lg break-all" data-testid="text-qrcode">
-                {bale.qrCode}
+                {bale.id}
               </p>
             </div>
 
