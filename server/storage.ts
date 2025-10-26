@@ -12,7 +12,7 @@ import {
 import { nanoid } from "nanoid";
 import { db } from "./db";
 import { users as usersTable, bales as balesTable, settings as settingsTable, talhaoCounters as talhaoCountersTable } from "@shared/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -195,7 +195,7 @@ export class PostgresStorage implements IStorage {
     const existingBales = await db
       .select({ id: balesTable.id })
       .from(balesTable)
-      .where(sql`${balesTable.id} = ANY(${allIds})`);
+      .where(inArray(balesTable.id, allIds));
     
     const existingIds = new Set(existingBales.map(b => b.id));
     const skippedIds: string[] = [];
