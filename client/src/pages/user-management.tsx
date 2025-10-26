@@ -120,6 +120,7 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
+        variant: "success",
         title: "Usuário criado!",
         description: `Usuário ${displayName} foi criado com sucesso.`,
       });
@@ -156,6 +157,7 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
+        variant: "success",
         title: "Papéis atualizados!",
         description: "Os papéis do usuário foram atualizados com sucesso.",
       });
@@ -184,6 +186,7 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
+        variant: "success",
         title: "Usuário removido!",
         description: "O usuário foi removido do sistema.",
       });

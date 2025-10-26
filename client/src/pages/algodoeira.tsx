@@ -57,6 +57,7 @@ export default function Algodoeira() {
       queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bales/stats"] });
       toast({
+        variant: "success",
         title: "Status atualizado",
         description: "Fardo marcado como beneficiado com sucesso.",
       });
@@ -114,7 +115,7 @@ export default function Algodoeira() {
   const handleManualSubmit = async () => {
     if (!manualBaleId.trim()) {
       toast({
-        variant: "destructive",
+        variant: "warning",
         title: "ID inválido",
         description: "Por favor, digite um ID válido.",
       });

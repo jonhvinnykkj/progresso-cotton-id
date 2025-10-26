@@ -24,13 +24,368 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus, Wheat, Hash, Calendar, Zap, Lightbulb, Tag, MapPin, Printer } from "lucide-react";
+import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus, Wheat, Hash, Calendar, Zap, Lightbulb, Tag, MapPin, Printer, Search, Filter } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
 import type { Bale } from "@shared/schema";
 import { TALHOES_INFO } from "@shared/talhoes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Footer } from "@/components/footer";
+
+// Componente para buscar etiquetas
+function EtiquetasTab({ defaultSafra }: { defaultSafra: string }) {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [talhaoFilter, setTalhaoFilter] = useState("");
+  const [numeroInicio, setNumeroInicio] = useState("");
+  const [numeroFim, setNumeroFim] = useState("");
+  const [baleIdBusca, setBaleIdBusca] = useState("");
+  
+  // Buscar todos os fardos
+  const { data: bales = [], isLoading } = useQuery<Bale[]>({
+    queryKey: ["/api/bales"],
+  });
+
+  // Filtrar fardos da safra atual e status campo (qualquer usuário pode ver)
+  const myBales = bales.filter(b => 
+    b.safra === defaultSafra && 
+    b.status === "campo"
+  );
+
+  const handleBuscarPorId = () => {
+    if (!baleIdBusca.trim()) {
+      toast({
+        variant: "warning",
+        title: "ID inválido",
+        description: "Digite um ID de fardo válido.",
+      });
+      return;
+    }
+    
+    const searchId = baleIdBusca.trim().toUpperCase();
+    
+    // Verificar se o fardo existe - buscar com e sem prefixo
+    let bale = myBales.find(b => b.id.toUpperCase() === searchId);
+    
+    // Se não encontrou, tentar normalizar o ID (adicionar T no talhão se não tiver)
+    if (!bale) {
+      // Tentar adicionar T no talhão: S25/26-1B-00001 -> S25/26-T1B-00001
+      const searchIdComT = searchId.replace(/(S\d+\/\d+-)(T?)(\w+)(-\d+)/, '$1T$3$4');
+      bale = myBales.find(b => b.id.toUpperCase() === searchIdComT);
+    }
+    
+    if (!bale) {
+      // Tentar buscar em todos os fardos para dar feedback melhor
+      const baleOutraSafra = bales.find(b => b.id.toUpperCase() === searchId);
+      if (baleOutraSafra) {
+        toast({
+          variant: "destructive",
+          title: "Fardo não disponível",
+          description: `Este fardo está com status "${baleOutraSafra.status}" ou de outra safra.`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Fardo não encontrado",
+          description: "Este ID não existe no sistema. Formato esperado: S25/26-T1B-00001",
+        });
+      }
+      return;
+    }
+    
+    setLocation(`/etiqueta?baleIds=${bale.id}`);
+  };
+
+  const handleBuscarPorIntervalo = () => {
+    if (!talhaoFilter) {
+      toast({
+        variant: "warning",
+        title: "Talhão obrigatório",
+        description: "Selecione um talhão para filtrar.",
+      });
+      return;
+    }
+    
+    if (!numeroInicio || !numeroFim) {
+      toast({
+        variant: "warning",
+        title: "Intervalo incompleto",
+        description: "Preencha o número inicial e final.",
+      });
+      return;
+    }
+
+    const inicio = parseInt(numeroInicio);
+    const fim = parseInt(numeroFim);
+
+    if (inicio > fim) {
+      toast({
+        variant: "warning",
+        title: "Intervalo inválido",
+        description: "O número inicial deve ser menor que o final.",
+      });
+      return;
+    }
+
+    if (fim - inicio > 100) {
+      toast({
+        variant: "warning",
+        title: "Intervalo muito grande",
+        description: "Máximo de 100 etiquetas por vez.",
+      });
+      return;
+    }
+
+    // Filtrar fardos do talhão e intervalo
+    const balesFiltrados = myBales.filter(b => {
+      // Normalizar talhões: remover o "T" se houver
+      const talhaoNormalizado = b.talhao.replace(/^T/, '');
+      const filtroNormalizado = talhaoFilter.replace(/^T/, '');
+      
+      if (talhaoNormalizado !== filtroNormalizado) return false;
+      
+      // Converter numero para inteiro, removendo zeros à esquerda
+      const numeroStr = String(b.numero).replace(/^0+/, '') || '0';
+      const numero = parseInt(numeroStr);
+      
+      return numero >= inicio && numero <= fim;
+    });
+
+    if (balesFiltrados.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nenhum fardo encontrado",
+        description: "Não há fardos neste intervalo.",
+      });
+      return;
+    }
+
+    const baleIds = balesFiltrados.map(b => b.id).join(',');
+    setLocation(`/etiqueta?baleIds=${baleIds}`);
+  };
+
+  // Agrupar fardos por talhão
+  const fardosPorTalhao = myBales.reduce((acc, bale) => {
+    if (!acc[bale.talhao]) {
+      acc[bale.talhao] = [];
+    }
+    acc[bale.talhao].push(bale);
+    return acc;
+  }, {} as Record<string, Bale[]>);
+
+  return (
+    <div className="space-y-6">
+      {/* Busca por ID único */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-200/30">
+            <Search className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base">Buscar por ID</h3>
+            <p className="text-xs text-muted-foreground">Digite o código completo do fardo</p>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-blue-50/80 to-blue-100/40 dark:from-blue-950/10 dark:to-blue-900/5 p-6 rounded-2xl border border-blue-200/30 shadow-sm space-y-4">
+          <div className="flex gap-3">
+            <Input
+              placeholder="Ex: S25/26-T1B-00001"
+              value={baleIdBusca}
+              onChange={(e) => setBaleIdBusca(e.target.value.toUpperCase())}
+              className="flex-1 font-mono h-12 rounded-xl border-blue-200/50 bg-white/80 dark:bg-background/50 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all shadow-sm"
+            />
+            <Button 
+              onClick={handleBuscarPorId} 
+              className="shrink-0 h-12 px-6 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <QrCode className="w-4 h-4 mr-2" />
+              Buscar
+            </Button>
+          </div>
+          <div className="flex items-start gap-2 text-xs text-blue-700/80 dark:text-blue-300/80 bg-blue-100/50 dark:bg-blue-900/20 px-3 py-2.5 rounded-xl">
+            <Lightbulb className="w-4 h-4 mt-0.5 shrink-0" />
+            <p>Cole ou digite o ID completo do fardo que deseja reimprimir a etiqueta</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative py-2">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-dashed border-border/50" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-background px-4 py-1 text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider rounded-full border border-border/30">
+            ou busque múltiplos
+          </span>
+        </div>
+      </div>
+
+      {/* Busca por intervalo */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-green-500/10 to-emerald-600/5 rounded-2xl border border-green-200/30">
+            <Filter className="w-5 h-5 text-green-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base">Buscar por Intervalo</h3>
+            <p className="text-xs text-muted-foreground">Selecione talhão e intervalo de números</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-50/80 to-emerald-100/40 dark:from-green-950/10 dark:to-emerald-900/5 p-6 rounded-2xl border border-green-200/30 shadow-sm space-y-5">
+          <div>
+            <label className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground/80">
+              <Wheat className="w-4 h-4 text-green-600" />
+              Talhão de Produção
+            </label>
+            <Select value={talhaoFilter} onValueChange={setTalhaoFilter}>
+              <SelectTrigger className="h-12 rounded-xl border-green-200/50 bg-white/80 dark:bg-background/50 backdrop-blur-sm hover:border-green-300 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all shadow-sm">
+                <SelectValue placeholder="Selecione o talhão" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-green-200/30 shadow-xl">
+                {Object.keys(fardosPorTalhao).sort().map((talhao) => (
+                  <SelectItem 
+                    key={talhao} 
+                    value={talhao} 
+                    className="rounded-xl my-1 mx-1 focus:bg-green-50 dark:focus:bg-green-900/20"
+                  >
+                    <div className="flex items-center justify-between gap-4 w-full py-1">
+                      <span className="font-bold font-mono text-green-700 dark:text-green-400">{talhao}</span>
+                      <span className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold shadow-sm">
+                        {fardosPorTalhao[talhao].length} fardos
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground/80">
+                <Hash className="w-4 h-4 text-green-600" />
+                Número Inicial
+              </label>
+              <Input
+                type="number"
+                placeholder="1"
+                value={numeroInicio}
+                onChange={(e) => setNumeroInicio(e.target.value)}
+                min="1"
+                max="99999"
+                className="h-12 rounded-xl border-green-200/50 bg-white/80 dark:bg-background/50 backdrop-blur-sm hover:border-green-300 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all font-mono text-base shadow-sm"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground/80">
+                <Hash className="w-4 h-4 text-green-600" />
+                Número Final
+              </label>
+              <Input
+                type="number"
+                placeholder="10"
+                value={numeroFim}
+                onChange={(e) => setNumeroFim(e.target.value)}
+                min="1"
+                max="99999"
+                className="h-12 rounded-xl border-green-200/50 bg-white/80 dark:bg-background/50 backdrop-blur-sm hover:border-green-300 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all font-mono text-base shadow-sm"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <Button 
+              onClick={handleBuscarPorIntervalo} 
+              className="w-full h-13 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-md hover:shadow-xl transition-all duration-300 text-base font-bold hover:scale-[1.02]"
+            >
+              <Printer className="w-5 h-5 mr-2" />
+              Gerar Etiquetas do Intervalo
+            </Button>
+          </div>
+
+          <div className="flex items-start gap-2 text-xs text-green-700/80 dark:text-green-300/80 bg-green-100/50 dark:bg-green-900/20 px-3 py-2.5 rounded-xl">
+            <Zap className="w-4 h-4 mt-0.5 shrink-0" />
+            <p>Gere até 100 etiquetas por vez • A numeração é contínua dentro do talhão</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Resumo dos fardos */}
+      {!isLoading && myBales.length > 0 && (
+        <div className="mt-8 bg-gradient-to-br from-muted/40 to-muted/20 p-6 rounded-2xl border border-border/30 shadow-sm space-y-5 animate-fade-in-up backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border border-primary/20">
+              <Package className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-bold text-base">Seus Fardos Disponíveis</h3>
+              <p className="text-xs text-muted-foreground">Fardos criados e prontos para reimprimir</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-white to-green-50/30 dark:from-background dark:to-green-950/10 rounded-2xl p-5 border border-green-200/20 shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md">
+              <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                {myBales.length}
+              </div>
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                Total em Campo
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-background dark:to-blue-950/10 rounded-2xl p-5 border border-blue-200/20 shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md">
+              <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent mb-2">
+                {Object.keys(fardosPorTalhao).length}
+              </div>
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                Talhões Ativos
+              </div>
+            </div>
+          </div>
+
+          {/* Lista de talhões com contagem */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border/50 to-transparent"></div>
+              <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Distribuição por Talhão</p>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border/50 to-transparent"></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {Object.entries(fardosPorTalhao).sort(([a], [b]) => a.localeCompare(b)).map(([talhao, bales]) => (
+                <div 
+                  key={talhao} 
+                  className="flex items-center justify-between bg-white/60 dark:bg-background/40 backdrop-blur-sm rounded-xl p-3.5 border border-border/20 text-xs transition-all duration-300 hover:border-primary/40 hover:scale-105 hover:shadow-sm"
+                >
+                  <span className="font-mono font-bold text-primary text-sm">{talhao}</span>
+                  <span className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 px-3 py-1.5 rounded-full text-green-700 dark:text-green-300 font-bold shadow-sm">
+                    {bales.length}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isLoading && myBales.length === 0 && (
+        <div className="text-center p-12 bg-gradient-to-br from-muted/20 to-muted/5 rounded-3xl border-2 border-dashed border-border/30 animate-fade-in-up backdrop-blur-sm">
+          <div className="inline-flex p-5 bg-gradient-to-br from-muted/40 to-muted/20 rounded-3xl mb-5 shadow-inner">
+            <Package className="w-12 h-12 text-muted-foreground/40" />
+          </div>
+          <p className="text-base font-bold text-foreground/80 mb-2">
+            Nenhum fardo em campo encontrado
+          </p>
+          <p className="text-sm text-muted-foreground/70">
+            Crie fardos nas abas "Em Lote" ou "Individual" para começar
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const batchCreateSchema = z.object({
   talhao: z.string().min(1, "Talhão é obrigatório"),
@@ -119,6 +474,7 @@ export default function Campo() {
       await queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
 
       toast({
+        variant: "success",
         title: "Fardo criado com sucesso",
         description: `Fardo ${baleId} criado no talhão ${data.talhao}`,
       });
@@ -187,11 +543,13 @@ export default function Campo() {
       // Mensagem diferenciada se houver fardos pulados
       if (skipped > 0) {
         toast({
+          variant: "warning",
           title: "Fardos criados com avisos",
           description: `${created} fardo(s) criado(s), ${skipped} pulado(s) (já existiam) no talhão ${data.talhao}`,
         });
       } else {
         toast({
+          variant: "success",
           title: "Fardos criados com sucesso",
           description: `${created} fardo(s) criado(s) no talhão ${data.talhao}`,
         });
@@ -308,20 +666,27 @@ export default function Campo() {
               )}
 
               <Tabs defaultValue="lote" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/50 rounded-xl h-12">
+                <TabsList className="grid w-full grid-cols-3 mb-6 p-1 bg-muted/50 rounded-xl h-12">
                   <TabsTrigger 
                     value="lote" 
                     className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
                   >
                     <Package className="w-4 h-4 mr-2" />
-                    <span className="font-semibold">Em Lote</span>
+                    <span className="font-semibold text-xs sm:text-sm">Em Lote</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="individual" 
                     className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    <span className="font-semibold">Individual</span>
+                    <span className="font-semibold text-xs sm:text-sm">Individual</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="etiquetas" 
+                    className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    <span className="font-semibold text-xs sm:text-sm">Etiquetas</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -349,19 +714,19 @@ export default function Campo() {
                               <SelectValue placeholder="Selecione o talhão de algodão" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="rounded-xl">
+                          <SelectContent className="rounded-2xl border-green-200/30 shadow-xl">
                             {TALHOES_INFO.map((talhao) => (
                               <SelectItem 
                                 key={talhao.id} 
                                 value={talhao.nome}
-                                className="rounded-lg my-0.5"
+                                className="rounded-xl my-1 mx-1 focus:bg-green-50 dark:focus:bg-green-900/20"
                               >
-                                <div className="flex items-center justify-between gap-3 w-full">
+                                <div className="flex items-center justify-between gap-3 w-full py-1">
                                   <div className="flex items-center gap-2">
-                                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                                    <MapPin className="w-3.5 h-3.5 text-green-600" />
                                     <span className="font-semibold">{talhao.nome}</span>
                                   </div>
-                                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                  <span className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold shadow-sm">
                                     {talhao.hectares} ha
                                   </span>
                                 </div>
@@ -454,19 +819,19 @@ export default function Campo() {
                                 <SelectValue placeholder="Selecione o talhão de algodão" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="rounded-xl">
+                            <SelectContent className="rounded-2xl border-green-200/30 shadow-xl">
                               {TALHOES_INFO.map((talhao) => (
                                 <SelectItem 
                                   key={talhao.id} 
                                   value={talhao.nome}
-                                  className="rounded-lg my-0.5"
+                                  className="rounded-xl my-1 mx-1 focus:bg-green-50 dark:focus:bg-green-900/20"
                                 >
-                                  <div className="flex items-center justify-between gap-3 w-full">
+                                  <div className="flex items-center justify-between gap-3 w-full py-1">
                                     <div className="flex items-center gap-2">
-                                      <MapPin className="w-3.5 h-3.5 text-primary" />
+                                      <MapPin className="w-3.5 h-3.5 text-green-600" />
                                       <span className="font-semibold">{talhao.nome}</span>
                                     </div>
-                                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                    <span className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold shadow-sm">
                                       {talhao.hectares} ha
                                     </span>
                                   </div>
@@ -530,6 +895,11 @@ export default function Campo() {
                     </Button>
                   </form>
                 </Form>
+              </TabsContent>
+
+              {/* Tab: Buscar Etiquetas */}
+              <TabsContent value="etiquetas">
+                <EtiquetasTab defaultSafra={defaultSafra} />
               </TabsContent>
             </Tabs>
             </CardContent>

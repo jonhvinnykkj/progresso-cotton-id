@@ -22,9 +22,9 @@ export function useOfflineBales() {
       console.log("📴 Ficou offline - usando cache local");
       setIsOnline(false);
       toast({
+        variant: "warning",
         title: "Modo Offline",
         description: "Você está offline. Os dados serão sincronizados quando voltar online.",
-        variant: "default",
       });
     };
 
@@ -108,6 +108,7 @@ export function useOfflineBales() {
       if ((data as any)._offlineUpdate) {
         // Offline update - show toast
         toast({
+          variant: "info",
           title: "Atualização salva localmente",
           description: "Será sincronizada quando você voltar online.",
         });
@@ -116,6 +117,7 @@ export function useOfflineBales() {
         queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
         queryClient.invalidateQueries({ queryKey: ["/api/bales/stats"] });
         toast({
+          variant: "success",
           title: "Status atualizado",
           description: "Fardo atualizado com sucesso.",
         });
@@ -170,6 +172,7 @@ export function useOfflineBales() {
 
       if (successCount > 0) {
         toast({
+          variant: "success",
           title: "Sincronização concluída",
           description: `${successCount} atualizações sincronizadas${errorCount > 0 ? `, ${errorCount} falharam` : ""}.`,
         });

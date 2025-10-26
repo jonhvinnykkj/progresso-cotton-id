@@ -178,6 +178,7 @@ export default function ReportsPage() {
       document.body.removeChild(a);
       
       toast({
+        variant: "success",
         title: "Relatório gerado com sucesso!",
         description: `${preview.totalFardos} fardos incluídos no relatório ${type.toUpperCase()}`,
       });

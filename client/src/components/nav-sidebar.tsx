@@ -50,6 +50,7 @@ export function NavSidebar() {
 
   const handleClearCache = async () => {
     toast({
+      variant: "info",
       title: "Limpando cache...",
       description: "Todos os dados em cache serão removidos.",
     });

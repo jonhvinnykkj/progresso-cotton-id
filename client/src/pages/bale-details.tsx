@@ -70,6 +70,7 @@ export default function BaleDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
       toast({
+        variant: "success",
         title: "Fardo excluído!",
         description: "O fardo foi removido do sistema com sucesso.",
       });

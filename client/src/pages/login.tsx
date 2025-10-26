@@ -197,6 +197,7 @@ export default function Login() {
     login(user, role);
 
     toast({
+      variant: "success",
       title: "Login realizado com sucesso",
       description: `Bem-vindo, ${user.displayName || roles.find((r) => r.value === role)?.label}!`,
     });
