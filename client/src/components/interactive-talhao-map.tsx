@@ -71,12 +71,14 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
     const stats = Object.values(statsMap);
     const totalFardos = stats.reduce((sum, s: any) => sum + s.totalFardos, 0);
     const totalArea = stats.reduce((sum, s: any) => sum + s.area, 0);
-    const produtividadeMedia = totalArea > 0 ? totalFardos / totalArea : 0;
+    const produtividadeFardos = totalArea > 0 ? totalFardos / totalArea : 0;
+    const produtividadeArrobas = produtividadeFardos * 66.67; // 1 fardo = 2000kg = 66.67@
     
     return {
       totalFardos,
       totalArea,
-      produtividadeMedia: Math.round(produtividadeMedia * 100) / 100,
+      produtividadeMedia: Math.round(produtividadeFardos * 100) / 100,
+      produtividadeArrobas: Math.round(produtividadeArrobas * 100) / 100,
       talhoes: stats.length
     };
   }, [statsMap]);
@@ -176,7 +178,7 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
         pdf.setFontSize(10);
         pdf.text(`Total de Fardos: ${overallStats.totalFardos}`, 20, 38);
         pdf.text(`Área Total: ${overallStats.totalArea.toFixed(2)} ha`, 20, 43);
-        pdf.text(`Produtividade Média: ${overallStats.produtividadeMedia.toFixed(2)} fardos/ha`, 20, 48);
+        pdf.text(`Produtividade Média: ${overallStats.produtividadeArrobas.toFixed(2)} @/ha (${overallStats.produtividadeMedia.toFixed(2)} fardos/ha)`, 20, 48);
         pdf.text(`Talhões: ${overallStats.talhoes}`, 20, 53);
       }
       
@@ -333,9 +335,10 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
       `;
       
       if (stats) {
+        const prodArrobas = (stats.produtividade * 66.67).toFixed(2);
         tooltipContent += `
           <p class="text-sm"><b>Fardos:</b> ${stats.totalFardos}</p>
-          <p class="text-sm"><b>Produtividade:</b> ${stats.produtividade.toFixed(2)} fardos/ha</p>
+          <p class="text-sm"><b>Produtividade:</b> ${prodArrobas} @/ha (${stats.produtividade.toFixed(2)} f/ha)</p>
         `;
       }
       

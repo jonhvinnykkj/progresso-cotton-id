@@ -129,12 +129,26 @@ export default function TalhaoStats() {
   // Calcular fardos/hectare para talhão selecionado
   const fardosPorHectare = (() => {
     if (!selectedTalhaoData || selectedTalhaoData.total === 0) return '0.00';
-    if (!selectedTalhaoInfo || !selectedTalhaoInfo.hectares) return 'N/A';
+    if (!selectedTalhaoInfo || !selectedTalhaoInfo.hectares) return '0.00';
     
     const hectares = parseFloat(selectedTalhaoInfo.hectares);
-    if (isNaN(hectares) || hectares === 0) return 'N/A';
+    if (isNaN(hectares) || hectares === 0) return '0.00';
     
     return (selectedTalhaoData.total / hectares).toFixed(2);
+  })();
+
+  // Calcular produtividade em arrobas (@) por hectare
+  // 1 fardo = 2000kg = 66.67 arrobas (1 arroba = 30kg)
+  const produtividadeArrobas = (() => {
+    if (!selectedTalhaoData || selectedTalhaoData.total === 0) return '0.00';
+    if (!selectedTalhaoInfo || !selectedTalhaoInfo.hectares) return '0.00';
+    
+    const hectares = parseFloat(selectedTalhaoInfo.hectares);
+    if (isNaN(hectares) || hectares === 0) return '0.00';
+    
+    const fardosPorHa = selectedTalhaoData.total / hectares;
+    const arrobasPorHa = fardosPorHa * 66.67; // 1 fardo = 2000kg = 66.67@
+    return arrobasPorHa.toFixed(2);
   })();
 
   // Calcular métricas adicionais
@@ -157,6 +171,14 @@ export default function TalhaoStats() {
   const avgFardosPorHectare = (() => {
     if (!globalStats?.total || totalHectares === 0) return '0.00';
     return (globalStats.total / totalHectares).toFixed(2);
+  })();
+
+  // Calcular média de produtividade em arrobas (@) por hectare
+  const avgArrobasPorHectare = (() => {
+    if (!globalStats?.total || totalHectares === 0) return '0.00';
+    const fardosPorHa = globalStats.total / totalHectares;
+    const arrobasPorHa = fardosPorHa * 66.67; // 1 fardo = 2000kg = 66.67@
+    return arrobasPorHa.toFixed(2);
   })();
   
   const avgBalesPerTalhao = talhaoStats.length > 0 
@@ -616,8 +638,8 @@ export default function TalhaoStats() {
                     <div className="text-center space-y-1">
                       <Activity className="w-5 h-5 mx-auto text-purple-600 mb-2" />
                       <p className="text-xs text-muted-foreground">Produtividade</p>
-                      <p className="text-2xl font-bold text-purple-600">{fardosPorHectare}</p>
-                      <p className="text-xs text-muted-foreground">fardos/ha</p>
+                      <p className="text-2xl font-bold text-purple-600">{produtividadeArrobas}</p>
+                      <p className="text-xs text-muted-foreground">@/ha</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -692,11 +714,11 @@ export default function TalhaoStats() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <p className="text-muted-foreground">Produtividade deste talhão</p>
-                    <p className="text-lg font-bold text-primary">{fardosPorHectare} fardos/ha</p>
+                    <p className="text-lg font-bold text-primary">{produtividadeArrobas} @/ha</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Média geral</p>
-                    <p className="text-lg font-bold">{avgFardosPorHectare} fardos/ha</p>
+                    <p className="text-lg font-bold">{avgArrobasPorHectare} @/ha</p>
                   </div>
                 </div>
               </div>
