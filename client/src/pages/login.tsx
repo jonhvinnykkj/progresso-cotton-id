@@ -80,6 +80,24 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Check and clear cache if app version changed
+  useEffect(() => {
+    const APP_VERSION = 'v4-superadmin';
+    const storedVersion = localStorage.getItem('app_version');
+    
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      // Version changed, clear caches
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => caches.delete(cacheName));
+        });
+      }
+      localStorage.setItem('app_version', APP_VERSION);
+    } else if (!storedVersion) {
+      localStorage.setItem('app_version', APP_VERSION);
+    }
+  }, []);
+
   // Redirect authenticated users to their role-specific page
   useEffect(() => {
     if (isAuthenticated && role) {

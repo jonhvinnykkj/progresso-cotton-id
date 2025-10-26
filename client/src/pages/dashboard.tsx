@@ -18,13 +18,16 @@ import {
   BarChart3,
   Settings,
   Users,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logoProgresso from "/favicon.png";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, clearCacheAndReload } = useAuth();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<BaleStatus | "all">("all");
 
@@ -44,6 +47,18 @@ export default function Dashboard() {
   const handleLogout = () => {
     logout();
     setLocation("/");
+  };
+
+  const handleClearCache = async () => {
+    toast({
+      title: "Limpando cache...",
+      description: "Todos os dados em cache serão removidos e a página será recarregada.",
+    });
+    
+    // Small delay to show the toast
+    setTimeout(() => {
+      clearCacheAndReload();
+    }, 1000);
   };
 
   const filteredBales = bales.filter((bale) => {
@@ -127,16 +142,28 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {user?.role === "superadmin" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation("/users")}
-                  data-testid="button-user-management"
-                  className="h-9 w-9 p-0 flex items-center justify-center"
-                  title="Gestão de Usuários"
-                >
-                  <Users className="w-4 h-4" />
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLocation("/users")}
+                    data-testid="button-user-management"
+                    className="h-9 w-9 p-0 flex items-center justify-center"
+                    title="Gestão de Usuários"
+                  >
+                    <Users className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearCache}
+                    data-testid="button-clear-cache"
+                    className="h-9 w-9 p-0 flex items-center justify-center"
+                    title="Limpar Cache e Recarregar"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </>
               )}
               {user?.role === "admin" && (
                 <>

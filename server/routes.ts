@@ -237,15 +237,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update bale status (SEM GPS)
   app.patch("/api/bales/:id/status", async (req, res) => {
     try {
-      const { status } = updateBaleStatusSchema.parse(req.body);
+      const { status, userId } = updateBaleStatusSchema.parse(req.body);
 
-      // For MVP, using a generic user ID
-      const userId = `${status}-user`;
+      // Use userId from request or fallback to status-user
+      const finalUserId = userId || `${status}-user`;
 
       const bale = await storage.updateBaleStatus(
         req.params.id,
         status,
-        userId
+        finalUserId
       );
 
       res.json(bale);

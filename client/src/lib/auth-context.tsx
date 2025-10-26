@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  clearCacheAndReload: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +37,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("cotton_user");
   };
 
+  const clearCacheAndReload = async () => {
+    try {
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      
+      // Clear localStorage (keep user session)
+      const currentUser = localStorage.getItem("cotton_user");
+      localStorage.clear();
+      if (currentUser) {
+        localStorage.setItem("cotton_user", currentUser);
+      }
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      
+      // Unregister service worker
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+      }
+      
+      // Hard reload
+      window.location.reload();
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      // Reload anyway
+      window.location.reload();
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -44,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         isAuthenticated: !!user,
+        clearCacheAndReload,
       }}
     >
       {children}

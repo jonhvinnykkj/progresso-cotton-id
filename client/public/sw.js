@@ -1,6 +1,6 @@
 // Service Worker for PWA offline functionality
-const CACHE_NAME = 'bale-tracker-v3-favicon-fix';
-const RUNTIME_CACHE = 'runtime-cache-v3';
+const CACHE_NAME = 'bale-tracker-v4-superadmin';
+const RUNTIME_CACHE = 'runtime-cache-v4';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
