@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BaleCard } from "@/components/bale-card";
 import { ReportsDialog } from "@/components/reports-dialog";
+import { Footer } from "@/components/footer";
 import { useAuth } from "@/lib/auth-context";
 import type { Bale, BaleStatus } from "@shared/schema";
 import {
@@ -350,6 +351,9 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

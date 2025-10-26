@@ -33,6 +33,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { Footer } from "@/components/footer";
 import { ShieldCheck, User, Package, Truck, Building } from "lucide-react";
 import logoProgresso from "/favicon.png";
 
@@ -300,6 +301,9 @@ export default function Login() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
