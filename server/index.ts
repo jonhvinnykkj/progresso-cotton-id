@@ -75,10 +75,14 @@ export default app;
 (async () => {
   const server = await setupApp();
   
-  // Serve on port 5000 for local development
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen(port, "localhost", () => {
-    log(`🚀 Server running on http://localhost:${port}`);
-    log(`📱 Client running on http://localhost:3000`);
+  // Use Railway's PORT or default to 5000
+  const PORT = parseInt(process.env.PORT || '5000', 10);
+  const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  
+  server.listen(PORT, HOST, () => {
+    log(`🚀 Server running on http://${HOST}:${PORT}`);
+    if (process.env.NODE_ENV !== 'production') {
+      log(`📱 Client running on http://localhost:3000`);
+    }
   });
 })();
