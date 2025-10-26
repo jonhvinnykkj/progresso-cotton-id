@@ -12,7 +12,7 @@ import L from 'leaflet';
 import { cottonTalhoes, otherTalhoes } from '@/data/talhoes-geojson';
 import { useTalhaoStats } from '@/hooks/use-talhao-stats';
 import { useSettings } from '@/hooks/use-settings';
-import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info } from 'lucide-react';
+import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
@@ -63,6 +63,7 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
   const [compareSafras, setCompareSafras] = useState(false);
   const [isPlayingTimeline, setIsPlayingTimeline] = useState(false);
   const [timelineDate, setTimelineDate] = useState<Date>(new Date());
+  const [showSummary, setShowSummary] = useState(true);
   
   // Calcular estatísticas gerais
   const overallStats = useMemo(() => {
@@ -602,16 +603,40 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
         
         {/* Mapa */}
         <div className="relative">
+          {/* Botão para mostrar/ocultar resumo */}
+          {!showSummary && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSummary(true)}
+              className="absolute top-2 left-2 sm:top-4 sm:left-4 z-[1000] bg-white/95 backdrop-blur shadow-lg"
+            >
+              <Info className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Mostrar Resumo</span>
+            </Button>
+          )}
+          
           {/* Estatísticas flutuantes sobre o mapa */}
-          <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-auto z-[1000] flex flex-col gap-2 max-w-full sm:max-w-xs">
-            {/* Card de resumo geral */}
-            <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-primary/20">
-              <CardContent className="p-3 sm:p-4">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-2 border-b pb-1.5 sm:pb-2">
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
-                    <h3 className="font-bold text-xs sm:text-sm">Resumo da Safra {safra}</h3>
-                  </div>
+          {showSummary && (
+            <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-auto z-[1000] flex flex-col gap-2 max-w-full sm:max-w-xs">
+              {/* Card de resumo geral */}
+              <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-primary/20">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between border-b pb-1.5 sm:pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
+                        <h3 className="font-bold text-xs sm:text-sm">Resumo da Safra {safra}</h3>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSummary(false)}
+                        className="h-6 w-6 p-0 hover:bg-destructive/10"
+                      >
+                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </Button>
+                    </div>
                   
                   {overallStats && (
                     <div className="grid grid-cols-2 gap-2 text-xs">
@@ -681,7 +706,8 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
                 </CardContent>
               </Card>
             )}
-          </div>
+            </div>
+          )}
           
           <div className="h-[400px] sm:h-[600px] w-full rounded-lg overflow-hidden border-2 border-muted shadow-xl">
             <MapContainer
