@@ -132,6 +132,7 @@ export default function Algodoeira() {
       id: scannedBale.id,
       data: {
         status: "beneficiado",
+        userId: user?.id,
       },
     });
   };

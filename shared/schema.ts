@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // User roles for authentication
-export type UserRole = "admin" | "campo" | "transporte" | "algodoeira";
+export type UserRole = "superadmin" | "admin" | "campo" | "transporte" | "algodoeira";
 
 // Bale status flow: campo -> patio -> beneficiado
 export type BaleStatus = "campo" | "patio" | "beneficiado";
@@ -13,11 +13,14 @@ export type BaleStatus = "campo" | "patio" | "beneficiado";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
+  displayName: text("display_name").notNull(), // Nome de exibição
   password: text("password").notNull(),
   role: text("role").notNull().$type<UserRole>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdBy: text("created_by"), // ID do usuário que criou
 });
 
-// Bales table (ID é o QR Code, sem campos extras)
+// Bales table (ID é o QR Code, com rastreabilidade)
 export const bales = pgTable("bales", {
   id: text("id").primaryKey(), // Format: S25/26-T2B-00001
   safra: text("safra").notNull(),
@@ -26,7 +29,13 @@ export const bales = pgTable("bales", {
   status: text("status").notNull().$type<BaleStatus>().default("campo"),
   statusHistory: text("status_history"), // JSON array of status changes with timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdBy: text("created_by").notNull(), // Usuário que criou o fardo
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedBy: text("updated_by"), // Último usuário que atualizou
+  transportedAt: timestamp("transported_at"), // Quando foi transportado
+  transportedBy: text("transported_by"), // Quem transportou
+  processedAt: timestamp("processed_at"), // Quando foi beneficiado
+  processedBy: text("processed_by"), // Quem beneficiou
 });
 
 // Contador de numeração por safra + talhão
@@ -58,8 +67,16 @@ export const talhoesInfo = pgTable("talhoes_info", {
 // Insert schemas with validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  displayName: true,
   password: true,
   role: true,
+});
+
+export const createUserSchema = z.object({
+  username: z.string().min(3, "Username deve ter no mínimo 3 caracteres"),
+  displayName: z.string().min(3, "Nome de exibição deve ter no mínimo 3 caracteres"),
+  password: z.string().min(4, "Senha deve ter no mínimo 4 caracteres"),
+  role: z.enum(["admin", "campo", "transporte", "algodoeira"]),
 });
 
 // Schema para criação em lote de fardos
@@ -87,10 +104,12 @@ export const insertBaleSchema = createInsertSchema(bales).pick({
 
 export const updateBaleStatusSchema = z.object({
   status: z.enum(["patio", "beneficiado"]),
+  userId: z.string().optional(), // ID do usuário que está fazendo a atualização
 });
 
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type CreateUser = z.infer<typeof createUserSchema>;
 export type User = typeof users.$inferSelect;
 
 export type BatchCreateBales = z.infer<typeof batchCreateBalesSchema>;

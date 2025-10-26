@@ -98,6 +98,7 @@ export default function Campo() {
         safra: defaultSafra,
         talhao: data.talhao,
         numero: data.numero,
+        userId: user?.id,
       };
 
       const response = await fetch("/api/bales", {
@@ -156,6 +157,7 @@ export default function Campo() {
       const payload = {
         ...data,
         safra: defaultSafra,
+        userId: user?.id,
       };
 
       const response = await fetch("/api/bales/batch", {

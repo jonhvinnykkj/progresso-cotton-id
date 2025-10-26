@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import {
   loginSchema,
+  createUserSchema,
   batchCreateBalesSchema,
   updateBaleStatusSchema,
   updateDefaultSafraSchema,
@@ -36,6 +37,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.status(500).json({
         error: "Erro ao fazer login",
+      });
+    }
+  });
+
+  // User management routes (superadmin only)
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      // Remove passwords from response
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({
+        error: "Erro ao buscar usuários",
+      });
+    }
+  });
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = createUserSchema.parse(req.body);
+      const creatorId = req.body.createdBy; // ID do super admin que está criando
+
+      const newUser = await storage.createUser({
+        ...userData,
+        createdBy: creatorId,
+      });
+
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Dados inválidos",
+          details: error.errors,
+        });
+      }
+      console.error("Error creating user:", error);
+      res.status(500).json({
+        error: "Erro ao criar usuário",
+      });
+    }
+  });
+
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteUser(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({
+        error: "Erro ao deletar usuário",
       });
     }
   });

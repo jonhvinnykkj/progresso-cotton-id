@@ -18,7 +18,9 @@ export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  createUser(user: InsertUser & { createdBy?: string }): Promise<User>;
+  deleteUser(id: string): Promise<void>;
 
   // Bale methods
   getAllBales(): Promise<Bale[]>;
@@ -70,13 +72,24 @@ export class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: InsertUser & { createdBy?: string }): Promise<User> {
     const result = await db.insert(usersTable).values({
       username: insertUser.username,
+      displayName: insertUser.displayName,
       password: insertUser.password,
       role: insertUser.role as UserRole,
+      createdBy: insertUser.createdBy,
     }).returning();
     return result[0];
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const result = await db.select().from(usersTable);
+    return result;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(usersTable).where(eq(usersTable.id, id));
   }
 
   // Talhao counter methods (contador único por safra)
@@ -136,7 +149,7 @@ export class PostgresStorage implements IStorage {
       const result = await db.select().from(balesTable).orderBy(sql`${balesTable.updatedAt} DESC`);
       return result;
     } catch (error: any) {
-      // Se a coluna status_history não existir, retorna sem ela
+      // Se colunas novas não existirem, retorna com valores null
       if (error.code === '42703') {
         const result = await db.select({
           id: balesTable.id,
@@ -147,7 +160,16 @@ export class PostgresStorage implements IStorage {
           createdAt: balesTable.createdAt,
           updatedAt: balesTable.updatedAt,
         }).from(balesTable).orderBy(sql`${balesTable.updatedAt} DESC`);
-        return result.map(b => ({ ...b, statusHistory: null }));
+        return result.map(b => ({ 
+          ...b, 
+          statusHistory: null,
+          createdBy: 'unknown',
+          updatedBy: null,
+          transportedAt: null,
+          transportedBy: null,
+          processedAt: null,
+          processedBy: null,
+        }));
       }
       throw error;
     }
@@ -158,7 +180,7 @@ export class PostgresStorage implements IStorage {
       const result = await db.select().from(balesTable).where(eq(balesTable.id, id)).limit(1);
       return result[0];
     } catch (error: any) {
-      // Se a coluna status_history não existir, retorna sem ela
+      // Se colunas novas não existirem, retorna com valores null
       if (error.code === '42703') {
         const result = await db.select({
           id: balesTable.id,
@@ -169,7 +191,16 @@ export class PostgresStorage implements IStorage {
           createdAt: balesTable.createdAt,
           updatedAt: balesTable.updatedAt,
         }).from(balesTable).where(eq(balesTable.id, id)).limit(1);
-        return result[0] ? { ...result[0], statusHistory: null } : undefined;
+        return result[0] ? { 
+          ...result[0], 
+          statusHistory: null,
+          createdBy: 'unknown',
+          updatedBy: null,
+          transportedAt: null,
+          transportedBy: null,
+          processedAt: null,
+          processedBy: null,
+        } : undefined;
       }
       throw error;
     }
@@ -216,6 +247,7 @@ export class PostgresStorage implements IStorage {
           talhao,
           numero: parseInt(numero),
           status: "campo" as BaleStatus,
+          createdBy: userId,
           createdAt: now,
           updatedAt: now,
         };
@@ -238,7 +270,7 @@ export class PostgresStorage implements IStorage {
       console.log(`✅ ${result.length} fardo(s) criado(s) com sucesso`);
       return result;
     } catch (error: any) {
-      // Se a coluna status_history não existir, tenta inserir sem ela
+      // Se colunas novas não existirem, tenta inserir sem elas
       if (error.code === '42703') {
         const result = await db.insert(balesTable).values(balesData).returning({
           id: balesTable.id,
@@ -249,8 +281,17 @@ export class PostgresStorage implements IStorage {
           createdAt: balesTable.createdAt,
           updatedAt: balesTable.updatedAt,
         });
-        console.log(`✅ ${result.length} fardo(s) criado(s) com sucesso (sem status_history)`);
-        return result.map(b => ({ ...b, statusHistory: null }));
+        console.log(`✅ ${result.length} fardo(s) criado(s) com sucesso (sem colunas de rastreamento)`);
+        return result.map(b => ({ 
+          ...b, 
+          statusHistory: null,
+          createdBy: 'unknown',
+          updatedBy: null,
+          transportedAt: null,
+          transportedBy: null,
+          processedAt: null,
+          processedBy: null,
+        }));
       }
       throw error;
     }
@@ -266,6 +307,7 @@ export class PostgresStorage implements IStorage {
       talhao,
       numero: numeroInt,
       status: "campo" as BaleStatus,
+      createdBy: userId,
       createdAt: now,
       updatedAt: now,
     };
@@ -274,7 +316,7 @@ export class PostgresStorage implements IStorage {
       const result = await db.insert(balesTable).values(baleData).returning();
       return result[0];
     } catch (error: any) {
-      // Se a coluna status_history não existir, tenta inserir sem ela
+      // Se colunas novas não existirem, tenta inserir sem elas
       if (error.code === '42703') {
         const result = await db.insert(balesTable).values(baleData).returning({
           id: balesTable.id,
@@ -285,7 +327,16 @@ export class PostgresStorage implements IStorage {
           createdAt: balesTable.createdAt,
           updatedAt: balesTable.updatedAt,
         });
-        return { ...result[0], statusHistory: null };
+        return { 
+          ...result[0], 
+          statusHistory: null,
+          createdBy: 'unknown',
+          updatedBy: null,
+          transportedAt: null,
+          transportedBy: null,
+          processedAt: null,
+          processedBy: null,
+        };
       }
       throw error;
     }
@@ -323,17 +374,30 @@ export class PostgresStorage implements IStorage {
     });
 
     const now = new Date();
-    const updates: Partial<Bale> = {
+    const updates: any = {
       status: status,
       statusHistory: JSON.stringify(history),
       updatedAt: now,
+      updatedBy: userId,
     };
+
+    // Se está sendo transportado para o pátio, registrar
+    if (status === "patio") {
+      updates.transportedAt = now;
+      updates.transportedBy = userId;
+    }
+
+    // Se está sendo beneficiado, registrar
+    if (status === "beneficiado") {
+      updates.processedAt = now;
+      updates.processedBy = userId;
+    }
 
     try {
       const result = await db.update(balesTable).set(updates).where(eq(balesTable.id, id)).returning();
       return result[0];
     } catch (error: any) {
-      // Se a coluna status_history não existir, atualiza sem ela
+      // Se colunas novas não existirem, atualiza sem elas
       if (error.code === '42703') {
         const simpleUpdates = {
           status: status,
@@ -348,7 +412,16 @@ export class PostgresStorage implements IStorage {
           createdAt: balesTable.createdAt,
           updatedAt: balesTable.updatedAt,
         });
-        return { ...result[0], statusHistory: null };
+        return { 
+          ...result[0], 
+          statusHistory: null,
+          createdBy: 'unknown',
+          updatedBy: null,
+          transportedAt: null,
+          transportedBy: null,
+          processedAt: null,
+          processedBy: null,
+        };
       }
       throw error;
     }

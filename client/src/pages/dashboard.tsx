@@ -17,6 +17,7 @@ import {
   Filter,
   BarChart3,
   Settings,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logoProgresso from "/favicon.png";
@@ -125,6 +126,18 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {user?.role === "superadmin" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/users")}
+                  data-testid="button-user-management"
+                  className="h-9 w-9 p-0 flex items-center justify-center"
+                  title="Gestão de Usuários"
+                >
+                  <Users className="w-4 h-4" />
+                </Button>
+              )}
               {user?.role === "admin" && (
                 <>
                   <Button

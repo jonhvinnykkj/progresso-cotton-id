@@ -14,6 +14,7 @@ import BaleDetails from "@/pages/bale-details";
 import Etiqueta from "@/pages/etiqueta";
 import SettingsPage from "@/pages/settings";
 import TalhaoStats from "@/pages/talhao-stats";
+import UserManagement from "@/pages/user-management";
 
 function ProtectedRoute({ component: Component, allowedRoles }: { 
   component: () => JSX.Element; 
@@ -67,6 +68,10 @@ function Router() {
       
       <Route path="/talhao-stats">
         <ProtectedRoute component={TalhaoStats} allowedRoles={["admin"]} />
+      </Route>
+      
+      <Route path="/users">
+        <ProtectedRoute component={UserManagement} allowedRoles={["superadmin"]} />
       </Route>
       
       <Route component={NotFound} />
