@@ -973,61 +973,61 @@ export default function TalhaoStats() {
 
       {/* Modal de Detalhes do Talhão */}
       <Dialog open={!!selectedTalhao} onOpenChange={() => setSelectedTalhao(null)}>
-        <DialogContent className="max-w-2xl z-[9999]">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[9999]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <MapPin className="w-6 h-6 text-primary" />
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-xl">
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               Talhão {selectedTalhao}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Informações detalhadas e métricas de produtividade
             </DialogDescription>
           </DialogHeader>
 
           {selectedTalhaoData && selectedTalhaoInfo && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Informações Gerais */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                 <Card className="bg-primary/5 border-primary/20">
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-1">
-                      <MapPin className="w-5 h-5 mx-auto text-primary mb-2" />
-                      <p className="text-xs text-muted-foreground">Área</p>
-                      <p className="text-2xl font-bold text-primary">{selectedTalhaoInfo.hectares}</p>
-                      <p className="text-xs text-muted-foreground">hectares</p>
+                  <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
+                    <div className="text-center space-y-0.5 sm:space-y-1">
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-primary mb-1 sm:mb-2" />
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Área</p>
+                      <p className="text-xl sm:text-2xl font-bold text-primary">{selectedTalhaoInfo.hectares}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">hectares</p>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-1">
-                      <Package className="w-5 h-5 mx-auto text-blue-600 mb-2" />
-                      <p className="text-xs text-muted-foreground">Total Fardos</p>
-                      <p className="text-2xl font-bold text-blue-600">{selectedTalhaoData.total}</p>
-                      <p className="text-xs text-muted-foreground">fardos</p>
+                  <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
+                    <div className="text-center space-y-0.5 sm:space-y-1">
+                      <Package className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1 sm:mb-2" />
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Total Fardos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-blue-600">{selectedTalhaoData.total}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">fardos</p>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-purple-50 border-purple-200">
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-1">
-                      <Activity className="w-5 h-5 mx-auto text-purple-600 mb-2" />
-                      <p className="text-xs text-muted-foreground">Produtividade</p>
-                      <p className="text-xl font-bold text-purple-600">{produtividadeArrobas} @/ha</p>
-                      <p className="text-sm text-purple-600/70">{fardosPorHectare} f/ha</p>
+                  <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
+                    <div className="text-center space-y-0.5 sm:space-y-1">
+                      <Activity className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-purple-600 mb-1 sm:mb-2" />
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Produtividade</p>
+                      <p className="text-base sm:text-xl font-bold text-purple-600">{produtividadeArrobas} @/ha</p>
+                      <p className="text-xs sm:text-sm text-purple-600/70">{fardosPorHectare} f/ha</p>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-green-50 border-green-200">
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-1">
-                      <CheckCircle className="w-5 h-5 mx-auto text-green-600 mb-2" />
-                      <p className="text-xs text-muted-foreground">Concluídos</p>
-                      <p className="text-2xl font-bold text-green-600">{selectedTalhaoData.beneficiado}</p>
-                      <p className="text-xs text-muted-foreground">
+                  <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
+                    <div className="text-center space-y-0.5 sm:space-y-1">
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-1 sm:mb-2" />
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Concluídos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">{selectedTalhaoData.beneficiado}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
                         {selectedTalhaoData.total > 0 
                           ? ((selectedTalhaoData.beneficiado / selectedTalhaoData.total) * 100).toFixed(0) 
                           : 0}%
@@ -1039,65 +1039,65 @@ export default function TalhaoStats() {
 
               {/* Distribuição por Status */}
               <div>
-                <h4 className="text-sm font-semibold mb-3">Distribuição por Status</h4>
-                <div className="space-y-3">
+                <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3">Distribuição por Status</h4>
+                <div className="space-y-2 sm:space-y-3">
                   <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
+                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-bale-campo" />
+                        <Package className="w-3 h-3 sm:w-4 sm:h-4 text-bale-campo" />
                         <span>Campo</span>
                       </div>
                       <span className="font-medium">{selectedTalhaoData.campo} fardos</span>
                     </div>
                     <Progress 
                       value={(selectedTalhaoData.campo / selectedTalhaoData.total) * 100} 
-                      className="h-2"
+                      className="h-1.5 sm:h-2"
                     />
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
+                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <Truck className="w-4 h-4 text-bale-patio" />
+                        <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-bale-patio" />
                         <span>Pátio</span>
                       </div>
                       <span className="font-medium">{selectedTalhaoData.patio} fardos</span>
                     </div>
                     <Progress 
                       value={(selectedTalhaoData.patio / selectedTalhaoData.total) * 100} 
-                      className="h-2 [&>div]:bg-bale-patio"
+                      className="h-1.5 sm:h-2 [&>div]:bg-bale-patio"
                     />
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
+                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-bale-beneficiado" />
                         <span>Beneficiado</span>
                       </div>
                       <span className="font-medium">{selectedTalhaoData.beneficiado} fardos</span>
                     </div>
                     <Progress 
                       value={(selectedTalhaoData.beneficiado / selectedTalhaoData.total) * 100} 
-                      className="h-2 [&>div]:bg-bale-beneficiado"
+                      className="h-1.5 sm:h-2 [&>div]:bg-bale-beneficiado"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Métricas Comparativas */}
-              <div className="bg-muted/50 rounded-lg p-4">
-                <h4 className="text-sm font-semibold mb-3">Comparativo com Média Geral</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Produtividade deste talhão</p>
-                    <p className="text-xl font-bold text-primary">{produtividadeArrobas} @/ha</p>
-                    <p className="text-sm text-muted-foreground">{fardosPorHectare} fardos/ha</p>
+              <div className="bg-muted/50 rounded-lg p-3 sm:p-4">
+                <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3">Comparativo com Média Geral</h4>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Produtividade deste talhão</p>
+                    <p className="text-lg sm:text-xl font-bold text-primary">{produtividadeArrobas} @/ha</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{fardosPorHectare} fardos/ha</p>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Média geral</p>
-                    <p className="text-xl font-bold">{avgArrobasPorHectare} @/ha</p>
-                    <p className="text-sm text-muted-foreground">{avgFardosPorHectare} fardos/ha</p>
+                  <div className="space-y-1 sm:space-y-2">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Média geral</p>
+                    <p className="text-lg sm:text-xl font-bold">{avgArrobasPorHectare} @/ha</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{avgFardosPorHectare} fardos/ha</p>
                   </div>
                 </div>
               </div>
