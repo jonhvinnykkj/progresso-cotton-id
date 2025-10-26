@@ -20,13 +20,13 @@ function ProtectedRoute({ component: Component, allowedRoles }: {
   component: () => JSX.Element; 
   allowedRoles?: string[] 
 }) {
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, selectedRole } = useAuth();
 
   if (!isAuthenticated) {
     return <Redirect to="/" />;
   }
 
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
+  if (allowedRoles && selectedRole && !allowedRoles.includes(selectedRole)) {
     return <Redirect to="/" />;
   }
 

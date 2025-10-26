@@ -19,7 +19,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
-  createUser(user: InsertUser & { createdBy?: string }): Promise<User>;
+  createUser(user: Omit<InsertUser, 'roles'> & { createdBy?: string; roles: string[] | UserRole[] }): Promise<User>;
   deleteUser(id: string): Promise<void>;
 
   // Bale methods
@@ -72,12 +72,12 @@ export class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async createUser(insertUser: InsertUser & { createdBy?: string }): Promise<User> {
+  async createUser(insertUser: Omit<InsertUser, 'roles'> & { createdBy?: string; roles: string[] | UserRole[] }): Promise<User> {
     const result = await db.insert(usersTable).values({
       username: insertUser.username,
       displayName: insertUser.displayName,
       password: insertUser.password,
-      role: insertUser.role as UserRole,
+      roles: JSON.stringify(insertUser.roles),
       createdBy: insertUser.createdBy,
     }).returning();
     return result[0];

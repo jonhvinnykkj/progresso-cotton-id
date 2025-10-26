@@ -41,13 +41,13 @@ type SafraSettingsForm = z.infer<typeof safraSettingsSchema>;
 
 export default function SettingsPage() {
   const [, setLocation] = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, selectedRole } = useAuth();
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Verificar se é admin
-  if (user?.role !== "admin") {
+  if (selectedRole !== "admin") {
     return <Redirect to="/dashboard" />;
   }
 

@@ -15,7 +15,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   displayName: text("display_name").notNull(), // Nome de exibição
   password: text("password").notNull(),
-  role: text("role").notNull().$type<UserRole>(),
+  roles: text("roles").notNull(), // Array de papéis em JSON: ["admin", "campo", "transporte"]
   createdAt: timestamp("created_at").notNull().defaultNow(),
   createdBy: text("created_by"), // ID do usuário que criou
 });
@@ -69,14 +69,14 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   displayName: true,
   password: true,
-  role: true,
+  roles: true,
 });
 
 export const createUserSchema = z.object({
   username: z.string().min(3, "Username deve ter no mínimo 3 caracteres"),
   displayName: z.string().min(3, "Nome de exibição deve ter no mínimo 3 caracteres"),
   password: z.string().min(4, "Senha deve ter no mínimo 4 caracteres"),
-  role: z.enum(["admin", "campo", "transporte", "algodoeira"]),
+  roles: z.array(z.enum(["admin", "campo", "transporte", "algodoeira"])).min(1, "Selecione pelo menos um papel"),
 });
 
 // Schema para criação em lote de fardos

@@ -27,7 +27,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { password: _, ...userWithoutPassword } = user;
 
-      res.json(userWithoutPassword);
+      // Parse roles do JSON
+      const availableRoles: string[] = user.roles ? JSON.parse(user.roles) : [];
+
+      res.json({
+        ...userWithoutPassword,
+        availableRoles, // Adiciona array de papéis disponíveis
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
@@ -62,7 +68,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const creatorId = req.body.createdBy; // ID do super admin que está criando
 
       const newUser = await storage.createUser({
-        ...userData,
+        username: userData.username,
+        displayName: userData.displayName,
+        password: userData.password,
+        roles: userData.roles, // Array será convertido para JSON no storage
         createdBy: creatorId,
       });
 

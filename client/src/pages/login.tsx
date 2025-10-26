@@ -30,6 +30,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
@@ -77,9 +84,12 @@ const roles: {
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { login, isAuthenticated, role } = useAuth();
+  const { login, isAuthenticated, selectedRole } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [pendingUser, setPendingUser] = useState<any>(null);
+  const [availableRoles, setAvailableRoles] = useState<UserRole[]>([]);
 
   // Check and clear cache if app version changed
   useEffect(() => {
@@ -101,8 +111,8 @@ export default function Login() {
 
   // Redirect authenticated users to their role-specific page
   useEffect(() => {
-    if (isAuthenticated && role) {
-      switch (role) {
+    if (isAuthenticated && selectedRole) {
+      switch (selectedRole) {
         case "superadmin":
         case "admin":
           setLocation("/dashboard");
@@ -120,7 +130,7 @@ export default function Login() {
           setLocation("/dashboard");
       }
     }
-  }, [isAuthenticated, role, setLocation]);
+  }, [isAuthenticated, selectedRole, setLocation]);
 
   const form = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
@@ -151,31 +161,19 @@ export default function Login() {
 
       const user = await response.json();
 
-      login(user);
-
-      toast({
-        title: "Login realizado com sucesso",
-        description: `Bem-vindo, ${user.displayName || roles.find((r) => r.value === user.role)?.label}!`,
-      });
-
-      // Redirect based on role from server
-      switch (user.role) {
-        case "superadmin":
-        case "admin":
-          setLocation("/dashboard");
-          break;
-        case "campo":
-          setLocation("/campo");
-          break;
-        case "transporte":
-          setLocation("/transporte");
-          break;
-        case "algodoeira":
-          setLocation("/algodoeira");
-          break;
-        default:
-          setLocation("/dashboard");
+      // Se o usuário tem múltiplos papéis, mostrar dialog de seleção
+      if (user.availableRoles && user.availableRoles.length > 1) {
+        setPendingUser(user);
+        setAvailableRoles(user.availableRoles);
+        setShowRoleSelector(true);
+        setIsLoading(false);
+        return;
       }
+
+      // Se tem apenas um papel, fazer login direto
+      const selectedRole = user.availableRoles?.[0];
+      completeLogin(user, selectedRole);
+      
     } catch (error) {
       toast({
         variant: "destructive",
@@ -187,6 +185,42 @@ export default function Login() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const completeLogin = (user: any, role: UserRole) => {
+    login(user, role);
+
+    toast({
+      title: "Login realizado com sucesso",
+      description: `Bem-vindo, ${user.displayName || roles.find((r) => r.value === role)?.label}!`,
+    });
+
+    // Redirect based on selected role
+    switch (role) {
+      case "superadmin":
+      case "admin":
+        setLocation("/dashboard");
+        break;
+      case "campo":
+        setLocation("/campo");
+        break;
+      case "transporte":
+        setLocation("/transporte");
+        break;
+      case "algodoeira":
+        setLocation("/algodoeira");
+        break;
+      default:
+        setLocation("/dashboard");
+    }
+  };
+
+  const handleRoleSelect = (selectedRole: UserRole) => {
+    if (pendingUser) {
+      completeLogin(pendingUser, selectedRole);
+      setShowRoleSelector(false);
+      setPendingUser(null);
     }
   };
 
@@ -301,6 +335,48 @@ export default function Login() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialog de Seleção de Papel */}
+      <Dialog open={showRoleSelector} onOpenChange={setShowRoleSelector}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+              Selecione seu Papel
+            </DialogTitle>
+            <DialogDescription>
+              Você tem acesso a múltiplos papéis. Escolha como deseja acessar o sistema.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            {availableRoles.map((roleValue) => {
+              const roleInfo = roles.find((r) => r.value === roleValue);
+              if (!roleInfo) return null;
+              
+              const Icon = roleInfo.icon;
+              
+              return (
+                <Button
+                  key={roleValue}
+                  variant="outline"
+                  className="h-auto p-4 justify-start hover:bg-primary/5 hover:border-primary transition-all"
+                  onClick={() => handleRoleSelect(roleValue)}
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold">{roleInfo.label}</p>
+                      <p className="text-xs text-muted-foreground">{roleInfo.description}</p>
+                    </div>
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <Footer />

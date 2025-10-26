@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS users (
   display_name TEXT NOT NULL,
   password TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'user',
+  roles TEXT, -- JSON array de papéis: ["admin", "campo"]
   created_at TIMESTAMP DEFAULT NOW(),
   created_by TEXT
 );
@@ -50,9 +51,13 @@ CREATE TABLE IF NOT EXISTS users (
 -- Add new columns if they don't exist (migration for existing databases)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS created_by TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS roles TEXT;
 
 -- Update existing users with display_name based on username
 UPDATE users SET display_name = username WHERE display_name IS NULL;
+
+-- Migrar role para roles (array) para usuários existentes
+UPDATE users SET roles = json_build_array(role)::text WHERE roles IS NULL;
 
 -- Create settings table
 CREATE TABLE IF NOT EXISTS settings (

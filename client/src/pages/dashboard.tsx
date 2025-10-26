@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { logout, user, clearCacheAndReload } = useAuth();
+  const { logout, user, selectedRole, clearCacheAndReload } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<BaleStatus | "all">("all");
@@ -137,12 +137,12 @@ export default function Dashboard() {
               <div className="min-w-0">
                 <h1 className="text-base sm:text-lg font-semibold truncate">Dashboard</h1>
                 <p className="text-xs text-muted-foreground truncate">
-                  {user?.username} {user?.role && <span className="ml-1 px-2 py-0.5 bg-primary/10 rounded text-primary font-medium">({user.role})</span>}
+                  {user?.username} {selectedRole && <span className="ml-1 px-2 py-0.5 bg-primary/10 rounded text-primary font-medium">({selectedRole})</span>}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              {user?.role === "superadmin" && (
+              {selectedRole === "superadmin" && (
                 <>
                   <Button
                     variant="outline"
@@ -166,7 +166,7 @@ export default function Dashboard() {
                   </Button>
                 </>
               )}
-              {user?.role === "admin" && (
+              {selectedRole === "admin" && (
                 <>
                   <Button
                     variant="outline"

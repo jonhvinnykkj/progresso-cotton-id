@@ -3,8 +3,9 @@ import type { User, UserRole } from "@shared/schema";
 
 interface AuthContextType {
   user: User | null;
-  role: UserRole | null;
-  login: (user: User) => void;
+  selectedRole: UserRole | null;
+  setSelectedRole: (role: UserRole) => void;
+  login: (user: User, selectedRole?: UserRole) => void;
   logout: () => void;
   isAuthenticated: boolean;
   clearCacheAndReload: () => Promise<void>;
@@ -14,27 +15,45 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [selectedRole, setSelectedRoleState] = useState<UserRole | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("cotton_user");
+    const storedRole = localStorage.getItem("cotton_selected_role");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        if (storedRole) {
+          setSelectedRoleState(storedRole as UserRole);
+        }
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("cotton_user");
+        localStorage.removeItem("cotton_selected_role");
       }
     }
   }, []);
 
-  const login = (newUser: User) => {
+  const login = (newUser: User, role?: UserRole) => {
     setUser(newUser);
     localStorage.setItem("cotton_user", JSON.stringify(newUser));
+    
+    if (role) {
+      setSelectedRoleState(role);
+      localStorage.setItem("cotton_selected_role", role);
+    }
+  };
+
+  const setSelectedRole = (role: UserRole) => {
+    setSelectedRoleState(role);
+    localStorage.setItem("cotton_selected_role", role);
   };
 
   const logout = () => {
     setUser(null);
+    setSelectedRoleState(null);
     localStorage.removeItem("cotton_user");
+    localStorage.removeItem("cotton_selected_role");
   };
 
   const clearCacheAndReload = async () => {
@@ -74,7 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        role: user?.role || null,
+        selectedRole,
+        setSelectedRole,
         login,
         logout,
         isAuthenticated: !!user,

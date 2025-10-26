@@ -93,13 +93,6 @@ export default function Campo() {
     try {
       const baleId = `S${defaultSafra}-T${data.talhao}-${data.numero}`;
       
-      console.log('🔍 DEBUG - Criando fardo:', {
-        userId: user?.id,
-        userIdType: typeof user?.id,
-        userIdString: String(user?.id),
-        userObject: user
-      });
-      
       const payload = {
         id: baleId,
         qrCode: baleId,
@@ -108,8 +101,6 @@ export default function Campo() {
         numero: data.numero,
         userId: user?.id ? String(user.id) : undefined,
       };
-
-      console.log('📦 Payload enviado:', payload);
 
       const response = await fetch("/api/bales", {
         method: "POST",

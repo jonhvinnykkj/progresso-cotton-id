@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, UserPlus, Users } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -24,18 +25,30 @@ interface User {
 }
 
 export default function UserManagement() {
-  const { user } = useAuth();
+  const { user, selectedRole } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("campo");
+  const [selectedRoles, setSelectedRoles] = useState<UserRole[]>(["campo"]);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
+  const toggleRole = (roleToToggle: UserRole) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(roleToToggle)) {
+        // Não permitir desmarcar se for o último
+        if (prev.length === 1) return prev;
+        return prev.filter(r => r !== roleToToggle);
+      } else {
+        return [...prev, roleToToggle];
+      }
+    });
+  };
+
   // Verificar se é superadmin
-  if (user?.role !== "superadmin") {
+  if (selectedRole !== "superadmin") {
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -66,7 +79,7 @@ export default function UserManagement() {
 
   // Criar usuário
   const createUserMutation = useMutation({
-    mutationFn: async (userData: { username: string; displayName: string; password: string; role: UserRole }) => {
+    mutationFn: async (userData: { username: string; displayName: string; password: string; role: UserRole; roles: UserRole[] }) => {
       const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,7 +102,7 @@ export default function UserManagement() {
       setUsername("");
       setDisplayName("");
       setPassword("");
-      setRole("campo");
+      setSelectedRoles(["campo"]);
     },
     onError: (error: Error) => {
       toast({
@@ -130,15 +143,23 @@ export default function UserManagement() {
 
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !displayName || !password) {
+    if (!username || !displayName || !password || selectedRoles.length === 0) {
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha todos os campos do formulário.",
+        description: "Preencha todos os campos e selecione pelo menos um papel.",
         variant: "destructive",
       });
       return;
     }
-    createUserMutation.mutate({ username, displayName, password, role });
+    // Usar o primeiro papel selecionado como papel principal
+    const mainRole = selectedRoles[0];
+    createUserMutation.mutate({ 
+      username, 
+      displayName, 
+      password, 
+      role: mainRole,
+      roles: selectedRoles 
+    });
   };
 
   const getRoleBadge = (role: UserRole | "superadmin") => {
@@ -217,20 +238,31 @@ export default function UserManagement() {
                   required
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="role">Tipo de Usuário</Label>
-                <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="campo">Campo</SelectItem>
-                    <SelectItem value="transporte">Transporte</SelectItem>
-                    <SelectItem value="algodoeira">Algodoeira</SelectItem>
-                  </SelectContent>
-                </Select>
+            </div>
+            
+            <div className="space-y-3">
+              <Label>Papéis de Acesso (selecione um ou mais)</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { value: "admin" as UserRole, label: "Administrador" },
+                  { value: "campo" as UserRole, label: "Campo" },
+                  { value: "transporte" as UserRole, label: "Transporte" },
+                  { value: "algodoeira" as UserRole, label: "Algodoeira" }
+                ].map(role => (
+                  <div key={role.value} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-accent">
+                    <Checkbox 
+                      id={role.value}
+                      checked={selectedRoles.includes(role.value)}
+                      onCheckedChange={() => toggleRole(role.value)}
+                    />
+                    <Label 
+                      htmlFor={role.value} 
+                      className="cursor-pointer flex-1"
+                    >
+                      {role.label}
+                    </Label>
+                  </div>
+                ))}
               </div>
             </div>
             
