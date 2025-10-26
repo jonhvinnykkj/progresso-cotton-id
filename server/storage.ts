@@ -24,6 +24,7 @@ export interface IStorage {
   getAllBales(): Promise<Bale[]>;
   getBale(id: string): Promise<Bale | undefined>;
   getBaleByQRCode(qrCode: string): Promise<Bale | undefined>;
+  createSingleBale(id: string, safra: string, talhao: string, numero: string, userId: string): Promise<Bale>;
   batchCreateBales(data: BatchCreateBales, userId: string): Promise<Bale[]>;
   updateBaleStatus(id: string, status: BaleStatus, userId: string): Promise<Bale>;
   getBaleStats(): Promise<{
@@ -223,18 +224,53 @@ export class PostgresStorage implements IStorage {
     }
   }
 
-  async updateBaleStatus(id: string, newStatus: BaleStatus, userId: string): Promise<Bale> {
+  async createSingleBale(id: string, safra: string, talhao: string, numero: string, userId: string): Promise<Bale> {
+    const now = new Date();
+    const numeroInt = parseInt(numero);
+
+    const baleData = {
+      id: id, // Ex: S25/26-T2B-00001
+      safra: safra,
+      talhao,
+      numero: numeroInt,
+      status: "campo" as BaleStatus,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    try {
+      const result = await db.insert(balesTable).values(baleData).returning();
+      return result[0];
+    } catch (error: any) {
+      // Se a coluna status_history não existir, tenta inserir sem ela
+      if (error.code === '42703') {
+        const result = await db.insert(balesTable).values(baleData).returning({
+          id: balesTable.id,
+          safra: balesTable.safra,
+          talhao: balesTable.talhao,
+          numero: balesTable.numero,
+          status: balesTable.status,
+          createdAt: balesTable.createdAt,
+          updatedAt: balesTable.updatedAt,
+        });
+        return { ...result[0], statusHistory: null };
+      }
+      throw error;
+    }
+  }
+
+  async updateBaleStatus(id: string, status: BaleStatus, userId: string): Promise<Bale> {
     const bale = await this.getBale(id);
     if (!bale) {
       throw new Error("Fardo não encontrado");
     }
 
     // Validate status transition
-    if (newStatus === "patio" && bale.status !== "campo") {
+    if (status === "patio" && bale.status !== "campo") {
       throw new Error("Apenas fardos no campo podem ser movidos para o pátio");
     }
 
-    if (newStatus === "beneficiado" && bale.status !== "patio") {
+    if (status === "beneficiado" && bale.status !== "patio") {
       throw new Error("Apenas fardos no pátio podem ser beneficiados");
     }
 
@@ -249,14 +285,14 @@ export class PostgresStorage implements IStorage {
     }
     
     history.push({
-      status: newStatus,
+      status: status,
       timestamp: new Date().toISOString(),
       userId,
     });
 
     const now = new Date();
     const updates: Partial<Bale> = {
-      status: newStatus,
+      status: status,
       statusHistory: JSON.stringify(history),
       updatedAt: now,
     };
@@ -268,7 +304,7 @@ export class PostgresStorage implements IStorage {
       // Se a coluna status_history não existir, atualiza sem ela
       if (error.code === '42703') {
         const simpleUpdates = {
-          status: newStatus,
+          status: status,
           updatedAt: now,
         };
         const result = await db.update(balesTable).set(simpleUpdates).where(eq(balesTable.id, id)).returning({

@@ -424,36 +424,37 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
   
   return (
     <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
+      <CardHeader className="pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
               Mapa Interativo - Safra {safra}
-              <Badge variant="outline">{filteredCottonFeatures.features.length} talhões</Badge>
+              <Badge variant="outline" className="text-xs">{filteredCottonFeatures.features.length} talhões</Badge>
               {talhoesComAlerta.length > 0 && (
-                <Badge variant="destructive" className="flex items-center gap-1">
+                <Badge variant="destructive" className="flex items-center gap-1 text-xs">
                   <AlertTriangle className="h-3 w-3" />
-                  {talhoesComAlerta.length} alertas
+                  {talhoesComAlerta.length}
                 </Badge>
               )}
             </CardTitle>
             {overallStats && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {overallStats.totalFardos} fardos • {overallStats.produtividadeMedia.toFixed(2)} fardos/ha • {overallStats.totalArea.toFixed(0)} ha
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                {overallStats.totalFardos} fardos • {overallStats.produtividadeMedia.toFixed(2)} f/ha • {overallStats.totalArea.toFixed(0)} ha
               </p>
             )}
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportPDF}>
-              <Download className="h-4 w-4 mr-2" />
-              Exportar PDF
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={handleExportPDF} className="h-8 text-xs">
+              <Download className="h-3 w-3 sm:mr-2" />
+              <span className="hidden sm:inline">Exportar PDF</span>
             </Button>
             <Button 
               variant={compareSafras ? "default" : "outline"} 
               size="sm"
               onClick={() => setCompareSafras(!compareSafras)}
+              className="h-8 text-xs hidden sm:flex"
             >
-              <CalendarIcon className="h-4 w-4 mr-2" />
+              <CalendarIcon className="h-3 w-3 mr-2" />
               Comparar Safras
             </Button>
           </div>
@@ -462,9 +463,9 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
       
       <CardContent className="space-y-4">
         {/* Controles */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 sm:p-4 bg-muted rounded-lg">
           {/* Busca */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             <Label className="text-xs font-semibold">Buscar Talhão</Label>
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -472,34 +473,34 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
                 placeholder="Ex: 1B, 2A..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
+                className="pl-8 h-9 text-sm"
               />
             </div>
           </div>
           
           {/* Modo de visualização */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             <Label className="text-xs font-semibold flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
               Visualização
             </Label>
             <Select value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="heatmap">Heatmap Produtividade</SelectItem>
-                <SelectItem value="status">Por Status</SelectItem>
+                <SelectItem value="heatmap">Heatmap</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           {/* Filtro de status */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold">Filtrar por Status</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label className="text-xs font-semibold">Status</Label>
             <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FilterStatus)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -512,10 +513,10 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
           </div>
           
           {/* Camadas */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             <Label className="text-xs font-semibold flex items-center gap-1">
               <Layers className="h-3 w-3" />
-              Camadas & Alertas
+              Camadas
             </Label>
             <div className="flex flex-col gap-2">
               <div className="flex items-center space-x-2">
@@ -602,48 +603,48 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
         {/* Mapa */}
         <div className="relative">
           {/* Estatísticas flutuantes sobre o mapa */}
-          <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2 max-w-xs">
+          <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-auto z-[1000] flex flex-col gap-2 max-w-full sm:max-w-xs">
             {/* Card de resumo geral */}
             <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-primary/20">
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <h3 className="font-bold text-sm">Resumo da Safra {safra}</h3>
+              <CardContent className="p-3 sm:p-4">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-2 border-b pb-1.5 sm:pb-2">
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
+                    <h3 className="font-bold text-xs sm:text-sm">Resumo da Safra {safra}</h3>
                   </div>
                   
                   {overallStats && (
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Talhões</p>
-                        <p className="text-lg font-bold text-primary">{filteredCottonFeatures.features.length}</p>
+                      <div className="space-y-0.5 sm:space-y-1">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs">Talhões</p>
+                        <p className="text-base sm:text-lg font-bold text-primary">{filteredCottonFeatures.features.length}</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Área Total</p>
-                        <p className="text-lg font-bold text-blue-600">{overallStats.totalArea.toFixed(0)} ha</p>
+                      <div className="space-y-0.5 sm:space-y-1">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs">Área Total</p>
+                        <p className="text-base sm:text-lg font-bold text-blue-600">{overallStats.totalArea.toFixed(0)} ha</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Fardos</p>
-                        <p className="text-lg font-bold text-purple-600">{overallStats.totalFardos}</p>
+                      <div className="space-y-0.5 sm:space-y-1">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs">Fardos</p>
+                        <p className="text-base sm:text-lg font-bold text-purple-600">{overallStats.totalFardos}</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Média</p>
-                        <p className="text-lg font-bold text-orange-600">{overallStats.produtividadeMedia.toFixed(1)} f/ha</p>
+                      <div className="space-y-0.5 sm:space-y-1">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs">Média</p>
+                        <p className="text-base sm:text-lg font-bold text-orange-600">{overallStats.produtividadeMedia.toFixed(1)} f/ha</p>
                       </div>
                     </div>
                   )}
                   
                   {statsMap && (
-                    <div className="pt-2 border-t space-y-1">
-                      <div className="flex justify-between text-xs">
+                    <div className="pt-1.5 sm:pt-2 border-t space-y-1">
+                      <div className="flex justify-between text-[10px] sm:text-xs">
                         <span className="text-muted-foreground">🟦 Em Colheita</span>
                         <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'em_colheita').length}</span>
                       </div>
-                      <div className="flex justify-between text-xs">
+                      <div className="flex justify-between text-[10px] sm:text-xs">
                         <span className="text-muted-foreground">🟩 Concluído</span>
                         <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'concluido').length}</span>
                       </div>
-                      <div className="flex justify-between text-xs">
+                      <div className="flex justify-between text-[10px] sm:text-xs">
                         <span className="text-muted-foreground">⬜ Não Iniciado</span>
                         <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'nao_iniciado').length}</span>
                       </div>
@@ -653,9 +654,9 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
               </CardContent>
             </Card>
             
-            {/* Ranking de produtividade */}
+            {/* Ranking de produtividade - Escondido no mobile */}
             {statsMap && Object.keys(statsMap).length > 0 && (
-              <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-orange-500/20">
+              <Card className="hidden sm:block bg-white/95 backdrop-blur shadow-lg border-2 border-orange-500/20">
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 border-b pb-2">
@@ -682,7 +683,7 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
             )}
           </div>
           
-          <div style={{ height: '600px', width: '100%' }} className="rounded-lg overflow-hidden border-2 border-muted shadow-xl">
+          <div className="h-[400px] sm:h-[600px] w-full rounded-lg overflow-hidden border-2 border-muted shadow-xl">
             <MapContainer
               center={[-7.49, -44.20]}
               zoom={12}

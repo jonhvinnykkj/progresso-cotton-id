@@ -114,6 +114,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create single bale
+  app.post("/api/bales", async (req, res) => {
+    try {
+      const { id, safra, talhao, numero } = req.body;
+
+      if (!id || !safra || !talhao || !numero) {
+        return res.status(400).json({
+          error: "Dados inválidos: id, safra, talhao e numero são obrigatórios",
+        });
+      }
+
+      // Check if bale already exists
+      const existing = await storage.getBale(id);
+      if (existing) {
+        return res.status(409).json({
+          error: `Fardo ${id} já existe no sistema`,
+        });
+      }
+
+      // Create single bale
+      const userId = "campo-user";
+      const bale = await storage.createSingleBale(id, safra, talhao, numero, userId);
+
+      res.status(201).json(bale);
+    } catch (error) {
+      console.error("Error creating bale:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Erro ao criar fardo",
+      });
+    }
+  });
+
   // Create bales in batch (NEW)
   app.post("/api/bales/batch", async (req, res) => {
     try {
