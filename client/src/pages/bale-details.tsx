@@ -172,89 +172,16 @@ export default function BaleDetails() {
           </CardContent>
         </Card>
 
-        {/* User Tracking Information */}
+        {/* Histórico de Rastreabilidade com Usuários */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Rastreamento de Usuários
+              Histórico de Rastreabilidade
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Criado por */}
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <div className="mt-0.5">
-                <User className="w-4 h-4 text-green-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">Criado por</p>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  <span className="font-medium">{getUserDisplayName(bale.createdBy)}</span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {format(new Date(bale.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                </p>
-              </div>
-            </div>
-
-            {/* Transportado por */}
-            {bale.status !== "campo" && (
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="mt-0.5">
-                  <User className="w-4 h-4 text-yellow-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">Transportado por</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    <span className="font-medium">{getUserDisplayName(bale.transportedBy)}</span>
-                  </p>
-                  {bale.transportedAt && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(bale.transportedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Processado por */}
-            {bale.status === "beneficiado" && (
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="mt-0.5">
-                  <User className="w-4 h-4 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">Processado por</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    <span className="font-medium">{getUserDisplayName(bale.processedBy)}</span>
-                  </p>
-                  {bale.processedAt && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(bale.processedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Informação complementar */}
-            {bale.updatedBy && (
-              <div className="pt-3 border-t">
-                <p className="text-xs text-muted-foreground">
-                  Última atualização por: <span className="font-medium">{getUserDisplayName(bale.updatedBy)}</span>
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Timeline */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Histórico de Rastreabilidade</CardTitle>
-          </CardHeader>
           <CardContent>
-            <BaleTimeline bale={bale} />
+            <BaleTimeline bale={bale} getUserDisplayName={getUserDisplayName} />
           </CardContent>
         </Card>
       </main>

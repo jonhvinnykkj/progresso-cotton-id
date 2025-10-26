@@ -6,15 +6,17 @@ import type { Bale } from "@shared/schema";
 
 interface BaleTimelineProps {
   bale: Bale;
+  getUserDisplayName?: (userId: string | null | undefined) => string;
 }
 
-export function BaleTimeline({ bale }: BaleTimelineProps) {
+export function BaleTimeline({ bale, getUserDisplayName }: BaleTimelineProps) {
   const timelineSteps = [
     {
       status: "campo",
       label: "Registrado no Campo",
       icon: Package,
       timestamp: bale.createdAt,
+      userId: bale.createdBy,
       completed: true,
       color: "text-bale-campo",
       bgColor: "bg-bale-campo",
@@ -23,7 +25,8 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
       status: "patio",
       label: "Transportado para Pátio",
       icon: Truck,
-      timestamp: bale.status === "patio" || bale.status === "beneficiado" ? bale.updatedAt : undefined,
+      timestamp: bale.transportedAt || (bale.status === "patio" || bale.status === "beneficiado" ? bale.updatedAt : undefined),
+      userId: bale.transportedBy,
       completed: bale.status === "patio" || bale.status === "beneficiado",
       color: "text-bale-patio",
       bgColor: "bg-bale-patio",
@@ -32,7 +35,8 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
       status: "beneficiado",
       label: "Beneficiado",
       icon: CheckCircle,
-      timestamp: bale.status === "beneficiado" ? bale.updatedAt : undefined,
+      timestamp: bale.processedAt || (bale.status === "beneficiado" ? bale.updatedAt : undefined),
+      userId: bale.processedBy,
       completed: bale.status === "beneficiado",
       color: "text-bale-beneficiado",
       bgColor: "bg-bale-beneficiado",
@@ -77,14 +81,24 @@ export function BaleTimeline({ bale }: BaleTimelineProps) {
                   <h3 className="font-semibold">{step.label}</h3>
 
                   {step.timestamp ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span>
-                        {format(new Date(step.timestamp), "dd/MM/yyyy 'às' HH:mm", {
-                          locale: ptBR,
-                        })}
-                      </span>
-                    </div>
+                    <>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4" />
+                        <span>
+                          {format(new Date(step.timestamp), "dd/MM/yyyy 'às' HH:mm", {
+                            locale: ptBR,
+                          })}
+                        </span>
+                      </div>
+                      {getUserDisplayName && step.userId && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <User className="w-4 h-4" />
+                          <span className="font-medium text-foreground">
+                            {getUserDisplayName(step.userId)}
+                          </span>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       Aguardando processamento
