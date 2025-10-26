@@ -48,7 +48,9 @@ export default function Algodoeira() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateBaleStatus }) => {
-      return apiRequest("PATCH", `/api/bales/${id}/status`, data);
+      // Encode ID para URL (IDs têm barras como S25/26-T2B-00001)
+      const encodedId = encodeURIComponent(id);
+      return apiRequest("PATCH", `/api/bales/${encodedId}/status`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bales"] });
