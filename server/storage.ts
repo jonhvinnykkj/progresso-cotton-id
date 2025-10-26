@@ -131,13 +131,47 @@ export class PostgresStorage implements IStorage {
 
   // Bale methods
   async getAllBales(): Promise<Bale[]> {
-    const result = await db.select().from(balesTable).orderBy(sql`${balesTable.updatedAt} DESC`);
-    return result;
+    try {
+      const result = await db.select().from(balesTable).orderBy(sql`${balesTable.updatedAt} DESC`);
+      return result;
+    } catch (error: any) {
+      // Se a coluna status_history não existir, retorna sem ela
+      if (error.code === '42703') {
+        const result = await db.select({
+          id: balesTable.id,
+          safra: balesTable.safra,
+          talhao: balesTable.talhao,
+          numero: balesTable.numero,
+          status: balesTable.status,
+          createdAt: balesTable.createdAt,
+          updatedAt: balesTable.updatedAt,
+        }).from(balesTable).orderBy(sql`${balesTable.updatedAt} DESC`);
+        return result.map(b => ({ ...b, statusHistory: null }));
+      }
+      throw error;
+    }
   }
 
   async getBale(id: string): Promise<Bale | undefined> {
-    const result = await db.select().from(balesTable).where(eq(balesTable.id, id)).limit(1);
-    return result[0];
+    try {
+      const result = await db.select().from(balesTable).where(eq(balesTable.id, id)).limit(1);
+      return result[0];
+    } catch (error: any) {
+      // Se a coluna status_history não existir, retorna sem ela
+      if (error.code === '42703') {
+        const result = await db.select({
+          id: balesTable.id,
+          safra: balesTable.safra,
+          talhao: balesTable.talhao,
+          numero: balesTable.numero,
+          status: balesTable.status,
+          createdAt: balesTable.createdAt,
+          updatedAt: balesTable.updatedAt,
+        }).from(balesTable).where(eq(balesTable.id, id)).limit(1);
+        return result[0] ? { ...result[0], statusHistory: null } : undefined;
+      }
+      throw error;
+    }
   }
 
   async getBaleByQRCode(qrCode: string): Promise<Bale | undefined> {
@@ -186,9 +220,26 @@ export class PostgresStorage implements IStorage {
       throw new Error("Apenas fardos no pátio podem ser beneficiados");
     }
 
+    // Update status history
+    let history: Array<{ status: BaleStatus; timestamp: string; userId: string }> = [];
+    if (bale.statusHistory) {
+      try {
+        history = JSON.parse(bale.statusHistory);
+      } catch (e) {
+        history = [];
+      }
+    }
+    
+    history.push({
+      status: newStatus,
+      timestamp: new Date().toISOString(),
+      userId,
+    });
+
     const now = new Date();
     const updates: Partial<Bale> = {
       status: newStatus,
+      statusHistory: JSON.stringify(history),
       updatedAt: now,
     };
 
@@ -250,6 +301,7 @@ export class PostgresStorage implements IStorage {
       statsMap[talhao] = {
         talhao,
         totalFardos,
+        total: totalFardos, // Adicionar para compatibilidade com frontend
         produtividade: Math.round(produtividade * 100) / 100,
         area,
         ultimoFardo: sortedBales[0] ? {

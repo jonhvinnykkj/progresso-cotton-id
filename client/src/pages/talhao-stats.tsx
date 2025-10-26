@@ -20,13 +20,39 @@ import {
   Activity,
   MapPin,
   Info,
+  Clock,
+  Filter,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from "recharts";
 import { Badge } from "@/components/ui/badge";
 import logoProgresso from "/favicon.png";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -58,6 +84,8 @@ export default function TalhaoStats() {
   const { logout, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTalhao, setSelectedTalhao] = useState<string | null>(null);
+  const [chartFilter, setChartFilter] = useState<"all" | "campo" | "patio" | "beneficiado">("all");
+  const [timeFilter, setTimeFilter] = useState<"7d" | "30d" | "all">("30d");
 
   const { data: talhaoStatsData, isLoading } = useQuery<Record<string, TalhaoStats>>({
     queryKey: ["/api/bales/stats-by-talhao"],
@@ -235,6 +263,22 @@ export default function TalhaoStats() {
       {/* Main Content */}
       <main className="mobile-content">
         <div className="container mx-auto px-4 py-6 max-w-7xl space-y-5">
+          {/* Card de Produtividade - DESTAQUE */}
+          <Card className="bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg border-0">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-2">
+                <p className="text-sm font-medium text-emerald-50">Produtividade Média Total</p>
+                <div className="flex items-baseline justify-center gap-2">
+                  <p className="text-5xl sm:text-6xl font-bold">{avgArrobasPorHectare}</p>
+                  <p className="text-2xl font-semibold text-emerald-50">@/ha</p>
+                </div>
+                <p className="text-sm text-emerald-50">
+                  {totalHectares} ha • {avgFardosPorHectare} fardos/ha
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* KPIs Cards - Métricas Principais */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card className="shadow-sm">
@@ -332,9 +376,10 @@ export default function TalhaoStats() {
 
           {/* Tabs para diferentes visões */}
           <Tabs defaultValue="talhao" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="talhao">Por Talhão</TabsTrigger>
               <TabsTrigger value="safra">Por Safra</TabsTrigger>
+              <TabsTrigger value="graficos">Gráficos</TabsTrigger>
               <TabsTrigger value="mapa">Mapa</TabsTrigger>
             </TabsList>
 
@@ -395,9 +440,12 @@ export default function TalhaoStats() {
                 
                 // Calcular produtividade do talhão
                 const talhaoInfo = getTalhaoInfo(stat.talhao);
-                const produtividade = talhaoInfo 
-                  ? (stat.total / parseFloat(talhaoInfo.hectares)).toFixed(2)
-                  : '0.00';
+                const produtividade = (() => {
+                  if (!talhaoInfo || !talhaoInfo.hectares) return '0.00';
+                  const hectares = parseFloat(talhaoInfo.hectares);
+                  if (isNaN(hectares) || hectares === 0) return '0.00';
+                  return (stat.total / hectares).toFixed(2);
+                })();
 
                 return (
                   <Card
@@ -581,6 +629,335 @@ export default function TalhaoStats() {
                   })}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Tab: Gráficos Interativos */}
+            <TabsContent value="graficos" className="space-y-6 mt-4">
+              {/* Filtros */}
+              <Card className="shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex flex-wrap gap-4 items-center">
+                    <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Filtros:</span>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant={timeFilter === "7d" ? "default" : "outline"}
+                        onClick={() => setTimeFilter("7d")}
+                      >
+                        7 dias
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={timeFilter === "30d" ? "default" : "outline"}
+                        onClick={() => setTimeFilter("30d")}
+                      >
+                        30 dias
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={timeFilter === "all" ? "default" : "outline"}
+                        onClick={() => setTimeFilter("all")}
+                      >
+                        Todos
+                      </Button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant={chartFilter === "all" ? "default" : "outline"}
+                        onClick={() => setChartFilter("all")}
+                      >
+                        Todos Status
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={chartFilter === "campo" ? "default" : "outline"}
+                        onClick={() => setChartFilter("campo")}
+                        className={chartFilter === "campo" ? "bg-bale-campo hover:bg-bale-campo/90" : ""}
+                      >
+                        Campo
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={chartFilter === "patio" ? "default" : "outline"}
+                        onClick={() => setChartFilter("patio")}
+                        className={chartFilter === "patio" ? "bg-bale-patio hover:bg-bale-patio/90" : ""}
+                      >
+                        Pátio
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={chartFilter === "beneficiado" ? "default" : "outline"}
+                        onClick={() => setChartFilter("beneficiado")}
+                        className={chartFilter === "beneficiado" ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90" : ""}
+                      >
+                        Beneficiado
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gráfico de Produção por Talhão */}
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Produção por Talhão
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={talhaoStats.map(stat => ({
+                        talhao: stat.talhao,
+                        campo: chartFilter === "all" || chartFilter === "campo" ? stat.campo : 0,
+                        patio: chartFilter === "all" || chartFilter === "patio" ? stat.patio : 0,
+                        beneficiado: chartFilter === "all" || chartFilter === "beneficiado" ? stat.beneficiado : 0,
+                        total: stat.total,
+                      }))}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="talhao" />
+                      <YAxis />
+                      <RechartsTooltip />
+                      <Legend />
+                      {(chartFilter === "all" || chartFilter === "campo") && (
+                        <Bar dataKey="campo" fill="#22c55e" name="Campo" />
+                      )}
+                      {(chartFilter === "all" || chartFilter === "patio") && (
+                        <Bar dataKey="patio" fill="#f59e0b" name="Pátio" />
+                      )}
+                      {(chartFilter === "all" || chartFilter === "beneficiado") && (
+                        <Bar dataKey="beneficiado" fill="#3b82f6" name="Beneficiado" />
+                      )}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Grid com 2 gráficos */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Gráfico de Produtividade em Arrobas (@) por Talhão */}
+                <Card className="shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Produtividade em Arrobas (@/ha)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        data={talhaoStats
+                          .map(stat => {
+                            const talhaoInfo = TALHOES_INFO.find(t => t.id === stat.talhao);
+                            const hectares = talhaoInfo ? parseFloat(talhaoInfo.hectares.replace(",", ".")) : 0;
+                            const fardosPorHectare = hectares > 0 ? stat.total / hectares : 0;
+                            const arrobasPorHectare = fardosPorHectare * 66.67;
+                            
+                            return {
+                              talhao: stat.talhao,
+                              arrobas: arrobasPorHectare,
+                              fardos: stat.total,
+                              hectares: hectares,
+                            };
+                          })
+                          .sort((a, b) => b.arrobas - a.arrobas)
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="talhao" />
+                        <YAxis />
+                        <RechartsTooltip 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-white p-3 border rounded-lg shadow-lg">
+                                  <p className="font-semibold">Talhão {data.talhao}</p>
+                                  <p className="text-sm text-emerald-600 font-medium">
+                                    {data.arrobas.toFixed(2)} @/ha
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {data.fardos} fardos • {data.hectares} ha
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar dataKey="arrobas" fill="#10b981" name="@/ha" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Gráfico de Produtividade em Fardos por Talhão */}
+                <Card className="shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="w-5 h-5" />
+                      Produtividade em Fardos (f/ha)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        data={talhaoStats
+                          .map(stat => {
+                            const talhaoInfo = TALHOES_INFO.find(t => t.id === stat.talhao);
+                            const hectares = talhaoInfo ? parseFloat(talhaoInfo.hectares.replace(",", ".")) : 0;
+                            const fardosPorHectare = hectares > 0 ? stat.total / hectares : 0;
+                            
+                            return {
+                              talhao: stat.talhao,
+                              fardosPorHa: fardosPorHectare,
+                              fardos: stat.total,
+                              hectares: hectares,
+                            };
+                          })
+                          .sort((a, b) => b.fardosPorHa - a.fardosPorHa)
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="talhao" />
+                        <YAxis />
+                        <RechartsTooltip 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-white p-3 border rounded-lg shadow-lg">
+                                  <p className="font-semibold">Talhão {data.talhao}</p>
+                                  <p className="text-sm text-blue-600 font-medium">
+                                    {data.fardosPorHa.toFixed(3)} f/ha
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {data.fardos} fardos • {data.hectares} ha
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar dataKey="fardosPorHa" fill="#3b82f6" name="fardos/ha" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Gráfico de Tempo Médio de Beneficiamento */}
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Tempo Médio: Pátio → Beneficiado
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const talhaoTempos: Record<string, { total: number; count: number; tempos: number[] }> = {};
+                    
+                    allBales
+                      .filter(b => b.status === "beneficiado" && b.statusHistory)
+                      .forEach(bale => {
+                        try {
+                          const history = JSON.parse(bale.statusHistory!);
+                          const patioEvent = history.find((h: any) => h.status === "patio");
+                          const beneficiadoEvent = history.find((h: any) => h.status === "beneficiado");
+                          
+                          if (patioEvent && beneficiadoEvent) {
+                            const patioTime = new Date(patioEvent.timestamp).getTime();
+                            const beneficiadoTime = new Date(beneficiadoEvent.timestamp).getTime();
+                            const hoursToProcess = (beneficiadoTime - patioTime) / (1000 * 60 * 60);
+                            
+                            if (!talhaoTempos[bale.talhao]) {
+                              talhaoTempos[bale.talhao] = { total: 0, count: 0, tempos: [] };
+                            }
+                            talhaoTempos[bale.talhao].total += hoursToProcess;
+                            talhaoTempos[bale.talhao].count += 1;
+                            talhaoTempos[bale.talhao].tempos.push(hoursToProcess);
+                          }
+                        } catch (e) {
+                          // Ignora erros de parsing
+                        }
+                      });
+                    
+                    const chartData = Object.entries(talhaoTempos)
+                      .map(([talhao, data]) => ({
+                        talhao,
+                        tempoMedio: data.total / data.count,
+                        quantidade: data.count,
+                        tempoMin: Math.min(...data.tempos),
+                        tempoMax: Math.max(...data.tempos),
+                      }))
+                      .sort((a, b) => a.talhao.localeCompare(b.talhao));
+                    
+                    if (chartData.length === 0) {
+                      return (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                          <p>Nenhum fardo beneficiado ainda</p>
+                          <p className="text-xs mt-1">Os dados aparecerão quando fardos forem movidos do pátio para beneficiado</p>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="talhao" />
+                          <YAxis label={{ value: 'Horas', angle: -90, position: 'insideLeft' }} />
+                          <RechartsTooltip 
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0].payload;
+                                const dias = Math.floor(data.tempoMedio / 24);
+                                const horas = Math.floor(data.tempoMedio % 24);
+                                const minDias = Math.floor(data.tempoMin / 24);
+                                const minHoras = Math.floor(data.tempoMin % 24);
+                                const maxDias = Math.floor(data.tempoMax / 24);
+                                const maxHoras = Math.floor(data.tempoMax % 24);
+                                
+                                return (
+                                  <div className="bg-white p-3 border rounded-lg shadow-lg">
+                                    <p className="font-semibold">Talhão {data.talhao}</p>
+                                    <p className="text-sm text-orange-600 font-medium">
+                                      Média: {dias > 0 ? `${dias}d ` : ''}{horas}h
+                                    </p>
+                                    <p className="text-xs text-green-600">
+                                      Mín: {minDias > 0 ? `${minDias}d ` : ''}{minHoras}h
+                                    </p>
+                                    <p className="text-xs text-red-600">
+                                      Máx: {maxDias > 0 ? `${maxDias}d ` : ''}{maxHoras}h
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {data.quantidade} fardo{data.quantidade !== 1 ? 's' : ''} processado{data.quantidade !== 1 ? 's' : ''}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <Legend />
+                          <Bar dataKey="tempoMedio" fill="#f59e0b" name="Tempo Médio (horas)" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Tab: Mapa */}

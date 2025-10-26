@@ -5,9 +5,13 @@ CREATE TABLE IF NOT EXISTS bales (
   talhao TEXT NOT NULL,
   safra TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'campo',
+  status_history TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Add status_history column if it doesn't exist (migration)
+ALTER TABLE bales ADD COLUMN IF NOT EXISTS status_history TEXT;
 
 -- Create talhao_counters table
 CREATE TABLE IF NOT EXISTS talhao_counters (

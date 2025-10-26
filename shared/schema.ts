@@ -24,6 +24,7 @@ export const bales = pgTable("bales", {
   talhao: text("talhao").notNull(),
   numero: integer("numero").notNull(), // Sequential number: 1, 2, 3...
   status: text("status").notNull().$type<BaleStatus>().default("campo"),
+  statusHistory: text("status_history"), // JSON array of status changes with timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

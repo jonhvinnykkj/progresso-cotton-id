@@ -69,6 +69,13 @@ export default function Dashboard() {
     return baleDate.getTime() === today.getTime();
   }).length;
 
+  // Calcular produtividade total em @/ha
+  // Área total dos 9 talhões de algodão: 4938 ha
+  const areaTotalHectares = 4938;
+  const totalFardos = stats?.total || 0;
+  const fardosPorHectare = areaTotalHectares > 0 ? totalFardos / areaTotalHectares : 0;
+  const arrobasPorHectare = fardosPorHectare * 66.67; // 1 fardo = 2000kg = 66.67@
+
   const progressPercent = stats?.total ? ((stats.beneficiado / stats.total) * 100).toFixed(1) : "0";
 
 
