@@ -167,28 +167,28 @@ export default function Dashboard() {
                 </>
               )}
               {(selectedRole === "admin" || selectedRole === "superadmin") && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setLocation("/talhao-stats")}
-                    data-testid="button-talhao-stats"
-                    className="h-9 w-9 p-0 flex items-center justify-center"
-                    title="Dashboard por Talhão"
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setLocation("/settings")}
-                    data-testid="button-settings"
-                    className="h-9 w-9 p-0"
-                    title="Configurações"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                </>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/talhao-stats")}
+                  data-testid="button-talhao-stats"
+                  className="h-9 w-9 p-0 flex items-center justify-center"
+                  title="Dashboard por Talhão"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                </Button>
+              )}
+              {selectedRole === "superadmin" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/settings")}
+                  data-testid="button-settings"
+                  className="h-9 w-9 p-0"
+                  title="Configurações"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
               )}
               <ReportsDialog />
               <Button

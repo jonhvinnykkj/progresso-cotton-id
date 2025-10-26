@@ -63,11 +63,11 @@ function Router() {
       </Route>
       
       <Route path="/settings">
-        <ProtectedRoute component={SettingsPage} allowedRoles={["admin"]} />
+        <ProtectedRoute component={SettingsPage} allowedRoles={["superadmin"]} />
       </Route>
       
       <Route path="/talhao-stats">
-        <ProtectedRoute component={TalhaoStats} allowedRoles={["admin"]} />
+        <ProtectedRoute component={TalhaoStats} allowedRoles={["admin", "superadmin"]} />
       </Route>
       
       <Route path="/users">
