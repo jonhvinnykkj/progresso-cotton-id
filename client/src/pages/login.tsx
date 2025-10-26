@@ -43,6 +43,12 @@ const roles: {
   description: string;
 }[] = [
   {
+    value: "superadmin",
+    label: "Super Administrador",
+    icon: ShieldCheck,
+    description: "Acesso total + gestão de usuários",
+  },
+  {
     value: "admin",
     label: "Administrador",
     icon: ShieldCheck,
@@ -78,6 +84,7 @@ export default function Login() {
   useEffect(() => {
     if (isAuthenticated && role) {
       switch (role) {
+        case "superadmin":
         case "admin":
           setLocation("/dashboard");
           break;
@@ -90,6 +97,8 @@ export default function Login() {
         case "algodoeira":
           setLocation("/algodoeira");
           break;
+        default:
+          setLocation("/dashboard");
       }
     }
   }, [isAuthenticated, role, setLocation]);
@@ -127,11 +136,12 @@ export default function Login() {
 
       toast({
         title: "Login realizado com sucesso",
-        description: `Bem-vindo, ${roles.find((r) => r.value === user.role)?.label}!`,
+        description: `Bem-vindo, ${user.displayName || roles.find((r) => r.value === user.role)?.label}!`,
       });
 
       // Redirect based on role from server
       switch (user.role) {
+        case "superadmin":
         case "admin":
           setLocation("/dashboard");
           break;
@@ -144,6 +154,8 @@ export default function Login() {
         case "algodoeira":
           setLocation("/algodoeira");
           break;
+        default:
+          setLocation("/dashboard");
       }
     } catch (error) {
       toast({
