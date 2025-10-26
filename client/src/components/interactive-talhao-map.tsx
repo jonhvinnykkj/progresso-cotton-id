@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap, Marker } from 'react-leaflet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -276,6 +276,32 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
       `,
       iconSize: [30, 30],
       iconAnchor: [15, 15],
+    });
+  };
+  
+  // Criar ícone de label para o nome do talhão
+  const createLabelIcon = (nome: string) => {
+    return L.divIcon({
+      className: 'custom-label-icon',
+      html: `
+        <div style="
+          background: rgba(0, 0, 0, 0.75);
+          color: white;
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-weight: bold;
+          font-size: 14px;
+          border: 2px solid white;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+          white-space: nowrap;
+          text-align: center;
+          pointer-events: none;
+        ">
+          ${nome}
+        </div>
+      `,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
     });
   };
   
@@ -755,6 +781,20 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
                 );
               })}
               
+              {/* Labels com numeração dos talhões */}
+              {showLabels && filteredCottonFeatures.features.map((feature: any) => {
+                const center = getPolygonCenter(feature.geometry.coordinates);
+                const nome = feature.properties.nome;
+                
+                return (
+                  <Marker
+                    key={`label-${nome}`}
+                    position={center}
+                    icon={createLabelIcon(nome)}
+                  />
+                );
+              })}
+              
               <ZoomToTalhao talhao={zoomToTalhao} />
             </MapContainer>
           </div>
@@ -882,6 +922,12 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
         }
         .leaflet-tooltip-right:before {
           border-right-color: #16a34a !important;
+        }
+        .custom-label-icon {
+          pointer-events: none !important;
+        }
+        .custom-label-icon > div {
+          transform: translate(-50%, -50%);
         }
       `}</style>
     </Card>
