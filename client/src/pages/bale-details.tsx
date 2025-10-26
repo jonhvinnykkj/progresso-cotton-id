@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { BaleTimeline } from "@/components/bale-timeline";
 import type { Bale } from "@shared/schema";
-import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2 } from "lucide-react";
+import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -147,6 +147,94 @@ export default function BaleDetails() {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* User Tracking Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Rastreamento de Usuários
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Criado por */}
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <div className="mt-0.5">
+                <User className="w-4 h-4 text-green-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">Criado por</p>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {bale.createdBy ? (
+                    <span className="font-mono">{bale.createdBy}</span>
+                  ) : (
+                    <span className="italic">Informação não disponível</span>
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {format(new Date(bale.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                </p>
+              </div>
+            </div>
+
+            {/* Transportado por */}
+            {bale.status !== "campo" && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="mt-0.5">
+                  <User className="w-4 h-4 text-yellow-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">Transportado por</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {bale.transportedBy ? (
+                      <span className="font-mono">{bale.transportedBy}</span>
+                    ) : (
+                      <span className="italic">Aguardando processamento</span>
+                    )}
+                  </p>
+                  {bale.transportedAt && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(new Date(bale.transportedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Processado por */}
+            {bale.status === "beneficiado" && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="mt-0.5">
+                  <User className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">Processado por</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {bale.processedBy ? (
+                      <span className="font-mono">{bale.processedBy}</span>
+                    ) : (
+                      <span className="italic">Aguardando processamento</span>
+                    )}
+                  </p>
+                  {bale.processedAt && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(new Date(bale.processedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Informação complementar */}
+            {bale.updatedBy && (
+              <div className="pt-3 border-t">
+                <p className="text-xs text-muted-foreground">
+                  Última atualização por: <span className="font-mono">{bale.updatedBy}</span>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
