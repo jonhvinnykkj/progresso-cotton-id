@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "vite",
-    "dev:server": "tsx server/index.ts",
-    "build": "vite build",
+    "dev:server": "tsx watch --clear-screen=false --env-file=.env server/index.ts",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "tsc --project tsconfig.server.json",
+    "start": "node dist/index.js",
     "preview": "vite preview",
     "check": "tsc",
     "db:push": "drizzle-kit push",
