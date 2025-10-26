@@ -81,12 +81,9 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   const tableData = filteredBales.map(bale => [
     bale.numero,
     bale.talhao,
-    bale.qrCode,
+    bale.id, // ID é o QR Code
     bale.status,
     format(bale.createdAt, "dd/MM/yyyy", { locale: ptBR }),
-    bale.campoTimestamp ? format(bale.campoTimestamp, "dd/MM/yyyy", { locale: ptBR }) : "-",
-    bale.patioTimestamp ? format(bale.patioTimestamp, "dd/MM/yyyy", { locale: ptBR }) : "-",
-    bale.beneficiadoTimestamp ? format(bale.beneficiadoTimestamp, "dd/MM/yyyy", { locale: ptBR }) : "-",
   ]);
   
   autoTable(doc, {
@@ -137,12 +134,11 @@ export function generateExcel(bales: Bale[], filters: ReportFilters): Buffer {
   const balesData = filteredBales.map(bale => ({
     "Número": bale.numero,
     "Talhão": bale.talhao,
-    "QR Code": bale.qrCode,
+    "Safra": bale.safra,
+    "ID/QR Code": bale.id,
     "Status": bale.status,
     "Data Cadastro": format(bale.createdAt, "dd/MM/yyyy HH:mm", { locale: ptBR }),
-    "Campo - Data": bale.campoTimestamp ? format(bale.campoTimestamp, "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
-    "Pátio - Data": bale.patioTimestamp ? format(bale.patioTimestamp, "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
-    "Beneficiado - Data": bale.beneficiadoTimestamp ? format(bale.beneficiadoTimestamp, "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
+    "Última Atualização": format(bale.updatedAt, "dd/MM/yyyy HH:mm", { locale: ptBR }),
   }));
   
   const balesSheet = XLSX.utils.json_to_sheet(balesData);

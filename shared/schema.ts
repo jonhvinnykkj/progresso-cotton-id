@@ -17,26 +17,15 @@ export const users = pgTable("users", {
   role: text("role").notNull().$type<UserRole>(),
 });
 
-// Bales table (SEM campos de GPS)
+// Bales table (ID é o QR Code, sem campos extras)
 export const bales = pgTable("bales", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  qrCode: text("qr_code").notNull().unique(),
-  safra: text("safra"),
+  id: text("id").primaryKey(), // Format: S25/26-T2B-00001
+  safra: text("safra").notNull(),
   talhao: text("talhao").notNull(),
-  numero: text("numero").notNull(), // Formato: 00001, 00002, etc
+  numero: integer("numero").notNull(), // Sequential number: 1, 2, 3...
   status: text("status").notNull().$type<BaleStatus>().default("campo"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  
-  // Timestamps de cada fase (sem GPS)
-  campoTimestamp: timestamp("campo_timestamp"),
-  campoUserId: varchar("campo_user_id"),
-  
-  patioTimestamp: timestamp("patio_timestamp"),
-  patioUserId: varchar("patio_user_id"),
-  
-  beneficiadoTimestamp: timestamp("beneficiado_timestamp"),
-  beneficiadoUserId: varchar("beneficiado_user_id"),
 });
 
 // Contador de numeração por safra + talhão
@@ -89,7 +78,7 @@ export const createBaleSchema = z.object({
 });
 
 export const insertBaleSchema = createInsertSchema(bales).pick({
-  qrCode: true,
+  id: true,
   safra: true,
   talhao: true,
   numero: true,
@@ -132,5 +121,5 @@ export const updateDefaultSafraSchema = z.object({
 export type InsertSetting = z.infer<typeof insertSettingSchema>;
 export type Setting = typeof settings.$inferSelect;
 export type UpdateDefaultSafra = z.infer<typeof updateDefaultSafraSchema>;
-// Talh�o info type
+// Talh�o info type
 export type TalhaoInfo = typeof talhoesInfo.$inferSelect;

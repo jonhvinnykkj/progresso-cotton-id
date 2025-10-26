@@ -58,30 +58,6 @@ export interface IStorage {
 }
 
 export class PostgresStorage implements IStorage {
-  constructor() {
-    this.seedDefaultUsers();
-  }
-
-  private async seedDefaultUsers() {
-    const defaultUsers = [
-      { username: "admin", password: "admin123", role: "admin" as const },
-      { username: "campo", password: "campo123", role: "campo" as const },
-      { username: "transporte", password: "trans123", role: "transporte" as const },
-      { username: "algodoeira", password: "algo123", role: "algodoeira" as const },
-    ];
-
-    for (const user of defaultUsers) {
-      try {
-        const existing = await this.getUserByUsername(user.username);
-        if (!existing) {
-          await this.createUser(user);
-        }
-      } catch (error) {
-        console.error(`Error seeding user ${user.username}:`, error);
-      }
-    }
-  }
-
   // User methods
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
@@ -165,7 +141,8 @@ export class PostgresStorage implements IStorage {
   }
 
   async getBaleByQRCode(qrCode: string): Promise<Bale | undefined> {
-    const result = await db.select().from(balesTable).where(eq(balesTable.qrCode, qrCode)).limit(1);
+    // QR Code é o ID do fardo
+    const result = await db.select().from(balesTable).where(eq(balesTable.id, qrCode)).limit(1);
     return result[0];
   }
 
@@ -176,20 +153,17 @@ export class PostgresStorage implements IStorage {
     // Gerar números sequenciais (zera a cada nova safra)
     const numbers = await this.getNextBaleNumbers(safra, talhao, quantidade);
 
-    // Criar fardos em lote com novo formato de QR Code: S{safra}-T{talhao}-{numero}
+    // Criar fardos em lote com novo formato de ID: S{safra}-T{talhao}-{numero}
     const balesData = numbers.map(numero => {
-      const qrCode = `S${safra}-T${talhao}-${numero}`; // Ex: S2526-T9C-00001
+      const id = `S${safra}-T${talhao}-${numero}`; // Ex: S25/26-T2B-00001
       return {
-        id: qrCode, // ID = QR Code
-        qrCode: qrCode,
+        id: id, // ID serve como QR Code
         safra: safra,
         talhao,
-        numero,
+        numero: parseInt(numero),
         status: "campo" as BaleStatus,
         createdAt: now,
         updatedAt: now,
-        campoTimestamp: now,
-        campoUserId: userId,
       };
     });
 
@@ -217,14 +191,6 @@ export class PostgresStorage implements IStorage {
       status: newStatus,
       updatedAt: now,
     };
-
-    if (newStatus === "patio") {
-      updates.patioTimestamp = now;
-      updates.patioUserId = userId;
-    } else if (newStatus === "beneficiado") {
-      updates.beneficiadoTimestamp = now;
-      updates.beneficiadoUserId = userId;
-    }
 
     const result = await db.update(balesTable).set(updates).where(eq(balesTable.id, id)).returning();
     return result[0];
