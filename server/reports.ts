@@ -75,72 +75,93 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   const verde = [34, 197, 94];
   const amarelo = [234, 179, 8];
   const amareloClaro = [253, 224, 71];
-  const cinza = [107, 114, 128];
+  const cinza = [75, 85, 99];
   const cinzaClaro = [249, 250, 251];
   const branco = [255, 255, 255];
+  const azul = [59, 130, 246];
   
-  // ==================== CABEÇALHO ====================
-  // Barra amarela superior
+  // Calcular estatisticas avancadas
+  const talhaoStats = new Map<string, { total: number; campo: number; patio: number; beneficiado: number }>();
+  const safraStats = new Map<string, number>();
+  const dailyStats = new Map<string, number>();
+  
+  filteredBales.forEach(bale => {
+    // Por talhao
+    const talhao = bale.talhao || "Sem Talhao";
+    if (!talhaoStats.has(talhao)) {
+      talhaoStats.set(talhao, { total: 0, campo: 0, patio: 0, beneficiado: 0 });
+    }
+    const tStat = talhaoStats.get(talhao)!;
+    tStat.total++;
+    if (bale.status === 'campo') tStat.campo++;
+    else if (bale.status === 'patio') tStat.patio++;
+    else if (bale.status === 'beneficiado') tStat.beneficiado++;
+    
+    // Por safra
+    if (bale.safra) {
+      safraStats.set(bale.safra, (safraStats.get(bale.safra) || 0) + 1);
+    }
+    
+    // Por dia
+    const day = format(bale.createdAt, "dd/MM", { locale: ptBR });
+    dailyStats.set(day, (dailyStats.get(day) || 0) + 1);
+  });
+  
+  // ==================== CABECALHO ====================
   doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
-  doc.rect(0, 0, pageWidth, 5, 'F');
+  doc.rect(0, 0, pageWidth, 4, 'F');
   
-  // Fundo verde do cabeçalho
   doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-  doc.rect(0, 5, pageWidth, 25, 'F');
+  doc.rect(0, 4, pageWidth, 20, 'F');
   
-  // Título principal
   doc.setTextColor(branco[0], branco[1], branco[2]);
-  doc.setFontSize(22);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text("GRUPO PROGRESSO", margin, 17);
+  doc.text("GRUPO PROGRESSO", margin, 14);
   
-  // Subtítulo
-  doc.setFontSize(13);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text("Relatório de Rastreabilidade de Algodão", margin, 25);
+  doc.text("Relatorio de Rastreabilidade de Algodao", margin, 20);
   
-  // Data de geração (direita)
-  doc.setFontSize(9);
-  const dataGeracao = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
-  doc.text(`Gerado em: ${dataGeracao}`, pageWidth - margin, 25, { align: 'right' });
+  doc.setFontSize(8);
+  const dataGeracao = format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR });
+  doc.text(`Gerado em: ${dataGeracao}`, pageWidth - margin, 20, { align: 'right' });
   
-  let currentY = 38;
+  let currentY = 30;
   
-  // ==================== INFORMAÇÕES DE FILTRO ====================
-  if (filters.startDate || filters.endDate || (filters.status && filters.status.length > 0) || (filters.talhao && filters.talhao.length > 0)) {
-    doc.setFillColor(cinzaClaro[0], cinzaClaro[1], cinzaClaro[2]);
-    doc.roundedRect(margin, currentY, contentWidth, 10, 2, 2, 'F');
-    
-    doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    
-    let filterTexts = [];
-    
-    if (filters.startDate || filters.endDate) {
-      const periodo = `Período: ${filters.startDate ? format(new Date(filters.startDate), "dd/MM/yyyy", { locale: ptBR }) : "Início"} - ${filters.endDate ? format(new Date(filters.endDate), "dd/MM/yyyy", { locale: ptBR }) : "Hoje"}`;
-      filterTexts.push(periodo);
-    }
-    
-    if (filters.status && filters.status.length > 0) {
-      filterTexts.push(`Status: ${filters.status.join(", ")}`);
-    }
-    
-    if (filters.talhao && filters.talhao.length > 0) {
-      const talhoesText = filters.talhao.join(", ");
-      filterTexts.push(`Talhões: ${talhoesText.length > 30 ? talhoesText.substring(0, 27) + "..." : talhoesText}`);
-    }
-    
-    doc.text(`🔍 Filtros: ${filterTexts.join(" | ")}`, margin + 2, currentY + 6.5);
-    currentY += 15;
+  // ==================== RESUMO EXECUTIVO ====================
+  doc.setFillColor(cinzaClaro[0], cinzaClaro[1], cinzaClaro[2]);
+  doc.roundedRect(margin, currentY, contentWidth, 10, 2, 2, 'F');
+  
+  doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  
+  let resumoText = "RESUMO: ";
+  if (filters.startDate || filters.endDate) {
+    const inicio = filters.startDate ? format(new Date(filters.startDate), "dd/MM/yy", { locale: ptBR }) : "Inicio";
+    const fim = filters.endDate ? format(new Date(filters.endDate), "dd/MM/yy", { locale: ptBR }) : "Hoje";
+    resumoText += `Periodo: ${inicio} - ${fim} | `;
+  }
+  resumoText += `Total: ${stats.total} fardos`;
+  
+  if (filters.status && filters.status.length > 0) {
+    resumoText += ` | Status: ${filters.status.join(", ")}`;
+  }
+  if (filters.talhao && filters.talhao.length > 0) {
+    const talhoesText = filters.talhao.slice(0, 5).join(", ");
+    resumoText += ` | Talhoes: ${talhoesText}${filters.talhao.length > 5 ? '...' : ''}`;
   }
   
-  // ==================== CARDS DE ESTATÍSTICAS ====================
-  const cardWidth = (contentWidth - 9) / 4; // 4 cards com espaçamento
+  doc.text(resumoText, margin + 3, currentY + 6.5);
+  currentY += 15;
+  
+  // ==================== INDICADORES PRINCIPAIS ====================
+  const cardWidth = (contentWidth - 9) / 4;
   const cardHeight = 22;
   const cardSpacing = 3;
   
-  // Card 1 - Total (Verde Escuro com borda amarela)
+  // Card 1 - Total
   doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
   doc.roundedRect(margin, currentY, cardWidth, cardHeight, 3, 3, 'F');
   doc.setDrawColor(amarelo[0], amarelo[1], amarelo[2]);
@@ -148,9 +169,9 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   doc.roundedRect(margin, currentY, cardWidth, cardHeight, 3, 3, 'S');
   
   doc.setTextColor(amareloClaro[0], amareloClaro[1], amareloClaro[2]);
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text("📦 TOTAL DE FARDOS", margin + 2, currentY + 6);
+  doc.text("TOTAL FARDOS", margin + 2, currentY + 6);
   doc.setTextColor(branco[0], branco[1], branco[2]);
   doc.setFontSize(20);
   doc.text(stats.total.toString(), margin + 2, currentY + 16);
@@ -160,24 +181,32 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
   doc.roundedRect(card2X, currentY, cardWidth, cardHeight, 3, 3, 'F');
   doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text("🌾 CAMPO", card2X + 2, currentY + 6);
+  doc.text("CAMPO", card2X + cardWidth/2, currentY + 6, { align: 'center' });
   doc.setFontSize(20);
-  doc.text(stats.campo.toString(), card2X + 2, currentY + 16);
+  doc.text(stats.campo.toString(), card2X + cardWidth/2, currentY + 15, { align: 'center' });
+  const campoPercent = stats.total > 0 ? ((stats.campo / stats.total) * 100).toFixed(1) : "0.0";
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${campoPercent}%`, card2X + cardWidth/2, currentY + 20, { align: 'center' });
   
-  // Card 3 - Pátio (Verde Claro)
+  // Card 3 - Patio (Verde)
   const card3X = card2X + cardWidth + cardSpacing;
   doc.setFillColor(verde[0], verde[1], verde[2]);
   doc.roundedRect(card3X, currentY, cardWidth, cardHeight, 3, 3, 'F');
   doc.setTextColor(branco[0], branco[1], branco[2]);
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text("🏭 PÁTIO", card3X + 2, currentY + 6);
+  doc.text("PATIO", card3X + cardWidth/2, currentY + 6, { align: 'center' });
   doc.setFontSize(20);
-  doc.text(stats.patio.toString(), card3X + 2, currentY + 16);
+  doc.text(stats.patio.toString(), card3X + cardWidth/2, currentY + 15, { align: 'center' });
+  const patioPercent = stats.total > 0 ? ((stats.patio / stats.total) * 100).toFixed(1) : "0.0";
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${patioPercent}%`, card3X + cardWidth/2, currentY + 20, { align: 'center' });
   
-  // Card 4 - Beneficiado (Verde escuro com acento amarelo)
+  // Card 4 - Beneficiado (Verde Escuro com tarja amarela)
   const card4X = card3X + cardWidth + cardSpacing;
   doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
   doc.roundedRect(card4X, currentY, cardWidth, cardHeight, 3, 3, 'F');
@@ -185,174 +214,203 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   doc.roundedRect(card4X, currentY, cardWidth, 5, 3, 3, 'F');
   
   doc.setTextColor(branco[0], branco[1], branco[2]);
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text("✅ BENEFICIADO", card4X + 2, currentY + 11);
+  doc.text("BENEFICIADO", card4X + cardWidth/2, currentY + 11, { align: 'center' });
   doc.setFontSize(20);
-  doc.text(stats.beneficiado.toString(), card4X + 2, currentY + 19);
+  doc.text(stats.beneficiado.toString(), card4X + cardWidth/2, currentY + 18, { align: 'center' });
+  const beneficiadoPercent = stats.total > 0 ? ((stats.beneficiado / stats.total) * 100).toFixed(1) : "0.0";
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${beneficiadoPercent}%`, card4X + cardWidth/2, currentY + 20, { align: 'center' });
   
   currentY += cardHeight + 8;
   
-  // ==================== GRÁFICO DE DISTRIBUIÇÃO ====================
-  if (stats.total > 0) {
-    // Box do gráfico
-    const graphBoxHeight = 40;
-    doc.setFillColor(branco[0], branco[1], branco[2]);
-    doc.roundedRect(margin, currentY, contentWidth, graphBoxHeight, 3, 3, 'F');
-    doc.setDrawColor(cinza[0], cinza[1], cinza[2]);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(margin, currentY, contentWidth, graphBoxHeight, 3, 3, 'S');
+  // ==================== SECAO DE ANALISES (3 COLUNAS) ====================
+  const col1Width = contentWidth * 0.32;
+  const col2Width = contentWidth * 0.32;
+  const col3Width = contentWidth * 0.32;
+  const colGap = 6;
+  
+  // COLUNA 1 - Ranking de Talhoes (Verde)
+  doc.setFillColor(branco[0], branco[1], branco[2]);
+  doc.roundedRect(margin, currentY, col1Width, 50, 2, 2, 'F');
+  doc.setDrawColor(verde[0], verde[1], verde[2]);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin, currentY, col1Width, 50, 2, 2, 'S');
+  
+  // Titulo com fundo verde
+  doc.setFillColor(verde[0], verde[1], verde[2]);
+  doc.roundedRect(margin, currentY, col1Width, 8, 2, 2, 'F');
+  doc.setTextColor(branco[0], branco[1], branco[2]);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Top 8 Talhoes por Volume", margin + col1Width/2, currentY + 5.5, { align: 'center' });
+  
+  const topTalhoes = Array.from(talhaoStats.entries())
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 8);
+  
+  let talhaoY = currentY + 12;
+  topTalhoes.forEach(([talhao, stat], index) => {
+    const barWidth = col1Width - 12;
+    const completionRate = stat.total > 0 ? (stat.beneficiado / stat.total) : 0;
     
-    // Título do gráfico
-    doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-    doc.setFontSize(11);
+    // Nome e quantidade
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'bold');
-    doc.text("📊 Distribuição por Status", margin + 3, currentY + 7);
-    
-    // Gráfico de pizza simplificado (retângulos coloridos com percentuais)
-    const graphY = currentY + 12;
-    const graphWidth = contentWidth / 2 - 10;
-    const pieX = margin + 5;
-    
-    // Calcular percentuais
-    const campoPercent = ((stats.campo / stats.total) * 100).toFixed(1);
-    const patioPercent = ((stats.patio / stats.total) * 100).toFixed(1);
-    const beneficiadoPercent = ((stats.beneficiado / stats.total) * 100).toFixed(1);
-    
-    // Desenhar barras horizontais
-    const barHeight = 7;
-    const barSpacing = 2;
-    const maxBarWidth = graphWidth;
-    
-    // Barra Campo
-    const campoWidth = (stats.campo / stats.total) * maxBarWidth;
-    doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
-    doc.roundedRect(pieX, graphY, campoWidth > 0 ? campoWidth : 1, barHeight, 2, 2, 'F');
-    doc.setFontSize(8);
     doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Campo: ${stats.campo} (${campoPercent}%)`, pieX + 2, graphY + 5);
+    doc.text(`${index + 1}. ${talhao}`, margin + 3, talhaoY);
     
-    // Barra Pátio
-    const patioY = graphY + barHeight + barSpacing;
-    const patioWidth = (stats.patio / stats.total) * maxBarWidth;
-    doc.setFillColor(verde[0], verde[1], verde[2]);
-    doc.roundedRect(pieX, patioY, patioWidth > 0 ? patioWidth : 1, barHeight, 2, 2, 'F');
-    doc.setTextColor(branco[0], branco[1], branco[2]);
-    doc.text(`Pátio: ${stats.patio} (${patioPercent}%)`, pieX + 2, patioY + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(cinza[0], cinza[1], cinza[2]);
+    doc.text(`${stat.total} fardos`, margin + 32, talhaoY);
     
-    // Barra Beneficiado
-    const beneficiadoY = patioY + barHeight + barSpacing;
-    const beneficiadoWidth = (stats.beneficiado / stats.total) * maxBarWidth;
-    doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-    doc.roundedRect(pieX, beneficiadoY, beneficiadoWidth > 0 ? beneficiadoWidth : 1, barHeight, 2, 2, 'F');
-    doc.setTextColor(branco[0], branco[1], branco[2]);
-    doc.text(`Beneficiado: ${stats.beneficiado} (${beneficiadoPercent}%)`, pieX + 2, beneficiadoY + 5);
+    // Barra de progresso
+    const miniBarX = margin + 3;
+    const miniBarY = talhaoY + 1;
     
-    // Gráfico de pizza visual (lado direito)
-    const pieRadius = 15;
-    const pieCenterX = margin + contentWidth - 50;
-    const pieCenterY = currentY + 23;
+    doc.setFillColor(230, 230, 230);
+    doc.rect(miniBarX, miniBarY, barWidth, 2, 'F');
     
-    // Desenhar pizza
-    let startAngle = -90; // Começa no topo
-    
-    if (stats.campo > 0) {
-      const campoAngle = (stats.campo / stats.total) * 360;
-      doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
-      drawPieSlice(doc, pieCenterX, pieCenterY, pieRadius, startAngle, startAngle + campoAngle);
-      startAngle += campoAngle;
-    }
-    
-    if (stats.patio > 0) {
-      const patioAngle = (stats.patio / stats.total) * 360;
+    if (completionRate > 0) {
       doc.setFillColor(verde[0], verde[1], verde[2]);
-      drawPieSlice(doc, pieCenterX, pieCenterY, pieRadius, startAngle, startAngle + patioAngle);
-      startAngle += patioAngle;
+      doc.rect(miniBarX, miniBarY, barWidth * completionRate, 2, 'F');
     }
     
-    if (stats.beneficiado > 0) {
-      const beneficiadoAngle = (stats.beneficiado / stats.total) * 360;
-      doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-      drawPieSlice(doc, pieCenterX, pieCenterY, pieRadius, startAngle, startAngle + beneficiadoAngle);
-    }
+    // Percentual
+    doc.setFontSize(6);
+    doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+    doc.text(`${(completionRate * 100).toFixed(0)}%`, margin + col1Width - 10, talhaoY);
     
-    // Borda do círculo
-    doc.setDrawColor(branco[0], branco[1], branco[2]);
-    doc.setLineWidth(1);
-    doc.circle(pieCenterX, pieCenterY, pieRadius, 'S');
-    
-    currentY += graphBoxHeight + 8;
-  }
-  
-  // ==================== DADOS IMPORTANTES ====================
-  // Agrupar por talhão
-  const talhaoStats = new Map<string, { total: number; campo: number; patio: number; beneficiado: number }>();
-  
-  filteredBales.forEach(bale => {
-    const talhao = bale.talhao || "Sem Talhão";
-    if (!talhaoStats.has(talhao)) {
-      talhaoStats.set(talhao, { total: 0, campo: 0, patio: 0, beneficiado: 0 });
-    }
-    const stat = talhaoStats.get(talhao)!;
-    stat.total++;
-    if (bale.status === 'campo') stat.campo++;
-    else if (bale.status === 'patio') stat.patio++;
-    else if (bale.status === 'beneficiado') stat.beneficiado++;
+    talhaoY += 4.5;
   });
   
-  // Box de resumo por talhão
-  if (talhaoStats.size > 0 && talhaoStats.size <= 10) {
-    const boxHeight = Math.min(6 + (talhaoStats.size * 6), 35);
-    doc.setFillColor(cinzaClaro[0], cinzaClaro[1], cinzaClaro[2]);
-    doc.roundedRect(margin, currentY, contentWidth, boxHeight, 3, 3, 'F');
-    
-    doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text("📍 Resumo por Talhão", margin + 3, currentY + 5);
-    
-    let talhaoY = currentY + 11;
-    let col = 0;
-    const colWidth = contentWidth / 3;
-    
-    Array.from(talhaoStats.entries())
-      .sort((a, b) => b[1].total - a[1].total)
-      .slice(0, 9)
-      .forEach(([talhao, stat], index) => {
-        const x = margin + 3 + (col * colWidth);
-        
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-        doc.text(`${talhao}: ${stat.total}`, x, talhaoY);
-        
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(cinza[0], cinza[1], cinza[2]);
-        doc.text(`(C:${stat.campo} P:${stat.patio} B:${stat.beneficiado})`, x + 15, talhaoY);
-        
-        col++;
-        if (col >= 3) {
-          col = 0;
-          talhaoY += 6;
-        }
-      });
-    
-    currentY += boxHeight + 8;
+  if (talhaoStats.size === 0) {
+    doc.setFontSize(7);
+    doc.setTextColor(cinza[0], cinza[1], cinza[2]);
+    doc.text("Nenhum talhao encontrado", margin + 3, currentY + 25);
   }
   
-  // ==================== TABELA DE FARDOS ====================
-  doc.setFontSize(11);
+  // COLUNA 2 - Distribuicao por Safra (Amarelo)
+  const col2X = margin + col1Width + colGap;
+  doc.setFillColor(branco[0], branco[1], branco[2]);
+  doc.roundedRect(col2X, currentY, col2Width, 50, 2, 2, 'F');
+  doc.setDrawColor(amarelo[0], amarelo[1], amarelo[2]);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(col2X, currentY, col2Width, 50, 2, 2, 'S');
+  
+  // Titulo com fundo amarelo
+  doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
+  doc.roundedRect(col2X, currentY, col2Width, 8, 2, 2, 'F');
+  doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Distribuicao por Safra", col2X + col2Width/2, currentY + 5.5, { align: 'center' });
+  
+  const safraArray = Array.from(safraStats.entries())
+    .sort((a, b) => b[1] - a[1]);
+  
+  if (safraArray.length > 0) {
+    let safraY = currentY + 13;
+    const maxSafraCount = Math.max(...safraArray.map(s => s[1]));
+    const chartHeight = 35;
+    const barWidth = (col2Width - 10) / safraArray.length - 2;
+    
+    safraArray.forEach(([safra, count], index) => {
+      const barHeight = (count / maxSafraCount) * chartHeight;
+      const barX = col2X + 5 + (index * (barWidth + 2));
+      const barY = currentY + 45 - barHeight;
+      
+      // Barra (Amarelo)
+      doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
+      doc.roundedRect(barX, barY, barWidth, barHeight, 1, 1, 'F');
+      
+      // Valor no topo
+      doc.setFontSize(6);
+      doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+      doc.setFont('helvetica', 'bold');
+      doc.text(count.toString(), barX + barWidth/2, barY - 1, { align: 'center' });
+      
+      // Label
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'normal');
+      doc.text(safra, barX + barWidth/2, currentY + 48, { align: 'center' });
+    });
+  } else {
+    doc.setFontSize(7);
+    doc.setTextColor(cinza[0], cinza[1], cinza[2]);
+    doc.text("Nenhuma safra registrada", col2X + 3, currentY + 25);
+  }
+  
+  // COLUNA 3 - Evolucao Diaria (Verde Escuro)
+  const col3X = col2X + col2Width + colGap;
+  doc.setFillColor(branco[0], branco[1], branco[2]);
+  doc.roundedRect(col3X, currentY, col3Width, 50, 2, 2, 'F');
+  doc.setDrawColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(col3X, currentY, col3Width, 50, 2, 2, 'S');
+  
+  // Titulo com fundo verde escuro
+  doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+  doc.roundedRect(col3X, currentY, col3Width, 8, 2, 2, 'F');
+  doc.setTextColor(amareloClaro[0], amareloClaro[1], amareloClaro[2]);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Cadastros Recentes", col3X + col3Width/2, currentY + 5.5, { align: 'center' });
+  
+  const dailyArray = Array.from(dailyStats.entries())
+    .sort((a, b) => {
+      const dateA = a[0].split('/').reverse().join('');
+      const dateB = b[0].split('/').reverse().join('');
+      return dateB.localeCompare(dateA);
+    })
+    .slice(0, 7);
+  
+  if (dailyArray.length > 0) {
+    let dailyY = currentY + 13;
+    const maxDaily = Math.max(...dailyArray.map(d => d[1]));
+    
+    dailyArray.forEach(([day, count]) => {
+      const barWidth = (count / maxDaily) * (col3Width - 40);
+      
+      // Data
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
+      doc.text(day, col3X + 3, dailyY);
+      
+      // Barra (Verde)
+      doc.setFillColor(verde[0], verde[1], verde[2]);
+      doc.roundedRect(col3X + 18, dailyY - 3, barWidth > 2 ? barWidth : 2, 4, 1, 1, 'F');
+      
+      // Quantidade
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(cinza[0], cinza[1], cinza[2]);
+      doc.text(count.toString(), col3X + 20 + barWidth, dailyY);
+      
+      dailyY += 5;
+    });
+  } else {
+    doc.setFontSize(7);
+    doc.setTextColor(cinza[0], cinza[1], cinza[2]);
+    doc.text("Sem dados recentes", col3X + 3, currentY + 25);
+  }
+  
+  currentY += 58;
+  
+  // ==================== TABELA DETALHADA ====================
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-  doc.text("📋 Detalhamento dos Fardos", margin, currentY);
+  doc.text("Detalhamento dos Fardos", margin, currentY);
   currentY += 2;
   
-  const tableData = filteredBales.slice(0, 50).map(bale => [
+  const tableData = filteredBales.slice(0, 100).map(bale => [
     bale.numero?.toString() || "-",
     bale.talhao || "-",
-    bale.id.substring(0, 25) + "...",
+    bale.id.substring(0, 30) + "...",
     bale.status,
     bale.safra || "-",
     format(bale.createdAt, "dd/MM/yy", { locale: ptBR }),
@@ -360,29 +418,29 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   
   autoTable(doc, {
     startY: currentY,
-    head: [["Nº", "Talhão", "QR Code", "Status", "Safra", "Cadastro"]],
+    head: [["No", "Talhao", "QR Code", "Status", "Safra", "Data"]],
     body: tableData,
     theme: "grid",
     headStyles: { 
       fillColor: [verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]],
       textColor: [amareloClaro[0], amareloClaro[1], amareloClaro[2]],
       fontStyle: 'bold',
-      fontSize: 9,
+      fontSize: 8,
       halign: 'center',
     },
     styles: { 
-      fontSize: 8,
-      cellPadding: 2.5,
-      lineColor: [verde[0], verde[1], verde[2]],
-      lineWidth: 0.2,
+      fontSize: 7,
+      cellPadding: 2,
+      lineColor: [200, 200, 200],
+      lineWidth: 0.1,
     },
     columnStyles: {
-      0: { cellWidth: 18, halign: 'center', fontStyle: 'bold' },
+      0: { cellWidth: 15, halign: 'center', fontStyle: 'bold' },
       1: { cellWidth: 22, halign: 'center' },
-      2: { cellWidth: 95 },
-      3: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
-      4: { cellWidth: 20, halign: 'center' },
-      5: { cellWidth: 24, halign: 'center' },
+      2: { cellWidth: 105 },
+      3: { cellWidth: 25, halign: 'center', fontStyle: 'bold' },
+      4: { cellWidth: 18, halign: 'center' },
+      5: { cellWidth: 20, halign: 'center' },
     },
     alternateRowStyles: {
       fillColor: [cinzaClaro[0], cinzaClaro[1], cinzaClaro[2]],
@@ -406,90 +464,39 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   });
   
   // Aviso se houver mais fardos
-  if (filteredBales.length > 50) {
-    const finalY = (doc as any).lastAutoTable.finalY + 5;
-    doc.setFontSize(8);
+  if (filteredBales.length > 100) {
+    const finalY = (doc as any).lastAutoTable.finalY + 3;
+    doc.setFontSize(7);
     doc.setTextColor(cinza[0], cinza[1], cinza[2]);
     doc.setFont('helvetica', 'italic');
-    doc.text(`⚠️ Mostrando 50 de ${filteredBales.length} fardos. Gere um relatório Excel para ver todos.`, margin, finalY);
+    doc.text(`Mostrando 100 de ${filteredBales.length} fardos. Para ver todos os dados, gere um relatorio Excel.`, margin, finalY);
   }
   
-  // ==================== RODAPÉ ====================
+  // ==================== RODAPE ====================
   const pageCount = (doc as any).internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     
-    // Barra verde
     doc.setFillColor(verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]);
-    doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+    doc.rect(0, pageHeight - 6, pageWidth, 6, 'F');
     
-    // Barra amarela
     doc.setFillColor(amarelo[0], amarelo[1], amarelo[2]);
-    doc.rect(0, pageHeight - 8, pageWidth, 2, 'F');
+    doc.rect(0, pageHeight - 6, pageWidth, 1.5, 'F');
     
-    // Texto do rodapé
     doc.setTextColor(branco[0], branco[1], branco[2]);
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'bold');
-    doc.text("🌱 Grupo Progresso", margin, pageHeight - 3);
+    doc.text("Grupo Progresso", margin, pageHeight - 2);
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.text("Sistema de Rastreabilidade de Algodão", 60, pageHeight - 3);
+    doc.setFontSize(6);
+    doc.text("Sistema de Rastreabilidade de Algodao", 45, pageHeight - 2);
     
     doc.setFont('helvetica', 'bold');
-    doc.text(`Página ${i}/${pageCount}`, pageWidth - margin, pageHeight - 3, { align: 'right' });
+    doc.text(`Pag. ${i}/${pageCount}`, pageWidth - margin, pageHeight - 2, { align: 'right' });
   }
   
   return Buffer.from(doc.output("arraybuffer"));
-}
-
-// Função auxiliar para desenhar fatia de pizza
-function drawPieSlice(doc: jsPDF, centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number) {
-  const startRad = (startAngle * Math.PI) / 180;
-  const endRad = (endAngle * Math.PI) / 180;
-  
-  doc.setLineWidth(0.5);
-  doc.setDrawColor(255, 255, 255);
-  
-  const x1 = centerX + radius * Math.cos(startRad);
-  const y1 = centerY + radius * Math.sin(startRad);
-  const x2 = centerX + radius * Math.cos(endRad);
-  const y2 = centerY + radius * Math.sin(endRad);
-  
-  // Criar path para a fatia
-  const path = `M ${centerX} ${centerY} L ${x1} ${y1} `;
-  
-  // Adicionar arco
-  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-  const arcPath = `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-  
-  // Desenhar usando lines (aproximação)
-  const steps = 20;
-  const angleStep = (endAngle - startAngle) / steps;
-  
-  for (let i = 0; i <= steps; i++) {
-    const angle = startAngle + (angleStep * i);
-    const rad = (angle * Math.PI) / 180;
-    const x = centerX + radius * Math.cos(rad);
-    const y = centerY + radius * Math.sin(rad);
-    
-    if (i === 0) {
-      doc.line(centerX, centerY, x, y);
-    } else {
-      const prevAngle = startAngle + (angleStep * (i - 1));
-      const prevRad = (prevAngle * Math.PI) / 180;
-      const prevX = centerX + radius * Math.cos(prevRad);
-      const prevY = centerY + radius * Math.sin(prevRad);
-      doc.line(prevX, prevY, x, y);
-    }
-  }
-  
-  // Linha de volta ao centro
-  const finalRad = (endAngle * Math.PI) / 180;
-  const finalX = centerX + radius * Math.cos(finalRad);
-  const finalY = centerY + radius * Math.sin(finalRad);
-  doc.line(finalX, finalY, centerX, centerY);
 }
 
 export function generateExcel(bales: Bale[], filters: ReportFilters): Buffer {

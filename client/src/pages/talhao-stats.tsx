@@ -219,11 +219,11 @@ export default function TalhaoStats() {
     : "0";
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
       <NavSidebar />
       
-      <div className="flex-1 lg:ml-64 flex flex-col">
-        <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8">
+      <div className="flex-1 lg:ml-64 flex flex-col overflow-x-hidden">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8 overflow-x-hidden">
           {/* Header modernizado */}
           <div className="mb-6 sm:mb-8 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
@@ -689,22 +689,25 @@ export default function TalhaoStats() {
             {/* Tab: Gráficos Interativos */}
             <TabsContent value="graficos" className="space-y-6 mt-4">
               {/* Filtros */}
-              <Card className="shadow-lg border-2 rounded-xl">
-                <CardContent className="pt-6">
-                  <div className="flex flex-wrap gap-4 items-center">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-primary/10 rounded-lg">
-                        <Filter className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="text-sm font-bold">Filtros:</span>
+              <Card className="shadow-lg border-2 rounded-xl overflow-hidden">
+                <CardContent className="pt-6 pb-6 space-y-4">
+                  {/* Título dos Filtros */}
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-primary/10 rounded-lg">
+                      <Filter className="w-4 h-4 text-primary" />
                     </div>
-                    
-                    <div className="flex gap-2">
+                    <span className="text-sm font-bold">Filtros:</span>
+                  </div>
+                  
+                  {/* Filtros de Tempo */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Período</label>
+                    <div className="grid grid-cols-3 gap-2">
                       <Button
                         size="sm"
                         variant={timeFilter === "7d" ? "default" : "outline"}
                         onClick={() => setTimeFilter("7d")}
-                        className="rounded-lg font-semibold"
+                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
                       >
                         7 dias
                       </Button>
@@ -712,7 +715,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "30d" ? "default" : "outline"}
                         onClick={() => setTimeFilter("30d")}
-                        className="rounded-lg font-semibold"
+                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
                       >
                         30 dias
                       </Button>
@@ -720,26 +723,30 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "all" ? "default" : "outline"}
                         onClick={() => setTimeFilter("all")}
-                        className="rounded-lg font-semibold"
+                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
                       >
                         Todos
                       </Button>
                     </div>
+                  </div>
 
-                    <div className="flex gap-2">
+                  {/* Filtros de Status */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
                         size="sm"
                         variant={chartFilter === "all" ? "default" : "outline"}
                         onClick={() => setChartFilter("all")}
-                        className="rounded-lg font-semibold"
+                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
                       >
-                        Todos Status
+                        Todos
                       </Button>
                       <Button
                         size="sm"
                         variant={chartFilter === "campo" ? "default" : "outline"}
                         onClick={() => setChartFilter("campo")}
-                        className={chartFilter === "campo" ? "bg-bale-campo hover:bg-bale-campo/90 rounded-lg font-semibold" : "rounded-lg font-semibold"}
+                        className={chartFilter === "campo" ? "bg-bale-campo hover:bg-bale-campo/90 rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2" : "rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"}
                       >
                         Campo
                       </Button>
@@ -747,7 +754,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "patio" ? "default" : "outline"}
                         onClick={() => setChartFilter("patio")}
-                        className={chartFilter === "patio" ? "bg-bale-patio hover:bg-bale-patio/90 rounded-lg font-semibold" : "rounded-lg font-semibold"}
+                        className={chartFilter === "patio" ? "bg-bale-patio hover:bg-bale-patio/90 rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2" : "rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"}
                       >
                         Pátio
                       </Button>
@@ -755,7 +762,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "beneficiado" ? "default" : "outline"}
                         onClick={() => setChartFilter("beneficiado")}
-                        className={chartFilter === "beneficiado" ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90 rounded-lg font-semibold" : "rounded-lg font-semibold"}
+                        className={chartFilter === "beneficiado" ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90 rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2" : "rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"}
                       >
                         Beneficiado
                       </Button>
@@ -770,15 +777,15 @@ export default function TalhaoStats() {
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
                   </div>
-                  <CardTitle className="flex items-center gap-2 relative">
+                  <CardTitle className="flex items-center gap-2 relative text-base sm:text-lg">
                     <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-                      <BarChart3 className="w-5 h-5" />
+                      <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     Produção por Talhão
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="pt-6 px-1 sm:px-6 overflow-x-auto">
+                  <ResponsiveContainer width="100%" height={300} minWidth={300}>
                     <BarChart
                       data={talhaoStats.map(stat => ({
                         talhao: stat.talhao,
@@ -787,12 +794,13 @@ export default function TalhaoStats() {
                         beneficiado: chartFilter === "all" || chartFilter === "beneficiado" ? stat.beneficiado : 0,
                         total: stat.total,
                       }))}
+                      margin={{ top: 5, right: 5, left: -10, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="talhao" />
-                      <YAxis />
+                      <XAxis dataKey="talhao" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
                       <RechartsTooltip />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                       {(chartFilter === "all" || chartFilter === "campo") && (
                         <Bar dataKey="campo" fill="#22c55e" name="Campo" />
                       )}
@@ -808,22 +816,22 @@ export default function TalhaoStats() {
               </Card>
 
               {/* Grid com 2 gráficos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Gráfico de Produtividade em Arrobas (@) por Talhão */}
                 <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
                   <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
                       <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
                     </div>
-                    <CardTitle className="flex items-center gap-2 relative text-base">
+                    <CardTitle className="flex items-center gap-2 relative text-sm sm:text-base">
                       <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-                        <TrendingUp className="w-4 h-4" />
+                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                       </div>
-                      Produtividade em Arrobas (@/ha)
+                      <span className="line-clamp-2">Produtividade em Arrobas (@/ha)</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                  <CardContent className="pt-6 px-1 sm:px-6 overflow-x-auto">
+                    <ResponsiveContainer width="100%" height={300} minWidth={300}>
                       <BarChart
                         data={talhaoStats
                           .map(stat => {
@@ -841,21 +849,22 @@ export default function TalhaoStats() {
                           })
                           .sort((a, b) => b.arrobas - a.arrobas)
                         }
+                        margin={{ top: 5, right: 5, left: -10, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="talhao" />
-                        <YAxis />
+                        <XAxis dataKey="talhao" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
                         <RechartsTooltip 
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               const data = payload[0].payload;
                               return (
                                 <div className="bg-white p-3 border rounded-lg shadow-lg">
-                                  <p className="font-semibold">Talhão {data.talhao}</p>
-                                  <p className="text-sm text-emerald-600 font-medium">
+                                  <p className="font-semibold text-sm">Talhão {data.talhao}</p>
+                                  <p className="text-xs text-emerald-600 font-medium">
                                     {data.arrobas.toFixed(2)} @/ha
                                   </p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-[10px] text-muted-foreground">
                                     {data.fardos} fardos • {data.hectares} ha
                                   </p>
                                 </div>
@@ -876,15 +885,15 @@ export default function TalhaoStats() {
                     <div className="absolute inset-0 opacity-10">
                       <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
                     </div>
-                    <CardTitle className="flex items-center gap-2 relative text-base">
+                    <CardTitle className="flex items-center gap-2 relative text-sm sm:text-base">
                       <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-                        <Package className="w-4 h-4" />
+                        <Package className="w-3 h-3 sm:w-4 sm:h-4" />
                       </div>
-                      Produtividade em Fardos (f/ha)
+                      <span className="line-clamp-2">Produtividade em Fardos (f/ha)</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                  <CardContent className="pt-6 px-1 sm:px-6 overflow-x-auto">
+                    <ResponsiveContainer width="100%" height={300} minWidth={300}>
                       <BarChart
                         data={talhaoStats
                           .map(stat => {
@@ -901,21 +910,22 @@ export default function TalhaoStats() {
                           })
                           .sort((a, b) => b.fardosPorHa - a.fardosPorHa)
                         }
+                        margin={{ top: 5, right: 5, left: -10, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="talhao" />
-                        <YAxis />
+                        <XAxis dataKey="talhao" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
                         <RechartsTooltip 
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               const data = payload[0].payload;
                               return (
                                 <div className="bg-white p-3 border rounded-lg shadow-lg">
-                                  <p className="font-semibold">Talhão {data.talhao}</p>
-                                  <p className="text-sm text-blue-600 font-medium">
+                                  <p className="font-semibold text-sm">Talhão {data.talhao}</p>
+                                  <p className="text-xs text-blue-600 font-medium">
                                     {data.fardosPorHa.toFixed(3)} f/ha
                                   </p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-[10px] text-muted-foreground">
                                     {data.fardos} fardos • {data.hectares} ha
                                   </p>
                                 </div>
@@ -937,14 +947,14 @@ export default function TalhaoStats() {
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
                   </div>
-                  <CardTitle className="flex items-center gap-2 relative">
+                  <CardTitle className="flex items-center gap-2 relative text-base sm:text-lg">
                     <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-                      <Clock className="w-5 h-5" />
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    Tempo Médio: Pátio → Beneficiado
+                    <span className="line-clamp-2">Tempo Médio: Pátio → Beneficiado</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6 px-1 sm:px-6 overflow-x-auto">
                   {(() => {
                     const talhaoTempos: Record<string, { total: number; count: number; tempos: number[] }> = {};
                     
@@ -994,11 +1004,11 @@ export default function TalhaoStats() {
                     }
                     
                     return (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={chartData}>
+                      <ResponsiveContainer width="100%" height={300} minWidth={300}>
+                        <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="talhao" />
-                          <YAxis label={{ value: 'Horas', angle: -90, position: 'insideLeft' }} />
+                          <XAxis dataKey="talhao" tick={{ fontSize: 12 }} />
+                          <YAxis label={{ value: 'Horas', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }} tick={{ fontSize: 12 }} />
                           <RechartsTooltip 
                             content={({ active, payload }) => {
                               if (active && payload && payload.length) {
@@ -1012,17 +1022,17 @@ export default function TalhaoStats() {
                                 
                                 return (
                                   <div className="bg-white p-3 border rounded-lg shadow-lg">
-                                    <p className="font-semibold">Talhão {data.talhao}</p>
-                                    <p className="text-sm text-orange-600 font-medium">
+                                    <p className="font-semibold text-sm">Talhão {data.talhao}</p>
+                                    <p className="text-xs text-orange-600 font-medium">
                                       Média: {dias > 0 ? `${dias}d ` : ''}{horas}h
                                     </p>
-                                    <p className="text-xs text-green-600">
+                                    <p className="text-[10px] text-green-600">
                                       Mín: {minDias > 0 ? `${minDias}d ` : ''}{minHoras}h
                                     </p>
-                                    <p className="text-xs text-red-600">
+                                    <p className="text-[10px] text-red-600">
                                       Máx: {maxDias > 0 ? `${maxDias}d ` : ''}{maxHoras}h
                                     </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-[10px] text-muted-foreground mt-1">
                                       {data.quantidade} fardo{data.quantidade !== 1 ? 's' : ''} processado{data.quantidade !== 1 ? 's' : ''}
                                     </p>
                                   </div>
@@ -1031,7 +1041,7 @@ export default function TalhaoStats() {
                               return null;
                             }}
                           />
-                          <Legend />
+                          <Legend wrapperStyle={{ fontSize: '12px' }} />
                           <Bar dataKey="tempoMedio" fill="#f59e0b" name="Tempo Médio (horas)" />
                         </BarChart>
                       </ResponsiveContainer>
