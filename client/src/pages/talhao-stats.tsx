@@ -638,8 +638,8 @@ export default function TalhaoStats() {
                     <div className="text-center space-y-1">
                       <Activity className="w-5 h-5 mx-auto text-purple-600 mb-2" />
                       <p className="text-xs text-muted-foreground">Produtividade</p>
-                      <p className="text-2xl font-bold text-purple-600">{produtividadeArrobas}</p>
-                      <p className="text-xs text-muted-foreground">@/ha</p>
+                      <p className="text-xl font-bold text-purple-600">{produtividadeArrobas} @/ha</p>
+                      <p className="text-sm text-purple-600/70">{fardosPorHectare} f/ha</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -710,15 +710,17 @@ export default function TalhaoStats() {
 
               {/* Métricas Comparativas */}
               <div className="bg-muted/50 rounded-lg p-4">
-                <h4 className="text-sm font-semibold mb-2">Comparativo com Média Geral</h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Produtividade deste talhão</p>
-                    <p className="text-lg font-bold text-primary">{produtividadeArrobas} @/ha</p>
+                <h4 className="text-sm font-semibold mb-3">Comparativo com Média Geral</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Produtividade deste talhão</p>
+                    <p className="text-xl font-bold text-primary">{produtividadeArrobas} @/ha</p>
+                    <p className="text-sm text-muted-foreground">{fardosPorHectare} fardos/ha</p>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Média geral</p>
-                    <p className="text-lg font-bold">{avgArrobasPorHectare} @/ha</p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Média geral</p>
+                    <p className="text-xl font-bold">{avgArrobasPorHectare} @/ha</p>
+                    <p className="text-sm text-muted-foreground">{avgFardosPorHectare} fardos/ha</p>
                   </div>
                 </div>
               </div>
