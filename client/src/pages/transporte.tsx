@@ -149,7 +149,7 @@ export default function Transporte() {
         id: scannedBale.id,
         data: {
           status: "patio",
-          userId: user?.id,
+          userId: user?.id ? String(user.id) : undefined,
         },
       },
       {
