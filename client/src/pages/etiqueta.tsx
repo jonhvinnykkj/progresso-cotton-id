@@ -84,16 +84,22 @@ export default function Etiqueta() {
 
   if (baleIds.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Erro</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background flex items-center justify-center p-4">
+        <Card className="max-w-md shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up">
+          <div className="bg-gradient-to-r from-red-500 to-orange-500 p-6 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            </div>
+            <CardTitle className="text-xl text-white font-bold">Erro</CardTitle>
+          </div>
+          <CardContent className="p-6">
             <p className="text-sm text-muted-foreground mb-4">
               Nenhum fardo selecionado. Volte e tente novamente.
             </p>
-            <Button onClick={handleBack} className="w-full">
+            <Button 
+              onClick={handleBack} 
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 font-bold"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
             </Button>
@@ -105,10 +111,10 @@ export default function Etiqueta() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-          <p className="text-sm text-muted-foreground">Carregando etiquetas...</p>
+          <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary" />
+          <p className="text-base text-muted-foreground font-semibold">Carregando etiquetas...</p>
         </div>
       </div>
     );
@@ -116,16 +122,22 @@ export default function Etiqueta() {
 
   if (bales.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Fardos não encontrados</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background flex items-center justify-center p-4">
+        <Card className="max-w-md shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up">
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-6 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            </div>
+            <CardTitle className="text-xl text-white font-bold">Fardos não encontrados</CardTitle>
+          </div>
+          <CardContent className="p-6">
             <p className="text-sm text-muted-foreground mb-4">
               Os fardos selecionados não foram encontrados no sistema.
             </p>
-            <Button onClick={handleBack} className="w-full">
+            <Button 
+              onClick={handleBack} 
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 font-bold"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
             </Button>
@@ -137,9 +149,9 @@ export default function Etiqueta() {
 
   return (
     <>
-      <div className="min-h-screen bg-background print:hidden">
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background print:hidden">
+        {/* Header modernizado */}
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-sm">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between gap-4 py-3 sm:py-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -148,17 +160,19 @@ export default function Etiqueta() {
                   size="icon"
                   onClick={handleBack}
                   data-testid="button-back"
-                  className="shrink-0"
+                  className="shrink-0 hover:scale-110 transition-transform duration-300"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <img 
                   src={logoProgresso} 
                   alt="Grupo Progresso" 
-                  className="h-8 sm:h-10 w-auto shrink-0"
+                  className="h-10 sm:h-12 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
                 />
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-base sm:text-xl font-semibold truncate">Etiquetas dos Fardos</h1>
+                  <h1 className="text-lg sm:text-xl font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
+                    Etiquetas dos Fardos
+                  </h1>
                   <p className="text-xs sm:text-sm text-muted-foreground truncate">
                     {bales.length} {bales.length === 1 ? 'etiqueta' : 'etiquetas'} • {user?.username}
                   </p>
@@ -172,46 +186,61 @@ export default function Etiqueta() {
         <main className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
           
           {/* Preview das etiquetas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <QrCode className="w-5 h-5 text-primary shrink-0" />
-                  Preview das Etiquetas
-                </span>
+          <Card className="shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+              </div>
+              
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <QrCode className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-xl text-white font-bold">
+                    Preview das Etiquetas
+                  </CardTitle>
+                </div>
                 <Button
                   onClick={handlePrint}
                   size="lg"
                   data-testid="button-print-labels"
                   disabled={qrDataUrls.size === 0}
+                  className="h-12 rounded-xl shadow-lg bg-white text-green-600 hover:bg-white/90 hover:scale-105 transition-all duration-300 font-bold"
                 >
-                  <Printer className="w-4 h-4 mr-2" />
+                  <Printer className="w-5 h-5 mr-2" />
                   Imprimir Todas
                 </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </div>
+            </div>
+            
+            <CardContent className="p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {bales.map((bale) => {
+                {bales.map((bale, index) => {
                   const qrUrl = qrDataUrls.get(bale.id);
                   
                   return (
-                    <div key={bale.id} className="border rounded-lg p-4 space-y-3">
+                    <div 
+                      key={bale.id} 
+                      className="border-2 border-primary/20 rounded-xl p-4 space-y-3 bg-gradient-to-br from-primary/5 to-primary/10 hover:scale-[1.02] transition-all duration-300 shadow-md animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
                       {qrUrl ? (
                         <img 
                           src={qrUrl} 
                           alt={`QR Code ${bale.numero}`}
-                          className="w-full aspect-square"
+                          className="w-full aspect-square rounded-lg"
                         />
                       ) : (
-                        <div className="w-full aspect-square bg-muted animate-pulse rounded" />
+                        <div className="w-full aspect-square bg-muted animate-pulse rounded-lg" />
                       )}
                       
                       <div className="text-center space-y-1">
-                        <p className="text-xs text-muted-foreground">Talhão: {bale.talhao}</p>
-                        <p className="text-lg font-bold font-mono">{bale.numero}</p>
+                        <p className="text-xs text-muted-foreground font-semibold">Talhão: {bale.talhao}</p>
+                        <p className="text-xl font-bold font-mono text-primary">{bale.numero}</p>
                         {bale.safra && (
-                          <p className="text-xs text-muted-foreground">Safra: {bale.safra}</p>
+                          <p className="text-xs text-muted-foreground font-semibold">Safra: {bale.safra}</p>
                         )}
                       </div>
                     </div>
@@ -222,14 +251,29 @@ export default function Etiqueta() {
           </Card>
 
           {/* Informações */}
-          <Card className="bg-muted/30 border-muted">
-            <CardContent className="pt-5 pb-5">
-              <h3 className="font-semibold text-sm mb-3">Instruções de Impressão</h3>
-              <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Conecte a impressora térmica móvel</li>
-                <li>Clique em "Imprimir Todas" acima</li>
-                <li>Verifique se todas as etiquetas foram impressas corretamente</li>
-                <li>Cole cada etiqueta no fardo físico correspondente</li>
+          <Card className="shadow-lg border-2 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+            <CardContent className="pt-6 pb-6 px-6">
+              <h3 className="font-bold text-base mb-4 flex items-center gap-2">
+                <Printer className="w-5 h-5 text-primary" />
+                Instruções de Impressão
+              </h3>
+              <ol className="text-sm text-muted-foreground space-y-3 list-decimal list-inside">
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">1.</span>
+                  <span className="flex-1">Conecte a impressora térmica móvel</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">2.</span>
+                  <span className="flex-1">Clique em "Imprimir Todas" acima</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">3.</span>
+                  <span className="flex-1">Verifique se todas as etiquetas foram impressas corretamente</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">4.</span>
+                  <span className="flex-1">Cole cada etiqueta no fardo físico correspondente</span>
+                </li>
               </ol>
             </CardContent>
           </Card>

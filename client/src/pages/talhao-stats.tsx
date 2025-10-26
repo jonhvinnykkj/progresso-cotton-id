@@ -219,8 +219,8 @@ export default function TalhaoStats() {
 
   return (
     <div className="mobile-page">
-      {/* Header */}
-      <header className="mobile-header">
+      {/* Header modernizado */}
+      <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-wrap items-center justify-between gap-3 py-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -229,17 +229,17 @@ export default function TalhaoStats() {
                 size="sm"
                 onClick={() => setLocation("/dashboard")}
                 data-testid="button-back"
-                className="h-9 shrink-0"
+                className="h-9 shrink-0 hover:scale-105 transition-transform duration-300"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <img 
                 src={logoProgresso} 
                 alt="Grupo Progresso" 
-                className="h-8 sm:h-10 w-auto shrink-0"
+                className="h-10 sm:h-12 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
               />
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-lg font-semibold truncate" data-testid="text-page-title">
+                <h1 className="text-lg sm:text-xl font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent" data-testid="text-page-title">
                   Fardos por Talhão
                 </h1>
                 <p className="text-xs text-muted-foreground truncate" data-testid="text-username">
@@ -252,7 +252,7 @@ export default function TalhaoStats() {
               size="sm"
               onClick={handleLogout}
               data-testid="button-logout"
-              className="h-9 shrink-0"
+              className="h-9 shrink-0 hover:scale-105 transition-transform duration-300"
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -261,80 +261,103 @@ export default function TalhaoStats() {
       </header>
 
       {/* Main Content */}
-      <main className="mobile-content">
+      <main className="mobile-content bg-gradient-to-br from-background via-muted/10 to-background">
         <div className="container mx-auto px-4 py-6 max-w-7xl space-y-5">
           {/* Card de Produtividade - DESTAQUE */}
-          <Card className="bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg border-0">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-2">
-                <p className="text-sm font-medium text-emerald-50">Produtividade Média Total</p>
-                <div className="flex items-baseline justify-center gap-2">
-                  <p className="text-5xl sm:text-6xl font-bold">{avgArrobasPorHectare}</p>
-                  <p className="text-2xl font-semibold text-emerald-50">@/ha</p>
+          <Card className="bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl border-0 rounded-2xl overflow-hidden animate-fade-in-up">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            </div>
+            <CardContent className="pt-8 pb-8 relative">
+              <div className="text-center space-y-3">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl w-fit mx-auto">
+                  <TrendingUp className="w-8 h-8 text-white" />
                 </div>
-                <p className="text-sm text-emerald-50">
-                  {totalHectares} ha • {avgFardosPorHectare} fardos/ha
-                </p>
+                <p className="text-sm font-semibold text-emerald-50 uppercase tracking-wide">Produtividade Média Total</p>
+                <div className="flex items-baseline justify-center gap-2">
+                  <p className="text-6xl sm:text-7xl font-bold">{avgArrobasPorHectare}</p>
+                  <p className="text-3xl font-bold text-emerald-50">@/ha</p>
+                </div>
+                <div className="flex items-center justify-center gap-4 text-sm text-emerald-50 font-semibold">
+                  <span className="flex items-center gap-1">
+                    <Layers className="w-4 h-4" />
+                    {totalHectares} ha
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Package className="w-4 h-4" />
+                    {avgFardosPorHectare} fardos/ha
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* KPIs Cards - Métricas Principais */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="shadow-sm">
+            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Total de Fardos</p>
-                    <Package className="w-4 h-4 text-primary" />
+                    <p className="text-xs text-muted-foreground font-semibold">Total de Fardos</p>
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Package className="w-4 h-4 text-primary" />
+                    </div>
                   </div>
                   <p className="text-3xl font-bold text-primary">{globalStats?.total || 0}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground font-medium">
                     {totalHectares} ha • {avgFardosPorHectare} fardos/ha
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Criados Hoje</p>
-                    <Calendar className="w-4 h-4 text-blue-600" />
+                    <p className="text-xs text-muted-foreground font-semibold">Criados Hoje</p>
+                    <div className="p-2 bg-blue-100 dark:bg-blue-950 rounded-lg">
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                    </div>
                   </div>
                   <p className="text-3xl font-bold text-blue-600">{balesToday}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground font-medium">
                     {balesThisWeek} esta semana
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Média/Talhão</p>
-                    <Activity className="w-4 h-4 text-purple-600" />
+                    <p className="text-xs text-muted-foreground font-semibold">Média/Talhão</p>
+                    <div className="p-2 bg-purple-100 dark:bg-purple-950 rounded-lg">
+                      <Activity className="w-4 h-4 text-purple-600" />
+                    </div>
                   </div>
                   <p className="text-3xl font-bold text-purple-600">{avgBalesPerTalhao.toFixed(0)}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground font-medium">
                     fardos por talhão
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Progresso</p>
-                    <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
+                    <p className="text-xs text-muted-foreground font-semibold">Progresso</p>
+                    <div className="p-2 bg-bale-beneficiado/10 rounded-lg">
+                      <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
+                    </div>
                   </div>
                   <p className="text-3xl font-bold text-bale-beneficiado">{progressPercent}%</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground font-medium">
                     {globalStats?.beneficiado || 0} beneficiados
                   </p>
                 </div>
@@ -343,56 +366,77 @@ export default function TalhaoStats() {
           </div>
 
           {/* Summary Card com Status */}
-          <Card className="brand-gradient text-white shadow-md" data-testid="card-summary">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Distribuição por Status
-              </CardTitle>
+          <Card className="brand-gradient text-white shadow-xl rounded-2xl border-0 overflow-hidden animate-fade-in-up" style={{ animationDelay: "0.25s" }} data-testid="card-summary">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            </div>
+            <CardHeader className="pb-4 relative">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <CardTitle className="text-lg font-bold">
+                  Distribuição por Status
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <Package className="w-6 h-6 mx-auto mb-1 text-white/80" />
-                  <p className="text-xs text-white/80">No Campo</p>
-                  <p className="text-2xl font-bold">{globalStats?.campo || 0}</p>
-                  <Progress value={globalStats?.total ? (globalStats.campo / globalStats.total) * 100 : 0} className="h-1 mt-2 bg-white/20 [&>div]:bg-white" />
+                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg w-fit mx-auto mb-2">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-xs text-white/90 font-semibold mb-1">No Campo</p>
+                  <p className="text-3xl font-bold mb-2">{globalStats?.campo || 0}</p>
+                  <Progress value={globalStats?.total ? (globalStats.campo / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
                 </div>
                 <div>
-                  <Truck className="w-6 h-6 mx-auto mb-1 text-white/80" />
-                  <p className="text-xs text-white/80">No Pátio</p>
-                  <p className="text-2xl font-bold">{globalStats?.patio || 0}</p>
-                  <Progress value={globalStats?.total ? (globalStats.patio / globalStats.total) * 100 : 0} className="h-1 mt-2 bg-white/20 [&>div]:bg-white" />
+                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg w-fit mx-auto mb-2">
+                    <Truck className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-xs text-white/90 font-semibold mb-1">No Pátio</p>
+                  <p className="text-3xl font-bold mb-2">{globalStats?.patio || 0}</p>
+                  <Progress value={globalStats?.total ? (globalStats.patio / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
                 </div>
                 <div>
-                  <CheckCircle className="w-6 h-6 mx-auto mb-1 text-white/80" />
-                  <p className="text-xs text-white/80">Beneficiados</p>
-                  <p className="text-2xl font-bold">{globalStats?.beneficiado || 0}</p>
-                  <Progress value={globalStats?.total ? (globalStats.beneficiado / globalStats.total) * 100 : 0} className="h-1 mt-2 bg-white/20 [&>div]:bg-white" />
+                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg w-fit mx-auto mb-2">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-xs text-white/90 font-semibold mb-1">Beneficiados</p>
+                  <p className="text-3xl font-bold mb-2">{globalStats?.beneficiado || 0}</p>
+                  <Progress value={globalStats?.total ? (globalStats.beneficiado / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Tabs para diferentes visões */}
-          <Tabs defaultValue="talhao" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="talhao">Por Talhão</TabsTrigger>
-              <TabsTrigger value="safra">Por Safra</TabsTrigger>
-              <TabsTrigger value="graficos">Gráficos</TabsTrigger>
-              <TabsTrigger value="mapa">Mapa</TabsTrigger>
+          <Tabs defaultValue="talhao" className="w-full animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+            <TabsList className="grid w-full grid-cols-4 p-1 bg-muted/50 rounded-xl h-12">
+              <TabsTrigger value="talhao" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+                Por Talhão
+              </TabsTrigger>
+              <TabsTrigger value="safra" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+                Por Safra
+              </TabsTrigger>
+              <TabsTrigger value="graficos" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+                Gráficos
+              </TabsTrigger>
+              <TabsTrigger value="mapa" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+                Mapa
+              </TabsTrigger>
             </TabsList>
 
             {/* Tab: Por Talhão */}
             <TabsContent value="talhao" className="space-y-4 mt-4">
               {/* Campo de busca */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
                 <Input
                   placeholder="Buscar talhão..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11"
+                  className="pl-11 h-12 rounded-xl border-2 hover:border-primary/50 transition-all text-base"
                   data-testid="input-search-talhao"
                 />
               </div>
@@ -401,29 +445,29 @@ export default function TalhaoStats() {
               {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse" data-testid={`skeleton-talhao-${i}`}>
+                <Card key={i} className="animate-pulse shadow-lg border-2 rounded-xl" data-testid={`skeleton-talhao-${i}`}>
                   <CardHeader className="space-y-2 pb-2">
-                    <div className="h-5 bg-muted rounded w-1/2" data-testid={`skeleton-title-${i}`} />
+                    <div className="h-6 bg-muted rounded-lg w-1/2" data-testid={`skeleton-title-${i}`} />
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="h-4 bg-muted rounded w-full" data-testid={`skeleton-row1-${i}`} />
-                    <div className="h-4 bg-muted rounded w-3/4" data-testid={`skeleton-row2-${i}`} />
-                    <div className="h-4 bg-muted rounded w-2/3" data-testid={`skeleton-row3-${i}`} />
+                    <div className="h-4 bg-muted rounded-lg w-full" data-testid={`skeleton-row1-${i}`} />
+                    <div className="h-4 bg-muted rounded-lg w-3/4" data-testid={`skeleton-row2-${i}`} />
+                    <div className="h-4 bg-muted rounded-lg w-2/3" data-testid={`skeleton-row3-${i}`} />
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : filteredTalhaoStats.length === 0 ? (
-            <Card className="p-12" data-testid="card-empty-state">
+            <Card className="p-12 shadow-xl border-2 rounded-2xl" data-testid="card-empty-state">
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center" data-testid="icon-empty">
-                  <Wheat className="w-8 h-8 text-muted-foreground" />
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center" data-testid="icon-empty">
+                  <Wheat className="w-10 h-10 text-muted-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold" data-testid="text-empty-title">
+                  <h3 className="text-lg font-bold" data-testid="text-empty-title">
                     {searchQuery ? "Nenhum talhão encontrado" : "Nenhum talhão cadastrado"}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1" data-testid="text-empty-description">
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-empty-description">
                     {searchQuery 
                       ? "Tente buscar por outro termo" 
                       : "Cadastre o primeiro fardo para visualizar estatísticas"}
@@ -450,27 +494,27 @@ export default function TalhaoStats() {
                 return (
                   <Card
                     key={stat.talhao}
-                    className="hover-elevate smooth-transition shadow-sm cursor-pointer"
+                    className="bg-card shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
                     data-testid={`card-talhao-${stat.talhao}`}
                     onClick={() => setSelectedTalhao(stat.talhao)}
                   >
                     <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0">
                           <Wheat className="w-5 h-5 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <CardTitle className="text-lg truncate" data-testid={`text-talhao-name-${stat.talhao}`}>{stat.talhao}</CardTitle>
-                            <Info className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <CardTitle className="text-lg font-bold truncate" data-testid={`text-talhao-name-${stat.talhao}`}>{stat.talhao}</CardTitle>
+                            <Info className="w-4 h-4 text-primary/60 shrink-0 hover:text-primary transition-colors" />
                           </div>
-                          <p className="text-xs text-muted-foreground" data-testid={`text-talhao-subtitle-${stat.talhao}`}>
+                          <p className="text-sm text-muted-foreground font-medium" data-testid={`text-talhao-subtitle-${stat.talhao}`}>
                             {getTalhaoInfo(stat.talhao)?.hectares || '0'} ha • {stat.total} {stat.total === 1 ? "fardo" : "fardos"} • {produtividade} f/ha
                           </p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="shrink-0" data-testid={`badge-total-${stat.talhao}`}>
-                        <TrendingUp className="w-3 h-3 mr-1" />
+                      <Badge variant="outline" className="shrink-0 border-2 px-3 py-1.5 rounded-lg font-bold" data-testid={`badge-total-${stat.talhao}`}>
+                        <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
                         <span data-testid={`text-badge-total-${stat.talhao}`}>{stat.total}</span>
                       </Badge>
                     </CardHeader>
@@ -479,16 +523,18 @@ export default function TalhaoStats() {
                       <div className="space-y-2" data-testid={`stats-campo-${stat.talhao}`}>
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">
-                            <Package className={`w-4 h-4 ${getStatusColor("campo")}`} data-testid={`icon-campo-${stat.talhao}`} />
-                            <span className="font-medium">Campo</span>
+                            <div className="p-1.5 bg-bale-campo/10 rounded-lg">
+                              <Package className="w-4 h-4 text-bale-campo" data-testid={`icon-campo-${stat.talhao}`} />
+                            </div>
+                            <span className="font-semibold">Campo</span>
                           </div>
-                          <span className="text-muted-foreground" data-testid={`text-campo-count-${stat.talhao}`}>
-                            {stat.campo} ({progressCampo.toFixed(0)}%)
+                          <span className="font-bold text-foreground" data-testid={`text-campo-count-${stat.talhao}`}>
+                            {stat.campo} <span className="text-muted-foreground font-medium">({progressCampo.toFixed(0)}%)</span>
                           </span>
                         </div>
                         <Progress 
                           value={progressCampo} 
-                          className="h-2"
+                          className="h-2.5 rounded-full"
                           data-testid={`progress-campo-${stat.talhao}`}
                         />
                       </div>
@@ -497,16 +543,18 @@ export default function TalhaoStats() {
                       <div className="space-y-2" data-testid={`stats-patio-${stat.talhao}`}>
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">
-                            <Truck className={`w-4 h-4 ${getStatusColor("patio")}`} data-testid={`icon-patio-${stat.talhao}`} />
-                            <span className="font-medium">Pátio</span>
+                            <div className="p-1.5 bg-bale-patio/10 rounded-lg">
+                              <Truck className="w-4 h-4 text-bale-patio" data-testid={`icon-patio-${stat.talhao}`} />
+                            </div>
+                            <span className="font-semibold">Pátio</span>
                           </div>
-                          <span className="text-muted-foreground" data-testid={`text-patio-count-${stat.talhao}`}>
-                            {stat.patio} ({progressPatio.toFixed(0)}%)
+                          <span className="font-bold text-foreground" data-testid={`text-patio-count-${stat.talhao}`}>
+                            {stat.patio} <span className="text-muted-foreground font-medium">({progressPatio.toFixed(0)}%)</span>
                           </span>
                         </div>
                         <Progress 
                           value={progressPatio} 
-                          className="h-2 [&>div]:bg-bale-patio"
+                          className="h-2.5 rounded-full [&>div]:bg-bale-patio"
                           data-testid={`progress-patio-${stat.talhao}`}
                         />
                       </div>
@@ -515,16 +563,18 @@ export default function TalhaoStats() {
                       <div className="space-y-2" data-testid={`stats-beneficiado-${stat.talhao}`}>
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">
-                            <CheckCircle className={`w-4 h-4 ${getStatusColor("beneficiado")}`} data-testid={`icon-beneficiado-${stat.talhao}`} />
-                            <span className="font-medium">Beneficiado</span>
+                            <div className="p-1.5 bg-bale-beneficiado/10 rounded-lg">
+                              <CheckCircle className="w-4 h-4 text-bale-beneficiado" data-testid={`icon-beneficiado-${stat.talhao}`} />
+                            </div>
+                            <span className="font-semibold">Beneficiado</span>
                           </div>
-                          <span className="text-muted-foreground" data-testid={`text-beneficiado-count-${stat.talhao}`}>
-                            {stat.beneficiado} ({progressBeneficiado.toFixed(0)}%)
+                          <span className="font-bold text-foreground" data-testid={`text-beneficiado-count-${stat.talhao}`}>
+                            {stat.beneficiado} <span className="text-muted-foreground font-medium">({progressBeneficiado.toFixed(0)}%)</span>
                           </span>
                         </div>
                         <Progress 
                           value={progressBeneficiado} 
-                          className="h-2 [&>div]:bg-bale-beneficiado"
+                          className="h-2.5 rounded-full [&>div]:bg-bale-beneficiado"
                           data-testid={`progress-beneficiado-${stat.talhao}`}
                         />
                       </div>
@@ -539,10 +589,10 @@ export default function TalhaoStats() {
             {/* Tab: Por Safra */}
             <TabsContent value="safra" className="space-y-4 mt-4">
               {safraStats.length === 0 ? (
-                <Card className="p-12">
+                <Card className="p-12 shadow-xl border-2 rounded-2xl">
                   <div className="text-center space-y-4">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
-                      <Layers className="w-8 h-8 text-muted-foreground" />
+                    <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                      <Layers className="w-10 h-10 text-muted-foreground" />
                     </div>
                     <div>
                       <h3 className="text-base font-semibold">Nenhuma safra registrada</h3>
@@ -562,22 +612,22 @@ export default function TalhaoStats() {
                     return (
                       <Card
                         key={stat.safra}
-                        className="hover-elevate smooth-transition shadow-sm"
+                        className="bg-card shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300"
                       >
                         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
                           <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <Calendar className="w-5 h-5 text-primary" />
+                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center shrink-0">
+                              <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <CardTitle className="text-lg truncate">Safra {stat.safra}</CardTitle>
-                              <p className="text-xs text-muted-foreground">
+                              <CardTitle className="text-lg font-bold truncate">Safra {stat.safra}</CardTitle>
+                              <p className="text-sm text-muted-foreground font-medium">
                                 {stat.total} {stat.total === 1 ? "fardo" : "fardos"}
                               </p>
                             </div>
                           </div>
-                          <Badge variant="outline" className="shrink-0">
-                            <TrendingUp className="w-3 h-3 mr-1" />
+                          <Badge variant="outline" className="shrink-0 border-2 px-3 py-1.5 rounded-lg font-bold">
+                            <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
                             <span>{stat.total}</span>
                           </Badge>
                         </CardHeader>
@@ -586,42 +636,48 @@ export default function TalhaoStats() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <div className="flex items-center gap-2">
-                                <Package className={`w-4 h-4 ${getStatusColor("campo")}`} />
-                                <span className="font-medium">Campo</span>
+                                <div className="p-1.5 bg-bale-campo/10 rounded-lg">
+                                  <Package className="w-4 h-4 text-bale-campo" />
+                                </div>
+                                <span className="font-semibold">Campo</span>
                               </div>
-                              <span className="text-muted-foreground">
-                                {stat.campo} ({progressCampo.toFixed(0)}%)
+                              <span className="font-bold text-foreground">
+                                {stat.campo} <span className="text-muted-foreground font-medium">({progressCampo.toFixed(0)}%)</span>
                               </span>
                             </div>
-                            <Progress value={progressCampo} className="h-2" />
+                            <Progress value={progressCampo} className="h-2.5 rounded-full" />
                           </div>
 
                           {/* Pátio */}
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <div className="flex items-center gap-2">
-                                <Truck className={`w-4 h-4 ${getStatusColor("patio")}`} />
-                                <span className="font-medium">Pátio</span>
+                                <div className="p-1.5 bg-bale-patio/10 rounded-lg">
+                                  <Truck className="w-4 h-4 text-bale-patio" />
+                                </div>
+                                <span className="font-semibold">Pátio</span>
                               </div>
-                              <span className="text-muted-foreground">
-                                {stat.patio} ({progressPatio.toFixed(0)}%)
+                              <span className="font-bold text-foreground">
+                                {stat.patio} <span className="text-muted-foreground font-medium">({progressPatio.toFixed(0)}%)</span>
                               </span>
                             </div>
-                            <Progress value={progressPatio} className="h-2 [&>div]:bg-bale-patio" />
+                            <Progress value={progressPatio} className="h-2.5 rounded-full [&>div]:bg-bale-patio" />
                           </div>
 
                           {/* Beneficiado */}
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <div className="flex items-center gap-2">
-                                <CheckCircle className={`w-4 h-4 ${getStatusColor("beneficiado")}`} />
-                                <span className="font-medium">Beneficiado</span>
+                                <div className="p-1.5 bg-bale-beneficiado/10 rounded-lg">
+                                  <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
+                                </div>
+                                <span className="font-semibold">Beneficiado</span>
                               </div>
-                              <span className="text-muted-foreground">
-                                {stat.beneficiado} ({progressBeneficiado.toFixed(0)}%)
+                              <span className="font-bold text-foreground">
+                                {stat.beneficiado} <span className="text-muted-foreground font-medium">({progressBeneficiado.toFixed(0)}%)</span>
                               </span>
                             </div>
-                            <Progress value={progressBeneficiado} className="h-2 [&>div]:bg-bale-beneficiado" />
+                            <Progress value={progressBeneficiado} className="h-2.5 rounded-full [&>div]:bg-bale-beneficiado" />
                           </div>
                         </CardContent>
                       </Card>
@@ -634,12 +690,14 @@ export default function TalhaoStats() {
             {/* Tab: Gráficos Interativos */}
             <TabsContent value="graficos" className="space-y-6 mt-4">
               {/* Filtros */}
-              <Card className="shadow-sm">
+              <Card className="shadow-lg border-2 rounded-xl">
                 <CardContent className="pt-6">
                   <div className="flex flex-wrap gap-4 items-center">
                     <div className="flex items-center gap-2">
-                      <Filter className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Filtros:</span>
+                      <div className="p-1.5 bg-primary/10 rounded-lg">
+                        <Filter className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm font-bold">Filtros:</span>
                     </div>
                     
                     <div className="flex gap-2">
@@ -647,6 +705,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "7d" ? "default" : "outline"}
                         onClick={() => setTimeFilter("7d")}
+                        className="rounded-lg font-semibold"
                       >
                         7 dias
                       </Button>
@@ -654,6 +713,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "30d" ? "default" : "outline"}
                         onClick={() => setTimeFilter("30d")}
+                        className="rounded-lg font-semibold"
                       >
                         30 dias
                       </Button>
@@ -661,6 +721,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "all" ? "default" : "outline"}
                         onClick={() => setTimeFilter("all")}
+                        className="rounded-lg font-semibold"
                       >
                         Todos
                       </Button>
@@ -671,6 +732,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "all" ? "default" : "outline"}
                         onClick={() => setChartFilter("all")}
+                        className="rounded-lg font-semibold"
                       >
                         Todos Status
                       </Button>
@@ -678,7 +740,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "campo" ? "default" : "outline"}
                         onClick={() => setChartFilter("campo")}
-                        className={chartFilter === "campo" ? "bg-bale-campo hover:bg-bale-campo/90" : ""}
+                        className={chartFilter === "campo" ? "bg-bale-campo hover:bg-bale-campo/90 rounded-lg font-semibold" : "rounded-lg font-semibold"}
                       >
                         Campo
                       </Button>
@@ -686,7 +748,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "patio" ? "default" : "outline"}
                         onClick={() => setChartFilter("patio")}
-                        className={chartFilter === "patio" ? "bg-bale-patio hover:bg-bale-patio/90" : ""}
+                        className={chartFilter === "patio" ? "bg-bale-patio hover:bg-bale-patio/90 rounded-lg font-semibold" : "rounded-lg font-semibold"}
                       >
                         Pátio
                       </Button>
@@ -694,7 +756,7 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "beneficiado" ? "default" : "outline"}
                         onClick={() => setChartFilter("beneficiado")}
-                        className={chartFilter === "beneficiado" ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90" : ""}
+                        className={chartFilter === "beneficiado" ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90 rounded-lg font-semibold" : "rounded-lg font-semibold"}
                       >
                         Beneficiado
                       </Button>
@@ -704,10 +766,15 @@ export default function TalhaoStats() {
               </Card>
 
               {/* Gráfico de Produção por Talhão */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5" />
+              <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  </div>
+                  <CardTitle className="flex items-center gap-2 relative">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                      <BarChart3 className="w-5 h-5" />
+                    </div>
                     Produção por Talhão
                   </CardTitle>
                 </CardHeader>
@@ -744,10 +811,15 @@ export default function TalhaoStats() {
               {/* Grid com 2 gráficos */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Gráfico de Produtividade em Arrobas (@) por Talhão */}
-                <Card className="shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
+                <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    </div>
+                    <CardTitle className="flex items-center gap-2 relative text-base">
+                      <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                        <TrendingUp className="w-4 h-4" />
+                      </div>
                       Produtividade em Arrobas (@/ha)
                     </CardTitle>
                   </CardHeader>
@@ -800,10 +872,15 @@ export default function TalhaoStats() {
                 </Card>
 
                 {/* Gráfico de Produtividade em Fardos por Talhão */}
-                <Card className="shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="w-5 h-5" />
+                <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    </div>
+                    <CardTitle className="flex items-center gap-2 relative text-base">
+                      <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                        <Package className="w-4 h-4" />
+                      </div>
                       Produtividade em Fardos (f/ha)
                     </CardTitle>
                   </CardHeader>
@@ -856,10 +933,15 @@ export default function TalhaoStats() {
               </div>
 
               {/* Gráfico de Tempo Médio de Beneficiamento */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
+              <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-green-600 to-yellow-600 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  </div>
+                  <CardTitle className="flex items-center gap-2 relative">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                      <Clock className="w-5 h-5" />
+                    </div>
                     Tempo Médio: Pátio → Beneficiado
                   </CardTitle>
                 </CardHeader>
@@ -962,10 +1044,26 @@ export default function TalhaoStats() {
 
             {/* Tab: Mapa */}
             <TabsContent value="mapa" className="mt-4">
-              <InteractiveTalhaoMap 
-                selectedTalhao={selectedTalhao || undefined}
-                onTalhaoClick={(talhao) => setSelectedTalhao(talhao)}
-              />
+              <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  </div>
+                  <CardTitle className="flex items-center gap-2 relative">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                      <MapPin className="w-5 h-5" />
+                    </div>
+                    Mapa Interativo dos Talhões
+                  </CardTitle>
+                  <p className="text-sm text-white/90 relative">Clique em um talhão para ver detalhes</p>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <InteractiveTalhaoMap 
+                    selectedTalhao={selectedTalhao || undefined}
+                    onTalhaoClick={(talhao) => setSelectedTalhao(talhao)}
+                  />
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
@@ -973,13 +1071,15 @@ export default function TalhaoStats() {
 
       {/* Modal de Detalhes do Talhão */}
       <Dialog open={!!selectedTalhao} onOpenChange={() => setSelectedTalhao(null)}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[9999]">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[9999] rounded-2xl border-2">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base sm:text-xl">
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-xl font-bold">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              </div>
               Talhão {selectedTalhao}
             </DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm">
+            <DialogDescription className="text-xs sm:text-sm font-medium">
               Informações detalhadas e métricas de produtividade
             </DialogDescription>
           </DialogHeader>
@@ -988,45 +1088,53 @@ export default function TalhaoStats() {
             <div className="space-y-4 sm:space-y-6">
               {/* Informações Gerais */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                <Card className="bg-primary/5 border-primary/20">
+                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 rounded-xl">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-primary mb-1 sm:mb-2" />
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">Área</p>
+                      <div className="p-1.5 bg-primary/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
+                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Área</p>
                       <p className="text-xl sm:text-2xl font-bold text-primary">{selectedTalhaoInfo.hectares}</p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground">hectares</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <Package className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1 sm:mb-2" />
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">Total Fardos</p>
-                      <p className="text-xl sm:text-2xl font-bold text-blue-600">{selectedTalhaoData.total}</p>
+                      <div className="p-1.5 bg-yellow-500/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
+                        <Package className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-500" />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Total Fardos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-500">{selectedTalhaoData.total}</p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground">fardos</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-purple-50 border-purple-200">
+                <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <Activity className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-purple-600 mb-1 sm:mb-2" />
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">Produtividade</p>
-                      <p className="text-base sm:text-xl font-bold text-purple-600">{produtividadeArrobas} @/ha</p>
-                      <p className="text-xs sm:text-sm text-purple-600/70">{fardosPorHectare} f/ha</p>
+                      <div className="p-1.5 bg-emerald-500/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
+                        <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-500" />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Produtividade</p>
+                      <p className="text-base sm:text-xl font-bold text-emerald-600 dark:text-emerald-500">{produtividadeArrobas} @/ha</p>
+                      <p className="text-xs sm:text-sm text-emerald-600/70 dark:text-emerald-500/70">{fardosPorHectare} f/ha</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-green-50 border-green-200">
+                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-2 border-green-200 dark:border-green-800 rounded-xl">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-1 sm:mb-2" />
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">Concluídos</p>
-                      <p className="text-xl sm:text-2xl font-bold text-green-600">{selectedTalhaoData.beneficiado}</p>
+                      <div className="p-1.5 bg-green-500/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
+                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-500" />
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Concluídos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-500">{selectedTalhaoData.beneficiado}</p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground">
                         {selectedTalhaoData.total > 0 
                           ? ((selectedTalhaoData.beneficiado / selectedTalhaoData.total) * 100).toFixed(0) 
@@ -1039,65 +1147,77 @@ export default function TalhaoStats() {
 
               {/* Distribuição por Status */}
               <div>
-                <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3">Distribuição por Status</h4>
+                <h4 className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  Distribuição por Status
+                </h4>
                 <div className="space-y-2 sm:space-y-3">
                   <div>
                     <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <Package className="w-3 h-3 sm:w-4 sm:h-4 text-bale-campo" />
-                        <span>Campo</span>
+                        <div className="p-1 bg-bale-campo/10 rounded">
+                          <Package className="w-3 h-3 sm:w-4 sm:h-4 text-bale-campo" />
+                        </div>
+                        <span className="font-semibold">Campo</span>
                       </div>
-                      <span className="font-medium">{selectedTalhaoData.campo} fardos</span>
+                      <span className="font-bold">{selectedTalhaoData.campo} fardos</span>
                     </div>
                     <Progress 
                       value={(selectedTalhaoData.campo / selectedTalhaoData.total) * 100} 
-                      className="h-1.5 sm:h-2"
+                      className="h-2 sm:h-2.5 rounded-full"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-bale-patio" />
-                        <span>Pátio</span>
+                        <div className="p-1 bg-bale-patio/10 rounded">
+                          <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-bale-patio" />
+                        </div>
+                        <span className="font-semibold">Pátio</span>
                       </div>
-                      <span className="font-medium">{selectedTalhaoData.patio} fardos</span>
+                      <span className="font-bold">{selectedTalhaoData.patio} fardos</span>
                     </div>
                     <Progress 
                       value={(selectedTalhaoData.patio / selectedTalhaoData.total) * 100} 
-                      className="h-1.5 sm:h-2 [&>div]:bg-bale-patio"
+                      className="h-2 sm:h-2.5 rounded-full [&>div]:bg-bale-patio"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-bale-beneficiado" />
-                        <span>Beneficiado</span>
+                        <div className="p-1 bg-bale-beneficiado/10 rounded">
+                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-bale-beneficiado" />
+                        </div>
+                        <span className="font-semibold">Beneficiado</span>
                       </div>
-                      <span className="font-medium">{selectedTalhaoData.beneficiado} fardos</span>
+                      <span className="font-bold">{selectedTalhaoData.beneficiado} fardos</span>
                     </div>
                     <Progress 
                       value={(selectedTalhaoData.beneficiado / selectedTalhaoData.total) * 100} 
-                      className="h-1.5 sm:h-2 [&>div]:bg-bale-beneficiado"
+                      className="h-2 sm:h-2.5 rounded-full [&>div]:bg-bale-beneficiado"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Métricas Comparativas */}
-              <div className="bg-muted/50 rounded-lg p-3 sm:p-4">
-                <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3">Comparativo com Média Geral</h4>
+              <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-3 sm:p-4 border-2">
+                <h4 className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                  Comparativo com Média Geral
+                </h4>
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-1 sm:space-y-2">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Produtividade deste talhão</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Produtividade deste talhão</p>
                     <p className="text-lg sm:text-xl font-bold text-primary">{produtividadeArrobas} @/ha</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">{fardosPorHectare} fardos/ha</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground font-medium">{fardosPorHectare} fardos/ha</p>
                   </div>
                   <div className="space-y-1 sm:space-y-2">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Média geral</p>
-                    <p className="text-lg sm:text-xl font-bold">{avgArrobasPorHectare} @/ha</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">{avgFardosPorHectare} fardos/ha</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Média geral</p>
+                    <p className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-500">{avgArrobasPorHectare} @/ha</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground font-medium">{avgFardosPorHectare} fardos/ha</p>
                   </div>
                 </div>
               </div>

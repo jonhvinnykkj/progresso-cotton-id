@@ -12,7 +12,7 @@ import L from 'leaflet';
 import { cottonTalhoes, otherTalhoes } from '@/data/talhoes-geojson';
 import { useTalhaoStats } from '@/hooks/use-talhao-stats';
 import { useSettings } from '@/hooks/use-settings';
-import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info, X } from 'lucide-react';
+import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info, X, MapPin, Wheat, Package, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
@@ -285,23 +285,24 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
       className: 'custom-label-icon',
       html: `
         <div style="
-          background: rgba(0, 0, 0, 0.75);
+          background: rgba(22, 163, 74, 0.95);
           color: white;
-          padding: 4px 10px;
-          border-radius: 4px;
+          padding: 6px 12px;
+          border-radius: 8px;
           font-weight: bold;
-          font-size: 14px;
+          font-size: 13px;
           border: 2px solid white;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+          box-shadow: 0 3px 8px rgba(0,0,0,0.3);
           white-space: nowrap;
           text-align: center;
           pointer-events: none;
+          transform: translate(-50%, -50%);
         ">
           ${nome}
         </div>
       `,
-      iconSize: [0, 0],
-      iconAnchor: [0, 0],
+      iconSize: [60, 30],
+      iconAnchor: [30, 15],
     });
   };
   
@@ -644,60 +645,83 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
           
           {/* Estatísticas flutuantes sobre o mapa */}
           {showSummary && (
-            <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-auto z-[1000] flex flex-col gap-2 max-w-full sm:max-w-xs">
+            <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-auto z-[1000] flex flex-col gap-3 max-w-full sm:max-w-xs">
               {/* Card de resumo geral */}
-              <Card className="bg-white/95 backdrop-blur shadow-lg border-2 border-primary/20">
+              <Card className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-md shadow-xl border-2 rounded-2xl overflow-hidden">
                 <CardContent className="p-3 sm:p-4">
                   <div className="space-y-2 sm:space-y-3">
-                    <div className="flex items-center justify-between border-b pb-1.5 sm:pb-2">
+                    <div className="flex items-center justify-between border-b-2 pb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
+                        <div className="p-1.5 bg-green-500/20 rounded-lg">
+                          <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 dark:text-green-500" />
+                        </div>
                         <h3 className="font-bold text-xs sm:text-sm">Resumo da Safra {safra}</h3>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowSummary(false)}
-                        className="h-6 w-6 p-0 hover:bg-destructive/10"
+                        className="h-7 w-7 p-0 hover:bg-destructive/10 rounded-lg"
                       >
-                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </Button>
                     </div>
                   
                   {overallStats && (
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs">
                       <div className="space-y-0.5 sm:space-y-1">
-                        <p className="text-muted-foreground text-[10px] sm:text-xs">Talhões</p>
-                        <p className="text-base sm:text-lg font-bold text-primary">{filteredCottonFeatures.features.length}</p>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3 text-green-600 dark:text-green-500" />
+                          <p className="text-muted-foreground text-[10px] sm:text-xs font-semibold">Talhões</p>
+                        </div>
+                        <p className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-500">{filteredCottonFeatures.features.length}</p>
                       </div>
                       <div className="space-y-0.5 sm:space-y-1">
-                        <p className="text-muted-foreground text-[10px] sm:text-xs">Área Total</p>
-                        <p className="text-base sm:text-lg font-bold text-blue-600">{overallStats.totalArea.toFixed(0)} ha</p>
+                        <div className="flex items-center gap-1.5">
+                          <Wheat className="w-3 h-3 text-yellow-600 dark:text-yellow-500" />
+                          <p className="text-muted-foreground text-[10px] sm:text-xs font-semibold">Área Total</p>
+                        </div>
+                        <p className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-500">{overallStats.totalArea.toFixed(0)} <span className="text-xs">ha</span></p>
                       </div>
                       <div className="space-y-0.5 sm:space-y-1">
-                        <p className="text-muted-foreground text-[10px] sm:text-xs">Fardos</p>
-                        <p className="text-base sm:text-lg font-bold text-purple-600">{overallStats.totalFardos}</p>
+                        <div className="flex items-center gap-1.5">
+                          <Package className="w-3 h-3 text-emerald-600 dark:text-emerald-500" />
+                          <p className="text-muted-foreground text-[10px] sm:text-xs font-semibold">Fardos</p>
+                        </div>
+                        <p className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-500">{overallStats.totalFardos}</p>
                       </div>
                       <div className="space-y-0.5 sm:space-y-1">
-                        <p className="text-muted-foreground text-[10px] sm:text-xs">Média</p>
-                        <p className="text-base sm:text-lg font-bold text-orange-600">{overallStats.produtividadeMedia.toFixed(1)} f/ha</p>
+                        <div className="flex items-center gap-1.5">
+                          <BarChart3 className="w-3 h-3 text-green-700 dark:text-green-400" />
+                          <p className="text-muted-foreground text-[10px] sm:text-xs font-semibold">Média</p>
+                        </div>
+                        <p className="text-lg sm:text-2xl font-bold text-green-700 dark:text-green-400">{overallStats.produtividadeMedia.toFixed(1)} <span className="text-xs">f/ha</span></p>
                       </div>
                     </div>
                   )}
                   
                   {statsMap && (
-                    <div className="pt-1.5 sm:pt-2 border-t space-y-1">
-                      <div className="flex justify-between text-[10px] sm:text-xs">
-                        <span className="text-muted-foreground">🟦 Em Colheita</span>
-                        <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'em_colheita').length}</span>
+                    <div className="pt-2 border-t-2 space-y-1.5">
+                      <div className="flex justify-between text-[10px] sm:text-xs items-center">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 bg-yellow-500 rounded-sm"></div>
+                          <span className="text-muted-foreground font-medium">Em Colheita</span>
+                        </div>
+                        <span className="font-bold text-foreground">{Object.values(statsMap).filter((s: any) => s.status === 'em_colheita').length}</span>
                       </div>
-                      <div className="flex justify-between text-[10px] sm:text-xs">
-                        <span className="text-muted-foreground">🟩 Concluído</span>
-                        <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'concluido').length}</span>
+                      <div className="flex justify-between text-[10px] sm:text-xs items-center">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 bg-green-500 rounded-sm"></div>
+                          <span className="text-muted-foreground font-medium">Concluído</span>
+                        </div>
+                        <span className="font-bold text-foreground">{Object.values(statsMap).filter((s: any) => s.status === 'concluido').length}</span>
                       </div>
-                      <div className="flex justify-between text-[10px] sm:text-xs">
-                        <span className="text-muted-foreground">⬜ Não Iniciado</span>
-                        <span className="font-semibold">{Object.values(statsMap).filter((s: any) => s.status === 'nao_iniciado').length}</span>
+                      <div className="flex justify-between text-[10px] sm:text-xs items-center">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 bg-gray-400 dark:bg-gray-500 rounded-sm"></div>
+                          <span className="text-muted-foreground font-medium">Não Iniciado</span>
+                        </div>
+                        <span className="font-bold text-foreground">{Object.values(statsMap).filter((s: any) => s.status === 'nao_iniciado').length}</span>
                       </div>
                     </div>
                   )}
@@ -707,11 +731,13 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
             
             {/* Ranking de produtividade - Escondido no mobile */}
             {statsMap && Object.keys(statsMap).length > 0 && (
-              <Card className="hidden sm:block bg-white/95 backdrop-blur shadow-lg border-2 border-orange-500/20">
+              <Card className="hidden sm:block bg-white/98 dark:bg-gray-900/98 backdrop-blur-md shadow-xl border-2 rounded-2xl overflow-hidden">
                 <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 border-b pb-2">
-                      <TrendingUp className="h-3 w-3 text-orange-500" />
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 border-b-2 pb-2">
+                      <div className="p-1.5 bg-yellow-500/20 rounded-lg">
+                        <TrendingUp className="h-3.5 w-3.5 text-yellow-600 dark:text-yellow-500" />
+                      </div>
                       <h3 className="font-bold text-sm">Top Produtividade</h3>
                     </div>
                     {Object.values(statsMap)
@@ -720,12 +746,12 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
                       .map((stat: any, index: number) => (
                         <div key={stat.talhao} className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
-                            <span className={`font-bold ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-400'}`}>
+                            <span className="text-base">
                               {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
                             </span>
-                            <span className="font-semibold">T{stat.talhao}</span>
+                            <span className="font-bold">T{stat.talhao}</span>
                           </div>
-                          <span className="font-bold text-orange-600">{stat.produtividade.toFixed(2)} f/ha</span>
+                          <span className="font-bold text-yellow-600 dark:text-yellow-500">{stat.produtividade.toFixed(2)} <span className="text-[10px]">f/ha</span></span>
                         </div>
                       ))}
                   </div>

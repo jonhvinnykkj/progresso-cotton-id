@@ -125,14 +125,14 @@ export default function Dashboard() {
   return (
     <div className="mobile-page">
       {/* Header sticky mobile-first */}
-      <header className="mobile-header">
+      <header className="mobile-header backdrop-blur-md bg-background/95 border-b">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-wrap items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 animate-fade-in-up">
               <img 
                 src={logoProgresso} 
                 alt="Grupo Progresso" 
-                className="h-8 sm:h-10 w-auto shrink-0"
+                className="h-8 sm:h-10 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
               />
               <div className="min-w-0">
                 <h1 className="text-base sm:text-lg font-semibold truncate">Dashboard</h1>
@@ -149,7 +149,7 @@ export default function Dashboard() {
                     size="sm"
                     onClick={() => setLocation("/users")}
                     data-testid="button-user-management"
-                    className="h-9 w-9 p-0 flex items-center justify-center"
+                    className="h-9 w-9 p-0 flex items-center justify-center transition-all hover:scale-110 duration-300"
                     title="Gestão de Usuários"
                   >
                     <Users className="w-4 h-4" />
@@ -159,7 +159,7 @@ export default function Dashboard() {
                     size="sm"
                     onClick={handleClearCache}
                     data-testid="button-clear-cache"
-                    className="h-9 w-9 p-0 flex items-center justify-center"
+                    className="h-9 w-9 p-0 flex items-center justify-center transition-all hover:scale-110 hover:rotate-180 duration-300"
                     title="Limpar Cache e Recarregar"
                   >
                     <RefreshCw className="w-4 h-4" />
@@ -172,7 +172,7 @@ export default function Dashboard() {
                   size="sm"
                   onClick={() => setLocation("/talhao-stats")}
                   data-testid="button-talhao-stats"
-                  className="h-9 w-9 p-0 flex items-center justify-center"
+                  className="h-9 w-9 p-0 flex items-center justify-center transition-all hover:scale-110 duration-300"
                   title="Dashboard por Talhão"
                 >
                   <BarChart3 className="w-4 h-4" />
@@ -184,7 +184,7 @@ export default function Dashboard() {
                   size="sm"
                   onClick={() => setLocation("/settings")}
                   data-testid="button-settings"
-                  className="h-9 w-9 p-0"
+                  className="h-9 w-9 p-0 transition-all hover:scale-110 hover:rotate-90 duration-300"
                   title="Configurações"
                 >
                   <Settings className="w-4 h-4" />
@@ -196,7 +196,7 @@ export default function Dashboard() {
                 size="sm"
                 onClick={handleLogout}
                 data-testid="button-logout"
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 transition-all hover:scale-110 duration-300"
                 title="Sair"
               >
                 <LogOut className="w-4 h-4" />
@@ -211,14 +211,15 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-6 max-w-7xl space-y-5">
           {/* Stats Cards - Grid responsivo */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {statusCards.map((card) => {
+            {statusCards.map((card, index) => {
               const Icon = card.icon;
               return (
                 <Card
                   key={card.status}
-                  className={`hover-elevate cursor-pointer shadow-sm smooth-transition ${
+                  className={`hover-elevate cursor-pointer shadow-sm smooth-transition animate-fade-in-up ${
                     statusFilter === card.status ? "ring-2 ring-primary" : ""
                   }`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                   onClick={() =>
                     setStatusFilter(statusFilter === card.status ? "all" : card.status)
                   }
@@ -226,7 +227,7 @@ export default function Dashboard() {
                 >
                   <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                     <CardTitle className="text-xs font-medium">{card.label}</CardTitle>
-                    <div className={`w-8 h-8 rounded-full ${card.bgColor} flex items-center justify-center shrink-0`}>
+                    <div className={`w-8 h-8 rounded-full ${card.bgColor} flex items-center justify-center shrink-0 transition-transform hover:scale-110 duration-300`}>
                       <Icon className={`w-4 h-4 ${card.color}`} />
                     </div>
                   </CardHeader>
@@ -242,26 +243,26 @@ export default function Dashboard() {
           </div>
 
           {/* Total Stats Card - Destaque com gradiente */}
-          <Card className="brand-gradient text-white shadow-md">
+          <Card className="brand-gradient text-white shadow-md animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
               <CardTitle className="text-base">Resumo Geral</CardTitle>
               <BarChart3 className="w-5 h-5 shrink-0" />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div>
+                <div className="transition-transform hover:scale-110 duration-300">
                   <p className="text-xs text-white/80 mb-1">Total de Fardos</p>
                   <p className="text-2xl font-bold">{stats?.total || 0}</p>
                 </div>
-                <div>
+                <div className="transition-transform hover:scale-110 duration-300">
                   <p className="text-xs text-white/80 mb-1">Talhões Ativos</p>
                   <p className="text-2xl font-bold">{uniqueTalhoesCount}</p>
                 </div>
-                <div>
+                <div className="transition-transform hover:scale-110 duration-300">
                   <p className="text-xs text-white/80 mb-1">Criados Hoje</p>
                   <p className="text-2xl font-bold">{balesToday}</p>
                 </div>
-                <div>
+                <div className="transition-transform hover:scale-110 duration-300">
                   <p className="text-xs text-white/80 mb-1">Beneficiados</p>
                   <p className="text-2xl font-bold">{progressPercent}%</p>
                 </div>
@@ -270,14 +271,14 @@ export default function Dashboard() {
           </Card>
 
           {/* Filtros mobile-first */}
-          <div className="space-y-3">
+          <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder="Buscar por ID, número, talhão ou QR..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11"
+                className="pl-10 h-11 transition-all focus:scale-[1.01] duration-300"
                 data-testid="input-search"
               />
             </div>
@@ -285,7 +286,7 @@ export default function Dashboard() {
             <div className="flex gap-2 flex-wrap">
               <Badge
                 variant={statusFilter === "all" ? "default" : "outline"}
-                className="cursor-pointer hover-elevate px-3 py-1.5 text-xs"
+                className="cursor-pointer hover-elevate px-3 py-1.5 text-xs transition-all hover:scale-105 duration-300"
                 onClick={() => setStatusFilter("all")}
                 data-testid="filter-all"
               >
@@ -296,7 +297,7 @@ export default function Dashboard() {
                 <Badge
                   key={card.status}
                   variant={statusFilter === card.status ? "default" : "outline"}
-                  className="cursor-pointer hover-elevate px-3 py-1.5 text-xs"
+                  className="cursor-pointer hover-elevate px-3 py-1.5 text-xs transition-all hover:scale-105 duration-300"
                   onClick={() => setStatusFilter(card.status)}
                   data-testid={`filter-${card.status}`}
                 >
@@ -323,9 +324,9 @@ export default function Dashboard() {
               ))}
             </div>
           ) : filteredBales.length === 0 ? (
-            <Card className="p-8 sm:p-12">
+            <Card className="p-8 sm:p-12 animate-fade-in-up">
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center animate-bounce-gentle">
                   <Package className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <div>
@@ -340,12 +341,17 @@ export default function Dashboard() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {filteredBales.map((bale) => (
-                <BaleCard
+              {filteredBales.map((bale, index) => (
+                <div
                   key={bale.id}
-                  bale={bale}
-                  onClick={() => setLocation(`/bale/${encodeURIComponent(bale.id)}`)}
-                />
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${(index % 9) * 0.05}s` }}
+                >
+                  <BaleCard
+                    bale={bale}
+                    onClick={() => setLocation(`/bale/${encodeURIComponent(bale.id)}`)}
+                  />
+                </div>
               ))}
             </div>
           )}

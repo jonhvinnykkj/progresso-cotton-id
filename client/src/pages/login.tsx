@@ -41,7 +41,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/footer";
-import { ShieldCheck, User, Package, Truck, Building } from "lucide-react";
+import { ShieldCheck, User, Package, Truck, Building, Loader2, Lock, Wheat } from "lucide-react";
 import logoProgresso from "/favicon.png";
 
 const roles: {
@@ -229,54 +229,132 @@ export default function Login() {
   };
 
   return (
-    <div className="mobile-page bg-gradient-to-br from-green-50 via-white to-yellow-50 dark:from-background dark:via-background dark:to-background">
-      {/* Hero section com gradiente da marca */}
-      <div className="brand-gradient text-white py-12 px-4 shadow-xl">
-        <div className="container mx-auto max-w-md text-center space-y-4">
-          <div className="flex justify-center">
-            <img
-              src={logoProgresso}
-              alt="Grupo Progresso"
-              className="h-20 sm:h-24 w-auto drop-shadow-2xl"
-            />
-          </div>
-          <h1 className="text-white font-bold drop-shadow-md">Rastreabilidade de Fardos</h1>
-          <p className="text-sm text-white/95 leading-snug drop-shadow">
-            Sistema de controle de algodão do campo ao beneficiamento
-          </p>
+    <div className="mobile-page relative overflow-hidden min-h-screen bg-gradient-to-br from-emerald-400 via-green-500 to-emerald-600">
+      {/* Animação de gradiente de fundo suave */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-300/20 via-green-400/20 to-emerald-500/20 animate-gradient-shift"></div>
+      
+      {/* Partículas de algodão flutuantes - mais suaves */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Bolinhas brancas de algodão */}
+        <div className="absolute top-10 left-5 animate-float-slow opacity-60" style={{ animationDelay: '0s' }}>
+          <div className="w-16 h-16 bg-white rounded-full shadow-xl"></div>
+        </div>
+        <div className="absolute top-20 right-10 animate-float-slow opacity-50" style={{ animationDelay: '2s' }}>
+          <div className="w-12 h-12 bg-white rounded-full shadow-lg"></div>
+        </div>
+        <div className="absolute top-1/3 left-1/4 animate-float-slow opacity-40" style={{ animationDelay: '4s' }}>
+          <div className="w-20 h-20 bg-white rounded-full shadow-xl"></div>
+        </div>
+        <div className="absolute bottom-1/4 right-1/3 animate-float-slow opacity-55" style={{ animationDelay: '3s' }}>
+          <div className="w-24 h-24 bg-white rounded-full shadow-2xl"></div>
+        </div>
+        <div className="absolute bottom-10 left-10 animate-float-slow opacity-45" style={{ animationDelay: '5s' }}>
+          <div className="w-10 h-10 bg-white rounded-full shadow-lg"></div>
+        </div>
+        <div className="absolute top-1/2 right-1/4 animate-float-slow opacity-50" style={{ animationDelay: '1s' }}>
+          <div className="w-14 h-14 bg-white rounded-full shadow-lg"></div>
+        </div>
+        
+        {/* Círculos pequenos adicionais */}
+        <div className="absolute top-1/4 right-1/2 animate-pulse opacity-40">
+          <div className="w-4 h-4 bg-white rounded-full"></div>
+        </div>
+        <div className="absolute bottom-1/3 left-1/3 animate-pulse opacity-35" style={{ animationDelay: '1.5s' }}>
+          <div className="w-6 h-6 bg-white rounded-full"></div>
         </div>
       </div>
 
-      {/* Conteúdo principal */}
-      <div className="flex-1 flex items-center justify-center px-4 py-8 -mt-6">
-        <Card className="w-full max-w-[360px] shadow-primary border-primary/10">
-          <CardHeader className="space-y-2 pb-4">
-            <CardTitle className="text-lg text-center">
-              Acesse sua conta
-            </CardTitle>
-            <CardDescription className="text-center text-xs">
-              Entre com suas credenciais para continuar
-            </CardDescription>
+      {/* Hero section centralizado */}
+      <div className="relative text-white py-12 px-4">
+        <div className="container mx-auto max-w-md text-center space-y-5 relative z-10">
+          <div className="flex justify-center animate-bounce-slow">
+            <div className="relative">
+              {/* Círculos brilhantes ao redor do logo */}
+              <div className="absolute inset-0 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
+              <div className="absolute -inset-4 border-4 border-white/30 rounded-full animate-spin-slow"></div>
+              
+              {/* Logo */}
+              <img
+                src={logoProgresso}
+                alt="Grupo Progresso"
+                className="relative h-20 sm:h-24 w-auto drop-shadow-2xl transform hover:scale-110 transition-transform duration-500"
+                style={{ 
+                  filter: 'brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(100%) contrast(119%)'
+                }}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-2xl tracking-tight">
+              Progresso Cotton Management
+            </h1>
+            <div className="flex items-center justify-center gap-2 text-sm sm:text-base font-medium">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span className="text-white drop-shadow-lg">Rastreabilidade de Fardos</span>
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+          </div>
+          
+          <p className="text-sm text-white/95 leading-relaxed drop-shadow-lg max-w-xs mx-auto font-medium animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            🌱 Do campo ao beneficiamento
+          </p>
+          
+          {/* Badges */}
+          <div className="flex items-center justify-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold border border-white/30 shadow-lg">
+              <div className="w-2 h-2 bg-green-300 rounded-full animate-ping"></div>
+              <span>Sistema Ativo</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-400/25 backdrop-blur-sm rounded-full text-xs font-semibold border border-yellow-300/40 shadow-lg">
+              <span>⚡</span>
+              <span>100% Digital</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Conteúdo principal - Card de Login */}
+      <div className="relative flex-1 flex items-center justify-center px-4 pb-12">
+        <Card className="w-full max-w-[380px] shadow-2xl border-3 border-white/70 backdrop-blur-sm bg-white/95 dark:bg-background/95 transform hover:scale-[1.01] transition-all duration-300 animate-slide-up-bounce relative overflow-visible rounded-2xl">
+          
+          <CardHeader className="space-y-2 pb-4 pt-8 relative">
+            {/* Ícone de algodão no topo */}
+            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-3.5 shadow-xl border-4 border-green-100 animate-float-gentle z-10">
+              <Wheat className="w-8 h-8 text-green-600" />
+            </div>
+            
+            <div className="pt-6">
+              <CardTitle className="text-xl text-center font-bold text-gray-800 flex items-center justify-center gap-2">
+                <Lock className="w-5 h-5 text-gray-600" />
+                Acesse sua conta
+                <Lock className="w-5 h-5 text-gray-600" />
+              </CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          
+          <CardContent className="space-y-4 relative pb-6">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
+                className="space-y-3"
               >
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Usuário</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" />
+                        Usuário
+                      </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Digite seu usuário"
+                          placeholder="admin"
                           {...field}
                           disabled={isLoading}
                           data-testid="input-username"
-                          className="h-11"
+                          className="h-10 border-2 border-gray-200 focus:border-green-500 transition-colors bg-white"
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -289,15 +367,18 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Senha</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5" />
+                        Senha
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Digite sua senha"
+                          placeholder="••••••••"
                           {...field}
                           disabled={isLoading}
                           data-testid="input-password"
-                          className="h-11"
+                          className="h-10 border-2 border-gray-200 focus:border-green-500 transition-colors bg-white"
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -307,48 +388,36 @@ export default function Login() {
 
                 <Button
                   type="submit"
-                  className="w-full h-11 shadow-primary hover-shadow-primary font-semibold"
+                  className="w-full mt-5 h-11 text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
                   disabled={isLoading}
-                  data-testid="button-login"
+                  data-testid="submit-login"
                 >
-                  {isLoading ? "Entrando..." : "Entrar"}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    <>Entrar no Sistema</>
+                  )}
                 </Button>
               </form>
             </Form>
-
-            <div className="p-3 bg-primary/5 rounded-lg space-y-2 border border-primary/20">
-              <p className="text-xs font-semibold text-center text-primary">
-                Credenciais de Teste
-              </p>
-              <div className="space-y-1.5">
-                {roles.map((role) => (
-                  <div
-                    key={role.value}
-                    className="flex items-center justify-between gap-2 text-xs"
-                  >
-                    <span className="font-medium text-muted-foreground truncate">
-                      {role.label}:
-                    </span>
-                    <code className="bg-background px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap">
-                      {role.value}/{role.value}123
-                    </code>
-                  </div>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Dialog de Seleção de Papel */}
       <Dialog open={showRoleSelector} onOpenChange={setShowRoleSelector}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl border-2">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-primary" />
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <ShieldCheck className="w-5 h-5 text-green-600 dark:text-green-500" />
+              </div>
               Selecione seu Papel
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="font-medium">
               Você tem acesso a múltiplos papéis. Escolha como deseja acessar o sistema.
             </DialogDescription>
           </DialogHeader>
@@ -363,16 +432,16 @@ export default function Login() {
                 <Button
                   key={roleValue}
                   variant="outline"
-                  className="h-auto p-4 justify-start hover:bg-primary/5 hover:border-primary transition-all"
+                  className="h-auto p-4 justify-start border-2 rounded-xl hover:scale-[1.02] hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950 hover:shadow-lg transition-all"
                   onClick={() => handleRoleSelect(roleValue)}
                 >
                   <div className="flex items-center gap-3 w-full">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-primary" />
+                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-foreground" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-semibold">{roleInfo.label}</p>
-                      <p className="text-xs text-muted-foreground">{roleInfo.description}</p>
+                      <p className="font-bold text-base">{roleInfo.label}</p>
+                      <p className="text-xs text-muted-foreground font-medium">{roleInfo.description}</p>
                     </div>
                   </div>
                 </Button>

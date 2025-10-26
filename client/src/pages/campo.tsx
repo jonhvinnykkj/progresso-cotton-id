@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus } from "lucide-react";
+import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus, Wheat, Hash, Calendar, Zap, Lightbulb, Tag, MapPin, Printer } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
 import type { Bale } from "@shared/schema";
@@ -228,14 +228,14 @@ export default function Campo() {
   return (
     <div className="mobile-page">
       {/* Header */}
-      <header className="mobile-header">
+      <header className="mobile-header backdrop-blur-md bg-background/95 border-b">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-1 min-w-0 animate-fade-in-up">
               <img 
                 src={logoProgresso} 
                 alt="Grupo Progresso" 
-                className="h-8 sm:h-10 w-auto shrink-0"
+                className="h-8 sm:h-10 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
               />
               <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-xl font-semibold truncate">Cadastro de Fardos</h1>
@@ -249,7 +249,7 @@ export default function Campo() {
               size="sm"
               onClick={handleLogout}
               data-testid="button-logout"
-              className="shrink-0"
+              className="shrink-0 transition-all hover:scale-110 duration-300"
             >
               <LogOut className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Sair</span>
@@ -259,38 +259,69 @@ export default function Campo() {
       </header>
 
       {/* Conteúdo principal */}
-      <main className="mobile-content">
+      <main className="mobile-content bg-gradient-to-br from-background via-muted/10 to-background">
         <div className="container mx-auto px-4 py-6 max-w-2xl space-y-5">
           
           {/* Formulário de Cadastro */}
-          <Card className="shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Package className="w-5 h-5 text-primary shrink-0" />
-                Criar Fardos
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Escolha entre criar múltiplos fardos ou um único fardo
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Exibir safra atual (somente leitura) */}
+          <Card className="shadow-xl border-2 animate-fade-in-up overflow-hidden" style={{ animationDelay: '0.1s' }}>
+            {/* Header com gradiente */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 pb-8 relative overflow-hidden">
+              {/* Padrão decorativo de fundo */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+              </div>
+              
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-white font-bold">Criar Fardos</CardTitle>
+                    <CardDescription className="text-white/90 text-sm mt-0.5">
+                      Sistema inteligente de cadastro
+                    </CardDescription>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <CardContent className="pt-6 -mt-4 relative">
+              {/* Exibir safra atual - Card flutuante */}
               {defaultSafra && (
-                <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Safra Atual</p>
-                  <p className="text-sm font-semibold text-primary">{defaultSafra}</p>
+                <div className="mb-6 p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/30 rounded-2xl shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl duration-300 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  <div className="relative flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Safra Ativa</p>
+                        <p className="text-lg font-bold text-primary">{defaultSafra}</p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1.5 bg-primary/20 rounded-full">
+                      <span className="text-xs font-semibold text-primary">ATIVA</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
               <Tabs defaultValue="lote" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="lote">
+                <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/50 rounded-xl h-12">
+                  <TabsTrigger 
+                    value="lote" 
+                    className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  >
                     <Package className="w-4 h-4 mr-2" />
-                    Em Lote
+                    <span className="font-semibold">Em Lote</span>
                   </TabsTrigger>
-                  <TabsTrigger value="individual">
+                  <TabsTrigger 
+                    value="individual" 
+                    className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+                  >
                     <Plus className="w-4 h-4 mr-2" />
-                    Individual
+                    <span className="font-semibold">Individual</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -298,29 +329,39 @@ export default function Campo() {
                 <TabsContent value="lote">
               
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleCreateBatch)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleCreateBatch)} className="space-y-5">
                   <FormField
                     control={form.control}
                     name="talhao"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Talhão</FormLabel>
+                        <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                          <Wheat className="w-4 h-4 text-primary" />
+                          Talhão de Produção
+                        </FormLabel>
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
                           disabled={isCreating}
                         >
                           <FormControl>
-                            <SelectTrigger className="h-11" data-testid="select-talhao">
-                              <SelectValue placeholder="Selecione o talhão" />
+                            <SelectTrigger className="h-12 rounded-xl border-2 hover:border-primary/50 transition-all" data-testid="select-talhao">
+                              <SelectValue placeholder="Selecione o talhão de algodão" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="rounded-xl">
                             {TALHOES_INFO.map((talhao) => (
-                              <SelectItem key={talhao.id} value={talhao.nome}>
-                                <div className="flex items-center justify-between gap-3">
-                                  <span className="font-medium">{talhao.nome}</span>
-                                  <span className="text-xs text-muted-foreground">
+                              <SelectItem 
+                                key={talhao.id} 
+                                value={talhao.nome}
+                                className="rounded-lg my-0.5"
+                              >
+                                <div className="flex items-center justify-between gap-3 w-full">
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                                    <span className="font-semibold">{talhao.nome}</span>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                                     {talhao.hectares} ha
                                   </span>
                                 </div>
@@ -328,7 +369,8 @@ export default function Campo() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormDescription>
+                        <FormDescription className="flex items-center gap-1.5 text-xs">
+                          <Lightbulb className="w-3.5 h-3.5" />
                           A numeração continuará de onde parou neste talhão
                         </FormDescription>
                         <FormMessage className="text-xs" />
@@ -341,22 +383,26 @@ export default function Campo() {
                     name="quantidade"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Quantidade</FormLabel>
+                        <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                          <Package className="w-4 h-4 text-primary" />
+                          Quantidade de Fardos
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             min="1"
                             max="1000"
-                            placeholder="Ex: 50"
+                            placeholder="Digite a quantidade (Ex: 50)"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                             disabled={isCreating}
                             data-testid="input-quantidade"
-                            className="h-11"
+                            className="h-12 rounded-xl border-2 hover:border-primary/50 transition-all focus:scale-[1.01] duration-300 text-base"
                           />
                         </FormControl>
-                        <FormDescription>
-                          Quantos fardos deseja criar? (máximo: 1000)
+                        <FormDescription className="flex items-center gap-1.5 text-xs">
+                          <Zap className="w-3.5 h-3.5" />
+                          Crie até 1000 fardos de uma só vez
                         </FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
@@ -365,52 +411,62 @@ export default function Campo() {
 
                   <Button
                     type="submit"
-                    className="w-full h-11 shadow"
+                    className="w-full h-13 rounded-xl shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl duration-300 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-base font-bold"
                     disabled={isCreating}
                     data-testid="button-create-batch"
                   >
                     {isCreating ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Criando {form.watch("quantidade")} fardo(s)...
                       </>
                     ) : (
                       <>
-                        <QrCode className="w-4 h-4 mr-2" />
-                        Gerar Etiquetas QR
+                        <Package className="w-5 h-5 mr-2" />
+                        Criar Lote de Fardos
                       </>
                     )}
                   </Button>
                 </form>
               </Form>
-              </TabsContent>
+            </TabsContent>
 
               {/* Tab: Criar Individual */}
               <TabsContent value="individual">
                 <Form {...singleForm}>
-                  <form onSubmit={singleForm.handleSubmit(handleCreateSingle)} className="space-y-4">
+                  <form onSubmit={singleForm.handleSubmit(handleCreateSingle)} className="space-y-5">
                     <FormField
                       control={singleForm.control}
                       name="talhao"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Talhão</FormLabel>
+                          <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                            <Wheat className="w-4 h-4 text-primary" />
+                            Talhão de Produção
+                          </FormLabel>
                           <Select
                             value={field.value}
                             onValueChange={field.onChange}
                             disabled={isCreating}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-11">
-                                <SelectValue placeholder="Selecione o talhão" />
+                              <SelectTrigger className="h-12 rounded-xl border-2 hover:border-primary/50 transition-all">
+                                <SelectValue placeholder="Selecione o talhão de algodão" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="rounded-xl">
                               {TALHOES_INFO.map((talhao) => (
-                                <SelectItem key={talhao.id} value={talhao.nome}>
-                                  <div className="flex items-center justify-between gap-3">
-                                    <span className="font-medium">{talhao.nome}</span>
-                                    <span className="text-xs text-muted-foreground">
+                                <SelectItem 
+                                  key={talhao.id} 
+                                  value={talhao.nome}
+                                  className="rounded-lg my-0.5"
+                                >
+                                  <div className="flex items-center justify-between gap-3 w-full">
+                                    <div className="flex items-center gap-2">
+                                      <MapPin className="w-3.5 h-3.5 text-primary" />
+                                      <span className="font-semibold">{talhao.nome}</span>
+                                    </div>
+                                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                                       {talhao.hectares} ha
                                     </span>
                                   </div>
@@ -418,6 +474,10 @@ export default function Campo() {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormDescription className="flex items-center gap-1.5 text-xs">
+                            <Lightbulb className="w-3.5 h-3.5" />
+                            A numeração continuará de onde parou neste talhão
+                          </FormDescription>
                           <FormMessage className="text-xs" />
                         </FormItem>
                       )}
@@ -428,7 +488,10 @@ export default function Campo() {
                       name="numero"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Número do Fardo</FormLabel>
+                          <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                            <Hash className="w-4 h-4 text-primary" />
+                            Número do Fardo
+                          </FormLabel>
                           <FormControl>
                             <Input
                               type="text"
@@ -436,10 +499,11 @@ export default function Campo() {
                               maxLength={5}
                               {...field}
                               disabled={isCreating}
-                              className="h-11"
+                              className="h-12 rounded-xl border-2 hover:border-primary/50 transition-all focus:scale-[1.01] duration-300 text-base"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="flex items-center gap-1.5 text-xs">
+                            <Tag className="w-3.5 h-3.5" />
                             Digite o número de 5 dígitos (Ex: 00001, 00042)
                           </FormDescription>
                           <FormMessage className="text-xs" />
@@ -449,17 +513,17 @@ export default function Campo() {
 
                     <Button
                       type="submit"
-                      className="w-full h-11 shadow"
+                      className="w-full h-13 rounded-xl shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl duration-300 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-base font-bold"
                       disabled={isCreating}
                     >
                       {isCreating ? (
                         <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                           Criando fardo...
                         </>
                       ) : (
                         <>
-                          <Plus className="w-4 h-4 mr-2" />
+                          <Package className="w-5 h-5 mr-2" />
                           Criar Fardo Individual
                         </>
                       )}
@@ -473,37 +537,68 @@ export default function Campo() {
 
           {/* Resultado da criação */}
           {createdBales.length > 0 && (
-            <Card className="shadow-md border-primary/20">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <CheckCircle className="w-5 h-5 text-primary shrink-0" />
-                  Fardos Criados com Sucesso
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-primary/10 rounded-lg p-4">
+            <Card className="shadow-xl border-2 border-green-200 animate-fade-in-up overflow-hidden" style={{ animationDelay: '0.2s' }}>
+              {/* Header com gradiente de sucesso */}
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-5 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                </div>
+                <div className="relative flex items-center gap-3">
+                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl animate-bounce-gentle">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-white font-bold flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Sucesso!
+                    </CardTitle>
+                    <p className="text-white/90 text-sm">Fardos criados e prontos para impressão</p>
+                  </div>
+                </div>
+              </div>
+              
+              <CardContent className="space-y-5 pt-6">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-2xl p-5 border-2 border-green-200/50">
                   <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-primary">{createdBales.length}</p>
-                      <p className="text-xs text-muted-foreground">Fardos Criados</p>
+                    <div className="transition-transform hover:scale-110 duration-300">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        {createdBales.length}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center justify-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                        Fardos Criados
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-primary">{createdBales[0].talhao}</p>
-                      <p className="text-xs text-muted-foreground">Talhão</p>
+                    <div className="transition-transform hover:scale-110 duration-300">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        {createdBales[0].talhao}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center justify-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-green-600" />
+                        Talhão
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                  <p className="text-sm font-medium">Numeração gerada:</p>
+                <div className="bg-muted/30 rounded-2xl p-5 space-y-3 border-2 border-muted">
+                  <div className="flex items-center gap-2">
+                    <Hash className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold">Numeração Gerada:</span>
+                    <div className="flex-1 h-px bg-border"></div>
+                  </div>
                   <div className="flex flex-wrap gap-2">
-                    {createdBales.slice(0, 10).map((bale) => (
-                      <span key={bale.id} className="px-2 py-1 bg-background rounded text-xs font-mono">
+                    {createdBales.slice(0, 10).map((bale, index) => (
+                      <span 
+                        key={bale.id} 
+                        className="px-3 py-2 bg-white dark:bg-background rounded-xl text-sm font-mono font-bold animate-fade-in-up transition-all hover:scale-110 hover:shadow-lg duration-300 border-2 border-green-200"
+                        style={{ animationDelay: `${index * 0.05}s` }}
+                      >
                         {bale.numero}
                       </span>
                     ))}
                     {createdBales.length > 10 && (
-                      <span className="px-2 py-1 bg-background rounded text-xs font-mono text-muted-foreground">
+                      <span className="px-3 py-2 bg-muted rounded-xl text-sm font-mono text-muted-foreground font-semibold animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
                         +{createdBales.length - 10} mais
                       </span>
                     )}
@@ -512,10 +607,10 @@ export default function Campo() {
 
                 <Button
                   onClick={handlePrintLabels}
-                  className="w-full h-11 shadow"
+                  className="w-full h-13 rounded-xl shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl duration-300 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-base font-bold"
                   data-testid="button-print-labels"
                 >
-                  <QrCode className="w-4 h-4 mr-2" />
+                  <Printer className="w-5 h-5 mr-2" />
                   Imprimir Todas as Etiquetas
                 </Button>
               </CardContent>
@@ -523,7 +618,7 @@ export default function Campo() {
           )}
 
           {/* Card de Instruções */}
-          <Card className="bg-muted/50 border-muted">
+          <Card className="bg-muted/50 border-muted animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold">Como funciona</CardTitle>
             </CardHeader>
