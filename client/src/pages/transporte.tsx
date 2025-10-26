@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineBales } from "@/lib/use-offline-bales";
+import { Footer } from "@/components/footer";
 import {
   ScanLine,
   Truck,
@@ -430,6 +431,9 @@ export default function Transporte() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

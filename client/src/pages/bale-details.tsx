@@ -8,6 +8,7 @@ import type { Bale } from "@shared/schema";
 import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Footer } from "@/components/footer";
 
 export default function BaleDetails() {
   const [, params] = useRoute("/bale/:id");
@@ -27,30 +28,24 @@ export default function BaleDetails() {
   });
 
   // Fetch users to map IDs to display names
-  const { data: users = [], isLoading: isLoadingUsers } = useQuery<Array<{ id: string; displayName: string }>>({
+  const { data: users = [] } = useQuery<Array<{ id: string; displayName: string }>>({
     queryKey: ["/api/users"],
     queryFn: async () => {
       const response = await fetch("/api/users", {
         credentials: "include",
       });
       if (!response.ok) {
-        console.error('Erro ao buscar usuários:', response.status);
         return [];
       }
-      const data = await response.json();
-      console.log('👥 Usuários carregados:', data);
-      return data;
+      return response.json();
     },
   });
 
   // Helper function to get user display name by ID
   const getUserDisplayName = (userId: string | null | undefined): string => {
     if (!userId) return "Não identificado";
-    console.log('🔍 Buscando usuário com ID:', userId, 'na lista:', users);
-    const user = users.find(u => u.id === userId);
-    const result = user?.displayName || `ID: ${userId}`;
-    console.log('✅ Resultado:', result);
-    return result;
+    const user = users.find(u => String(u.id) === String(userId));
+    return user?.displayName || `Usuário #${userId}`;
   };
 
   if (isLoading) {
@@ -263,6 +258,9 @@ export default function BaleDetails() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

@@ -9,7 +9,7 @@ export function Footer() {
           <img 
             src={logoProgresso} 
             alt="Grupo Progresso" 
-            className="h-8 w-auto opacity-60 hover:opacity-100 transition-opacity"
+            className="h-12 w-auto opacity-60 hover:opacity-100 transition-opacity"
           />
           
           {/* Assinatura do desenvolvedor */}

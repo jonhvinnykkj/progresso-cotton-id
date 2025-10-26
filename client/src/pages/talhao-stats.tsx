@@ -23,6 +23,7 @@ import {
   Clock,
   Filter,
 } from "lucide-react";
+import { Footer } from "@/components/footer";
 import {
   BarChart,
   Bar,
@@ -1114,6 +1115,9 @@ export default function TalhaoStats() {
           z-index: 9999 !important;
         }
       `}</style>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

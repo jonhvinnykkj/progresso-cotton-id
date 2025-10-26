@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS talhao_counters (
   UNIQUE(safra, talhao)
 );
 
--- Create users table with display_name and tracking
+-- Create users table with display_name and tracking (UUID ids)
 CREATE TABLE IF NOT EXISTS users (
-  id SERIAL PRIMARY KEY,
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
   username TEXT UNIQUE NOT NULL,
   display_name TEXT NOT NULL,
   password TEXT NOT NULL,

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { Footer } from "@/components/footer";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
   ScanLine,
@@ -380,6 +381,9 @@ export default function Algodoeira() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

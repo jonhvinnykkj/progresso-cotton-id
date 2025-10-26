@@ -30,6 +30,7 @@ import { z } from "zod";
 import type { Bale } from "@shared/schema";
 import { TALHOES_INFO } from "@shared/talhoes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Footer } from "@/components/footer";
 
 const batchCreateSchema = z.object({
   talhao: z.string().min(1, "Talhão é obrigatório"),
@@ -538,6 +539,9 @@ export default function Campo() {
           </Card>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

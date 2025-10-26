@@ -9,6 +9,7 @@ import { Printer, QrCode, ArrowLeft, Loader2 } from "lucide-react";
 import QRCode from "qrcode";
 import logoProgresso from "/favicon.png";
 import type { Bale } from "@shared/schema";
+import { Footer } from "@/components/footer";
 
 export default function Etiqueta() {
   const [, setLocation] = useLocation();
@@ -346,6 +347,9 @@ export default function Etiqueta() {
           })}
         </div>
       )}
+
+      {/* Footer */}
+      <Footer />
     </>
   );
 }

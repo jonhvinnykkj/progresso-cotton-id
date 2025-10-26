@@ -28,6 +28,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Footer } from "@/components/footer";
 import { Settings, LogOut, Save, Loader2, Trash2, AlertTriangle } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
@@ -340,6 +341,9 @@ export default function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
