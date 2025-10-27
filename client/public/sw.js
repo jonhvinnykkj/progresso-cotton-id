@@ -47,8 +47,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache successful API responses
-          if (response.ok) {
+          // Clone and cache successful API responses (only GET requests)
+          if (response.ok && request.method === 'GET') {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
               cache.put(request, responseClone);
@@ -92,8 +92,8 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(request).then((response) => {
-        // Cache successful responses
-        if (response.ok) {
+        // Cache successful responses (only GET requests)
+        if (response.ok && request.method === 'GET') {
           const responseClone = response.clone();
           caches.open(RUNTIME_CACHE).then((cache) => {
             cache.put(request, responseClone);
