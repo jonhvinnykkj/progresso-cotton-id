@@ -147,48 +147,63 @@ export default function BaleDetails() {
     <>
       <NavSidebar />
       <div className={cn("min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800 transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
-        <header className="bg-background/95 backdrop-blur-md border-b shadow-sm">
-          <div className="container mx-auto px-4 py-4 max-w-3xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg">
-                  <img
-                    src={logoProgresso}
-                    alt="Grupo Progresso"
-                    className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
-                  />
+        <header className="bg-gradient-to-r from-green-50 via-yellow-50/30 to-green-50 dark:from-gray-900 dark:to-gray-800 border-b-2 border-green-200 dark:border-gray-700 shadow-md">
+          <div className="container mx-auto px-4 py-6 max-w-3xl">
+            <div className="flex flex-col gap-4">
+              {/* Top row: Logo + Title + Back button */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <img
+                      src={logoProgresso}
+                      alt="Grupo Progresso"
+                      className="h-7 w-7 sm:h-9 sm:w-9 transition-transform hover:scale-110 duration-300"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
+                      Detalhes do Fardo
+                    </h1>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold rounded-full shadow-md">
+                        <Package className="w-3 h-3" />
+                        Campo
+                      </span>
+                      <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-medium">
+                        Rastreabilidade completa
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
-                    Detalhes do Fardo
-                  </h1>
-                  <p className="text-xs sm:text-sm text-green-700 font-medium">
-                    Rastreabilidade completa
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setLocation("/dashboard")}
-                  className="hover:scale-105 transition-transform duration-300 border-2 border-green-300 hover:border-yellow-400 rounded-xl font-semibold"
+                  className="shrink-0 hover:scale-105 transition-transform duration-300 border-2 border-green-300 hover:border-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-950 rounded-xl font-bold text-green-700 hover:text-yellow-700"
                   data-testid="button-back"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-1" />
-                  Voltar
+                  <ArrowLeft className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Voltar</span>
                 </Button>
-                <StatusBadge status={bale.status} size="lg" />
+              </div>
+
+              {/* Bottom row: Status + Actions */}
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-green-100 dark:border-gray-700">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400">Status:</span>
+                  <StatusBadge status={bale.status} size="lg" />
+                </div>
+
                 {selectedRole === "superadmin" && (
                   <Button
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
                     onClick={() => setShowDeleteDialog(true)}
-                    className="h-9 rounded-xl hover:scale-105 transition-all duration-300 font-semibold shadow-lg"
+                    className="border-2 border-red-200 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950 text-red-600 hover:text-red-700 rounded-xl hover:scale-105 transition-all duration-300 font-bold shadow-sm hover:shadow-md"
                   >
                     <Trash2 className="w-4 h-4 mr-1.5" />
-                    Excluir
+                    Excluir Fardo
                   </Button>
                 )}
               </div>
