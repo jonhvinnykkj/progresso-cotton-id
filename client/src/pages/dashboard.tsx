@@ -9,6 +9,7 @@ import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
 import { Footer } from "@/components/footer";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useAuth } from "@/lib/auth-context";
+import { useRealtime } from "@/hooks/use-realtime";
 import type { Bale, BaleStatus } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import {
@@ -26,8 +27,11 @@ import logoProgresso from "/favicon.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const { collapsed } = useSidebar();
+
+  // Habilita atualizações em tempo real via SSE
+  useRealtime(isAuthenticated);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<BaleStatus | "all">("all");
 
