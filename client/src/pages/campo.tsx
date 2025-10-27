@@ -390,7 +390,10 @@ function EtiquetasTab({ defaultSafra }: { defaultSafra: string }) {
 
 const batchCreateSchema = z.object({
   talhao: z.string().min(1, "Talhão é obrigatório"),
-  quantidade: z.number().min(1, "Quantidade deve ser maior que 0").max(1000, "Máximo 1000 fardos por vez"),
+  quantidade: z.preprocess(
+    (val) => (val === undefined || val === null || val === "") ? 1 : val,
+    z.number().min(1, "Quantidade deve ser maior que 0").max(1000, "Máximo 1000 fardos por vez")
+  ),
 });
 
 const singleCreateSchema = z.object({
@@ -420,7 +423,7 @@ export default function Campo() {
     resolver: zodResolver(batchCreateSchema),
     defaultValues: {
       talhao: "",
-      quantidade: 1,
+      quantidade: undefined,
     },
   });
 
@@ -562,8 +565,8 @@ export default function Campo() {
         });
       }
 
-      // Resetar apenas quantidade
-      form.setValue("quantidade", 1);
+      // Resetar apenas quantidade (deixar vazio)
+      form.setValue("quantidade", undefined);
 
     } catch (error) {
       console.error("Erro ao criar fardos:", error);
@@ -781,7 +784,8 @@ export default function Campo() {
                             max="1000"
                             placeholder="Digite a quantidade (Ex: 50)"
                             {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                             disabled={isCreating}
                             data-testid="input-quantidade"
                             className="h-12 rounded-xl border-2 hover:border-primary/50 transition-all focus:scale-[1.01] duration-300 text-base"
