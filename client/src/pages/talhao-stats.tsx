@@ -960,7 +960,7 @@ export default function TalhaoStats() {
                 </Card>
               </div>
 
-              {/* Gráfico de Tempo Médio de Beneficiamento */}
+              {/* Card Criativo de Tempo Médio de Beneficiamento */}
               <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-green-600 to-yellow-600 text-white relative overflow-hidden">
                   <div className="absolute inset-0 opacity-10">
@@ -973,7 +973,7 @@ export default function TalhaoStats() {
                     <span className="line-clamp-2">Tempo Médio: Pátio → Beneficiado</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 px-1 sm:px-6 overflow-x-auto">
+                <CardContent className="pt-6 px-4 sm:px-6">
                   {(() => {
                     const talhaoTempos: Record<string, { total: number; count: number; tempos: number[] }> = {};
                     
@@ -1002,17 +1002,15 @@ export default function TalhaoStats() {
                         }
                       });
                     
-                    const chartData = Object.entries(talhaoTempos)
-                      .map(([talhao, data]) => ({
-                        talhao,
-                        tempoMedio: data.total / data.count,
-                        quantidade: data.count,
-                        tempoMin: Math.min(...data.tempos),
-                        tempoMax: Math.max(...data.tempos),
-                      }))
-                      .sort((a, b) => a.talhao.localeCompare(b.talhao));
+                    // Calcular tempo médio geral
+                    const totalHoras = Object.values(talhaoTempos).reduce((sum, t) => sum + t.total, 0);
+                    const totalFardos = Object.values(talhaoTempos).reduce((sum, t) => sum + t.count, 0);
+                    const tempoMedioGeral = totalFardos > 0 ? totalHoras / totalFardos : 0;
+                    const dias = Math.floor(tempoMedioGeral / 24);
+                    const horas = Math.floor(tempoMedioGeral % 24);
+                    const minutos = Math.floor((tempoMedioGeral % 1) * 60);
                     
-                    if (chartData.length === 0) {
+                    if (totalFardos === 0) {
                       return (
                         <div className="text-center py-12 text-muted-foreground">
                           <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -1022,48 +1020,109 @@ export default function TalhaoStats() {
                       );
                     }
                     
+                    // Calcular percentual para o relógio (0-100%, máximo 7 dias)
+                    const maxHours = 24 * 7; // 7 dias
+                    const percentage = Math.min((tempoMedioGeral / maxHours) * 100, 100);
+                    const strokeDasharray = 2 * Math.PI * 90; // Circunferência do círculo
+                    const strokeDashoffset = strokeDasharray - (strokeDasharray * percentage) / 100;
+                    
                     return (
-                      <ResponsiveContainer width="100%" height={300} minWidth={300}>
-                        <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="talhao" tick={{ fontSize: 12 }} />
-                          <YAxis label={{ value: 'Horas', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }} tick={{ fontSize: 12 }} />
-                          <RechartsTooltip 
-                            content={({ active, payload }) => {
-                              if (active && payload && payload.length) {
-                                const data = payload[0].payload;
-                                const dias = Math.floor(data.tempoMedio / 24);
-                                const horas = Math.floor(data.tempoMedio % 24);
-                                const minDias = Math.floor(data.tempoMin / 24);
-                                const minHoras = Math.floor(data.tempoMin % 24);
-                                const maxDias = Math.floor(data.tempoMax / 24);
-                                const maxHoras = Math.floor(data.tempoMax % 24);
-                                
-                                return (
-                                  <div className="bg-white p-3 border rounded-lg shadow-lg">
-                                    <p className="font-semibold text-sm">Talhão {data.talhao}</p>
-                                    <p className="text-xs text-orange-600 font-medium">
-                                      Média: {dias > 0 ? `${dias}d ` : ''}{horas}h
-                                    </p>
-                                    <p className="text-[10px] text-green-600">
-                                      Mín: {minDias > 0 ? `${minDias}d ` : ''}{minHoras}h
-                                    </p>
-                                    <p className="text-[10px] text-red-600">
-                                      Máx: {maxDias > 0 ? `${maxDias}d ` : ''}{maxHoras}h
-                                    </p>
-                                    <p className="text-[10px] text-muted-foreground mt-1">
-                                      {data.quantidade} fardo{data.quantidade !== 1 ? 's' : ''} processado{data.quantidade !== 1 ? 's' : ''}
-                                    </p>
+                      <div className="space-y-6">
+                        {/* Relógio Circular */}
+                        <div className="flex flex-col items-center justify-center py-4">
+                          <div className="relative w-48 h-48">
+                            {/* Círculo de fundo */}
+                            <svg className="w-full h-full transform -rotate-90">
+                              <circle
+                                cx="96"
+                                cy="96"
+                                r="90"
+                                fill="none"
+                                stroke="#e5e7eb"
+                                strokeWidth="12"
+                              />
+                              {/* Círculo de progresso */}
+                              <circle
+                                cx="96"
+                                cy="96"
+                                r="90"
+                                fill="none"
+                                stroke="url(#gradient)"
+                                strokeWidth="12"
+                                strokeDasharray={strokeDasharray}
+                                strokeDashoffset={strokeDashoffset}
+                                strokeLinecap="round"
+                                style={{
+                                  transition: 'stroke-dashoffset 1s ease-in-out'
+                                }}
+                              />
+                              <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                  <stop offset="0%" stopColor="#16a34a" />
+                                  <stop offset="100%" stopColor="#eab308" />
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                            
+                            {/* Ícone e tempo no centro */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <Clock className="w-8 h-8 text-orange-500 mb-2" />
+                              <div className="text-center">
+                                <div className="text-3xl font-bold text-gray-800">
+                                  {dias > 0 && <span>{dias}<span className="text-lg">d</span> </span>}
+                                  {horas}<span className="text-lg">h</span>
+                                </div>
+                                {minutos > 0 && (
+                                  <div className="text-sm text-gray-500">
+                                    {minutos} min
                                   </div>
-                                );
-                              }
-                              return null;
-                            }}
-                          />
-                          <Legend wrapperStyle={{ fontSize: '12px' }} />
-                          <Bar dataKey="tempoMedio" fill="#f59e0b" name="Tempo Médio (horas)" />
-                        </BarChart>
-                      </ResponsiveContainer>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Descrição */}
+                          <div className="text-center mt-4 space-y-1">
+                            <p className="text-sm font-medium text-gray-700">
+                              Tempo médio de processamento
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Baseado em {totalFardos} fardo{totalFardos !== 1 ? 's' : ''} beneficiado{totalFardos !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Lista de talhões (compacta) */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {Object.entries(talhaoTempos)
+                            .sort(([a], [b]) => a.localeCompare(b))
+                            .map(([talhao, data]) => {
+                              const media = data.total / data.count;
+                              const d = Math.floor(media / 24);
+                              const h = Math.floor(media % 24);
+                              
+                              return (
+                                <div 
+                                  key={talhao}
+                                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow"
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-6 h-6 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">
+                                      {talhao.slice(0, 2)}
+                                    </div>
+                                    <span className="font-semibold text-sm text-gray-700">{talhao}</span>
+                                  </div>
+                                  <div className="text-orange-600 font-bold text-sm">
+                                    {d > 0 ? `${d}d ` : ''}{h}h
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {data.count} fardo{data.count !== 1 ? 's' : ''}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
                     );
                   })()}
                 </CardContent>

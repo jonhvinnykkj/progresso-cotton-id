@@ -72,11 +72,6 @@ export function NavSidebar() {
       icon: Wheat,
     },
     {
-      title: "Etiquetas",
-      href: "/etiqueta",
-      icon: Package,
-    },
-    {
       title: "Transporte",
       href: "/transporte",
       icon: Truck,
