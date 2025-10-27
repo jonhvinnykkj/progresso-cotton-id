@@ -14,6 +14,9 @@ import { Trash2, UserPlus, Users, Edit } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getAuthHeaders } from "@/lib/api-client";
+import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
+import { cn } from "@/lib/utils";
+import logoProgresso from "/favicon.png";
 
 type UserRole = "admin" | "campo" | "transporte" | "algodoeira";
 
@@ -28,6 +31,7 @@ interface User {
 
 export default function UserManagement() {
   const { user, selectedRole } = useAuth();
+  const { collapsed } = useSidebar();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -271,8 +275,10 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
-      <main className="container mx-auto py-6 px-4 space-y-6">
+    <>
+      <NavSidebar />
+      <div className={cn("min-h-screen bg-gradient-to-br from-background via-muted/10 to-background transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
+        <main className="container mx-auto py-6 px-4 space-y-6">
         {/* Header */}
         <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50 -mx-4 px-4 py-4">
           <div className="flex items-center gap-3">
@@ -563,6 +569,7 @@ export default function UserManagement() {
         </AlertDialogContent>
       </AlertDialog>
       </main>
-    </div>
+      </div>
+    </>
   );
 }

@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { BaleCard } from "@/components/bale-card";
-import { NavSidebar } from "@/components/nav-sidebar";
+import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
 import { Footer } from "@/components/footer";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useAuth } from "@/lib/auth-context";
 import type { Bale, BaleStatus } from "@shared/schema";
+import { cn } from "@/lib/utils";
 import {
   Package,
   Truck,
@@ -26,6 +27,7 @@ import logoProgresso from "/favicon.png";
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { logout } = useAuth();
+  const { collapsed } = useSidebar();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<BaleStatus | "all">("all");
 
@@ -113,7 +115,7 @@ export default function Dashboard() {
     <div className="flex min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800">
       <NavSidebar />
 
-      <div className="flex-1 lg:ml-64 flex flex-col">
+      <div className={cn("flex-1 flex flex-col transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
         {/* Conteúdo principal */}
         <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8">
           {/* Header com título e estatísticas rápidas - Design moderno */}

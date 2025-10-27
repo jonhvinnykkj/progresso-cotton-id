@@ -51,3 +51,9 @@ export function notifyBaleChange() {
   console.log('🔔 notifyBaleChange() called');
   notifyClients('bale-update', { timestamp: Date.now() });
 }
+
+// Notify about new version/deployment
+export function notifyVersionUpdate(version: string) {
+  console.log('🚀 notifyVersionUpdate() called with version:', version);
+  notifyClients('version-update', { version, timestamp: Date.now() });
+}

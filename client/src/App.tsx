@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "./lib/auth-context";
 import { useRealtime } from "./hooks/use-realtime";
+import { useVersionCheck } from "./hooks/use-version-check";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
@@ -35,13 +36,16 @@ function ProtectedRoute({ component: Component, allowedRoles }: {
   return <Component />;
 }
 
-// Component to enable real-time updates only when authenticated
+// Component to enable real-time updates and version checking
 function RealtimeProvider() {
   const { isAuthenticated } = useAuth();
-  
+
   // Always call the hook, but pass authentication status
   useRealtime(isAuthenticated);
-  
+
+  // Check for new versions periodically
+  useVersionCheck();
+
   return null;
 }
 

@@ -38,9 +38,10 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Bale } from "@shared/schema";
-import { NavSidebar } from "@/components/nav-sidebar";
+import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
 import { Footer } from "@/components/footer";
 import { BackButton } from "@/components/back-button";
+import { cn } from "@/lib/utils";
 import logoProgresso from "/favicon.png";
 
 interface ReportFilters {
@@ -61,6 +62,7 @@ interface ReportPreview {
 
 export default function ReportsPage() {
   const { toast } = useToast();
+  const { collapsed } = useSidebar();
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   
@@ -200,8 +202,8 @@ export default function ReportsPage() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-yellow-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
       <NavSidebar />
-      
-      <div className="flex-1 lg:ml-64">
+
+      <div className={cn("flex-1 transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
         <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8 animate-fade-in-up">

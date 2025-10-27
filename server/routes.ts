@@ -8,7 +8,7 @@ import {
   updateBaleStatusSchema,
   updateDefaultSafraSchema,
 } from "@shared/schema";
-import { addClient, notifyBaleChange } from "./events";
+import { addClient, notifyBaleChange, notifyVersionUpdate } from "./events";
 import {
   verifyPassword,
   generateAccessToken,
@@ -43,6 +43,16 @@ const authLimiter = rateLimit({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Version endpoint for client auto-update detection
+  const APP_VERSION = process.env.RAILWAY_DEPLOYMENT_ID || Date.now().toString();
+
+  app.get("/api/version", (_req, res) => {
+    res.json({
+      version: APP_VERSION,
+      timestamp: Date.now()
+    });
+  });
+
   // Server-Sent Events endpoint for real-time updates
   app.get("/api/events", (req, res) => {
     // Set SSE headers
@@ -61,6 +71,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     // Send initial connection message
     res.write('event: connected\ndata: {"message":"Connected to real-time updates"}\n\n');
+
+    // Send current version to newly connected client
+    res.write(`event: version-update\ndata: ${JSON.stringify({ version: APP_VERSION, timestamp: Date.now() })}\n\n`);
 
     // Send keepalive every 30 seconds to prevent connection timeout
     const keepaliveInterval = setInterval(() => {

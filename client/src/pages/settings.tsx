@@ -33,6 +33,8 @@ import { Footer } from "@/components/footer";
 import { Settings, LogOut, Save, Loader2, Trash2, AlertTriangle } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
+import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
+import { cn } from "@/lib/utils";
 
 const safraSettingsSchema = z.object({
   safra: z.string().min(1, "Safra é obrigatória"),
@@ -43,6 +45,7 @@ type SafraSettingsForm = z.infer<typeof safraSettingsSchema>;
 export default function SettingsPage() {
   const [, setLocation] = useLocation();
   const { logout, user, selectedRole } = useAuth();
+  const { collapsed } = useSidebar();
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -146,9 +149,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mobile-page">
-      {/* Header modernizado */}
-      <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
+    <>
+      <NavSidebar />
+      <div className={cn("mobile-page transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
+        {/* Header modernizado */}
+        <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between gap-3 py-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -404,6 +409,7 @@ export default function SettingsPage() {
 
       {/* Footer */}
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
