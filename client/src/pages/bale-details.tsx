@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { BaleTimeline } from "@/components/bale-timeline";
 import type { Bale } from "@shared/schema";
-import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users, Trash2 } from "lucide-react";
+import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users, Trash2, Package } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Footer } from "@/components/footer";
@@ -161,9 +161,15 @@ export default function BaleDetails() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
-                      Detalhes do Fardo
-                    </h1>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
+                        Detalhes do Fardo
+                      </h1>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-shadow">
+                        <Package className="w-3.5 h-3.5" />
+                        Campo
+                      </span>
+                    </div>
                     <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-medium mt-1">
                       Rastreabilidade completa
                     </p>
@@ -183,9 +189,9 @@ export default function BaleDetails() {
               </div>
 
               {/* Bottom row: Status + Actions */}
-              <div className="flex items-center justify-between gap-3 pt-2 border-t border-green-100 dark:border-gray-700">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-green-700 dark:text-green-400">Status:</span>
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-green-100 dark:border-gray-700">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold text-green-700 dark:text-green-400">Status Atual:</span>
                   <StatusBadge status={bale.status} size="lg" />
                 </div>
 
