@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import L from 'leaflet';
 import { cottonTalhoes, otherTalhoes } from '@/data/talhoes-geojson';
 import { useTalhaoStats } from '@/hooks/use-talhao-stats';
 import { useSettings } from '@/hooks/use-settings';
-import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info, X, MapPin, Wheat, Package, BarChart3 } from 'lucide-react';
+import { Search, Layers, TrendingUp, AlertTriangle, Download, Eye, EyeOff, Play, Pause, Calendar as CalendarIcon, Info, X, MapPin, Wheat, Package, BarChart3, Maximize2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
@@ -64,6 +65,7 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
   const [isPlayingTimeline, setIsPlayingTimeline] = useState(false);
   const [timelineDate, setTimelineDate] = useState<Date>(new Date());
   const [showSummary, setShowSummary] = useState(true);
+  const [fullscreenMap, setFullscreenMap] = useState(false);
   
   // Calcular estatísticas gerais
   const overallStats = useMemo(() => {
@@ -472,6 +474,15 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
             )}
           </div>
           <div className="flex gap-2 shrink-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setFullscreenMap(true)} 
+              className="h-8 text-xs"
+            >
+              <Maximize2 className="h-3 w-3 sm:mr-2" />
+              <span className="hidden sm:inline">Expandir</span>
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportPDF} className="h-8 text-xs">
               <Download className="h-3 w-3 sm:mr-2" />
               <span className="hidden sm:inline">Exportar PDF</span>
@@ -956,6 +967,89 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
           transform: translate(-50%, -50%);
         }
       `}</style>
+
+      {/* Fullscreen Map Dialog */}
+      <Dialog open={fullscreenMap} onOpenChange={setFullscreenMap}>
+        <DialogContent className="max-w-[95vw] h-[95vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  Mapa Interativo - Safra {safra}
+                  <Badge variant="outline">{filteredCottonFeatures.features.length} talhões</Badge>
+                </div>
+                {overallStats && (
+                  <p className="text-sm text-muted-foreground font-normal mt-1">
+                    {overallStats.totalFardos} fardos • {overallStats.produtividadeMedia.toFixed(2)} f/ha • {overallStats.totalArea.toFixed(0)} ha
+                  </p>
+                )}
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 h-full p-6 pt-4 overflow-hidden">
+            <MapContainer
+              center={[-7.49, -44.20]}
+              zoom={12}
+              style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              />
+              
+              {/* Cotton Talhões */}
+              <GeoJSON
+                data={filteredCottonFeatures}
+                style={getCottonStyle}
+                onEachFeature={onEachCottonFeature}
+              />
+
+               {/* Other Cultures */}
+              {showOtherCultures && (
+                <GeoJSON
+                  data={otherTalhoes}
+                  style={otherStyle}
+                  onEachFeature={onEachOtherFeature}
+                />
+              )}
+
+              {/* Labels */}
+              {showLabels && filteredCottonFeatures.features.map((feature: any) => {
+                const talhao = feature.properties.nome;
+                const centroid = getPolygonCenter(feature.geometry.coordinates);
+                const stats = statsMap?.[talhao];
+
+                return (
+                  <Marker
+                    key={`label-${talhao}`}
+                    position={centroid}
+                    icon={L.divIcon({
+                      className: 'custom-label-icon',
+                      html: `
+                        <div style="
+                          background: white;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          border: 2px solid ${stats?.status === 'concluido' ? '#16a34a' : stats?.status === 'em_colheita' ? '#eab308' : '#6b7280'};
+                          font-weight: bold;
+                          font-size: 11px;
+                          white-space: nowrap;
+                          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        ">
+                          ${talhao}${stats?.totalFardos ? ` (${stats.totalFardos}f)` : ''}
+                        </div>
+                      `,
+                      iconSize: [0, 0],
+                      iconAnchor: [0, 0],
+                    })}
+                  />
+                );
+              })}
+            </MapContainer>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
