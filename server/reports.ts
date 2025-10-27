@@ -407,40 +407,39 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   doc.text("Detalhamento dos Fardos", margin, currentY);
   currentY += 2;
   
-  const tableData = filteredBales.slice(0, 100).map(bale => [
+  const tableData = filteredBales.slice(0, 150).map(bale => [
     bale.numero?.toString() || "-",
     bale.talhao || "-",
-    bale.id.substring(0, 30) + "...",
-    bale.status,
     bale.safra || "-",
+    bale.status,
     format(bale.createdAt, "dd/MM/yy", { locale: ptBR }),
   ]);
   
   autoTable(doc, {
     startY: currentY,
-    head: [["No", "Talhao", "QR Code", "Status", "Safra", "Data"]],
+    head: [["Nº", "Talhão", "Safra", "Status", "Data"]],
     body: tableData,
     theme: "grid",
-    headStyles: { 
+    headStyles: {
       fillColor: [verdeEscuro[0], verdeEscuro[1], verdeEscuro[2]],
       textColor: [amareloClaro[0], amareloClaro[1], amareloClaro[2]],
       fontStyle: 'bold',
-      fontSize: 8,
+      fontSize: 9,
       halign: 'center',
+      cellPadding: 3,
     },
-    styles: { 
-      fontSize: 7,
-      cellPadding: 2,
+    styles: {
+      fontSize: 8,
+      cellPadding: 3,
       lineColor: [200, 200, 200],
       lineWidth: 0.1,
     },
     columnStyles: {
-      0: { cellWidth: 15, halign: 'center', fontStyle: 'bold' },
-      1: { cellWidth: 22, halign: 'center' },
-      2: { cellWidth: 105 },
-      3: { cellWidth: 25, halign: 'center', fontStyle: 'bold' },
-      4: { cellWidth: 18, halign: 'center' },
-      5: { cellWidth: 20, halign: 'center' },
+      0: { cellWidth: 20, halign: 'center', fontStyle: 'bold', fontSize: 9 },
+      1: { cellWidth: 40, halign: 'center', fontStyle: 'bold' },
+      2: { cellWidth: 35, halign: 'center' },
+      3: { cellWidth: 50, halign: 'center', fontStyle: 'bold', fontSize: 9 },
+      4: { cellWidth: 30, halign: 'center' },
     },
     alternateRowStyles: {
       fillColor: [cinzaClaro[0], cinzaClaro[1], cinzaClaro[2]],
@@ -464,12 +463,12 @@ export function generatePDF(bales: Bale[], filters: ReportFilters): Buffer {
   });
   
   // Aviso se houver mais fardos
-  if (filteredBales.length > 100) {
+  if (filteredBales.length > 150) {
     const finalY = (doc as any).lastAutoTable.finalY + 3;
-    doc.setFontSize(7);
+    doc.setFontSize(8);
     doc.setTextColor(cinza[0], cinza[1], cinza[2]);
     doc.setFont('helvetica', 'italic');
-    doc.text(`Mostrando 100 de ${filteredBales.length} fardos. Para ver todos os dados, gere um relatorio Excel.`, margin, finalY);
+    doc.text(`Mostrando 150 de ${filteredBales.length} fardos. Para consultar todos os dados, gere um relatorio Excel.`, margin, finalY);
   }
   
   // ==================== RODAPE ====================
