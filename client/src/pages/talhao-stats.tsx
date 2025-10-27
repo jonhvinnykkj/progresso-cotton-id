@@ -676,70 +676,97 @@ export default function TalhaoStats() {
                         key={stat.safra}
                         className="bg-card shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300"
                       >
-                        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center shrink-0">
-                              <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
+                        <CardHeader className="space-y-0 pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shrink-0 shadow-md">
+                                <Calendar className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <CardTitle className="text-xl font-bold truncate bg-gradient-to-r from-yellow-600 to-yellow-700 bg-clip-text text-transparent">
+                                  Safra {stat.safra}
+                                </CardTitle>
+                              </div>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <CardTitle className="text-lg font-bold truncate">Safra {stat.safra}</CardTitle>
-                              <p className="text-sm text-muted-foreground font-medium">
-                                {stat.total} {stat.total === 1 ? "fardo" : "fardos"}
-                              </p>
+                            <div className="flex flex-col items-end shrink-0">
+                              <span className="text-3xl font-bold text-green-700 dark:text-green-300">{stat.total}</span>
+                              <span className="text-xs font-semibold text-muted-foreground uppercase">fardos</span>
                             </div>
                           </div>
-                          <Badge variant="outline" className="shrink-0 border-2 px-3 py-1.5 rounded-lg font-bold">
-                            <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
-                            <span>{stat.total}</span>
-                          </Badge>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-3">
                           {/* Campo */}
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1.5 bg-bale-campo/10 rounded-lg">
-                                  <Package className="w-4 h-4 text-bale-campo" />
+                          <div className="space-y-2.5 p-3 bg-gradient-to-r from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-900/10 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-md">
+                                  <Package className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="font-semibold">Campo</span>
+                                <span className="font-bold text-sm text-yellow-900 dark:text-yellow-100">Campo</span>
                               </div>
-                              <span className="font-bold text-foreground">
-                                {stat.campo} <span className="text-muted-foreground font-medium">({progressCampo.toFixed(0)}%)</span>
-                              </span>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-bold text-2xl text-yellow-700 dark:text-yellow-300">
+                                  {stat.campo}
+                                </span>
+                                <span className="text-sm font-bold text-yellow-600 dark:text-yellow-400">
+                                  ({progressCampo.toFixed(0)}%)
+                                </span>
+                              </div>
                             </div>
-                            <Progress value={progressCampo} className="h-2.5 rounded-full" />
+                            <div className="relative h-3 bg-yellow-200/50 dark:bg-yellow-900/30 rounded-full overflow-hidden">
+                              <div
+                                className="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full shadow-sm transition-all duration-700 ease-out"
+                                style={{ width: `${progressCampo}%` }}
+                              />
+                            </div>
                           </div>
 
                           {/* Pátio */}
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1.5 bg-bale-patio/10 rounded-lg">
-                                  <Truck className="w-4 h-4 text-bale-patio" />
+                          <div className="space-y-2.5 p-3 bg-gradient-to-r from-green-50 to-emerald-100/50 dark:from-green-950/20 dark:to-emerald-900/10 rounded-xl border border-green-200 dark:border-green-800">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
+                                  <Truck className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="font-semibold">Pátio</span>
+                                <span className="font-bold text-sm text-green-900 dark:text-green-100">Pátio</span>
                               </div>
-                              <span className="font-bold text-foreground">
-                                {stat.patio} <span className="text-muted-foreground font-medium">({progressPatio.toFixed(0)}%)</span>
-                              </span>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-bold text-2xl text-green-700 dark:text-green-300">
+                                  {stat.patio}
+                                </span>
+                                <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                                  ({progressPatio.toFixed(0)}%)
+                                </span>
+                              </div>
                             </div>
-                            <Progress value={progressPatio} className="h-2.5 rounded-full [&>div]:bg-bale-patio" />
+                            <div className="relative h-3 bg-green-200/50 dark:bg-green-900/30 rounded-full overflow-hidden">
+                              <div
+                                className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 rounded-full shadow-sm transition-all duration-700 ease-out"
+                                style={{ width: `${progressPatio}%` }}
+                              />
+                            </div>
                           </div>
 
                           {/* Beneficiado */}
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1.5 bg-bale-beneficiado/10 rounded-lg">
-                                  <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
+                          <div className="space-y-2.5 p-3 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 rounded-xl border border-green-300 dark:border-green-700">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-green-700 to-green-800 rounded-xl shadow-md">
+                                  <CheckCircle className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="font-semibold">Beneficiado</span>
+                                <span className="font-bold text-sm text-green-900 dark:text-green-100">Beneficiado</span>
                               </div>
-                              <span className="font-bold text-foreground">
-                                {stat.beneficiado} <span className="text-muted-foreground font-medium">({progressBeneficiado.toFixed(0)}%)</span>
-                              </span>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-bold text-2xl text-green-800 dark:text-green-200">{stat.beneficiado}</span>
+                                <span className="text-sm font-bold text-green-700 dark:text-green-300">({progressBeneficiado.toFixed(0)}%)</span>
+                              </div>
                             </div>
-                            <Progress value={progressBeneficiado} className="h-2.5 rounded-full [&>div]:bg-bale-beneficiado" />
+                            <div className="relative h-3 bg-green-200/50 dark:bg-green-900/40 rounded-full overflow-hidden">
+                              <div
+                                className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-600 via-green-700 to-green-800 rounded-full shadow-sm transition-all duration-700 ease-out"
+                                style={{ width: `${progressBeneficiado}%` }}
+                              />
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
