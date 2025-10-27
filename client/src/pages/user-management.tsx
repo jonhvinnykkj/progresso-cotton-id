@@ -280,7 +280,7 @@ export default function UserManagement() {
       <div className={cn("min-h-screen bg-gradient-to-br from-background via-muted/10 to-background transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
         <main className="container mx-auto py-6 px-4 space-y-6">
         {/* Header */}
-        <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50 -mx-4 px-4 py-4">
+        <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm lg:sticky top-0 z-50 -mx-4 px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
               <Users className="h-6 w-6 text-primary" />

@@ -14,11 +14,15 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { getAuthHeaders } from "@/lib/api-client";
+import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
+import { cn } from "@/lib/utils";
+import logoProgresso from "/favicon.png";
 
 export default function BaleDetails() {
   const [, params] = useRoute("/bale/:id");
   const [, setLocation] = useLocation();
   const { selectedRole } = useAuth();
+  const { collapsed } = useSidebar();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -92,69 +96,86 @@ export default function BaleDetails() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground font-semibold">Carregando detalhes do fardo...</p>
+      <>
+        <NavSidebar />
+        <div className={cn("min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
+          <div className="text-center space-y-4">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto text-green-600" />
+            <p className="text-green-700 font-semibold">Carregando detalhes do fardo...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!bale) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background flex items-center justify-center p-4">
-        <Card className="max-w-md shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up">
-          <div className="bg-gradient-to-r from-red-500 to-orange-500 p-6 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      <>
+        <NavSidebar />
+        <div className={cn("min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
+          <Card className="max-w-md shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up">
+            <div className="bg-gradient-to-r from-red-500 to-orange-500 p-6 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              </div>
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl w-fit mx-auto mb-3">
+                <Hash className="w-8 h-8 text-white" />
+              </div>
             </div>
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl w-fit mx-auto mb-3">
-              <Hash className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          <CardContent className="pt-6 text-center space-y-4 p-6">
-            <div>
-              <h2 className="text-xl font-bold">Fardo não encontrado</h2>
-              <p className="text-sm text-muted-foreground mt-2">
-                O fardo solicitado não existe no sistema
-              </p>
-            </div>
-            <Button 
-              onClick={() => setLocation("/dashboard")}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 font-bold"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar ao Dashboard
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            <CardContent className="pt-6 text-center space-y-4 p-6">
+              <div>
+                <h2 className="text-xl font-bold">Fardo não encontrado</h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  O fardo solicitado não existe no sistema
+                </p>
+              </div>
+              <Button
+                onClick={() => setLocation("/dashboard")}
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 font-bold"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar ao Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => setLocation("/dashboard")}
-            className="mb-3 hover:scale-105 transition-transform duration-300"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
-                Detalhes do Fardo
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Rastreabilidade completa
-              </p>
+    <>
+      <NavSidebar />
+      <div className={cn("min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800 transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
+        <header className="lg:sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md">
+                <img
+                  src={logoProgresso}
+                  alt="Grupo Progresso"
+                  className="h-8 w-8 brightness-0 invert"
+                />
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/dashboard")}
+                className="hover:scale-105 transition-transform duration-300 border-2 border-green-200 hover:border-yellow-400 rounded-xl"
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
             </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
+                  Detalhes do Fardo
+                </h1>
+                <p className="text-sm text-green-700 font-semibold mt-1">
+                  Rastreabilidade completa
+                </p>
+              </div>
             <div className="flex items-center gap-2">
               <StatusBadge status={bale.status} size="lg" />
               {selectedRole === "superadmin" && (
@@ -162,7 +183,7 @@ export default function BaleDetails() {
                   variant="destructive"
                   size="sm"
                   onClick={() => setShowDeleteDialog(true)}
-                  className="h-10 rounded-xl hover:scale-105 transition-all duration-300 font-semibold"
+                  className="h-10 rounded-xl hover:scale-105 transition-all duration-300 font-semibold shadow-lg"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Excluir
@@ -171,115 +192,122 @@ export default function BaleDetails() {
             </div>
           </div>
         </div>
-      </header>
+        </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
-        {/* Basic Information */}
-        <Card className="shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 pb-8 relative overflow-hidden">
-            {/* Decorative circles */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
-            </div>
-            
-            <div className="relative">
-              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl w-fit mb-3">
-                <Hash className="w-6 h-6 text-white" />
+        <main className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
+          {/* Basic Information */}
+          <Card className="shadow-xl border-2 border-green-200 rounded-2xl overflow-hidden animate-fade-in-up">
+            <div className="bg-gradient-to-r from-green-500 via-green-600 to-yellow-500 p-6 pb-8 relative overflow-hidden">
+              {/* Decorative circles */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-300 rounded-full translate-y-1/2 -translate-x-1/2"></div>
               </div>
-              <CardTitle className="text-xl text-white font-bold">
-                Informações Básicas
-              </CardTitle>
-            </div>
-          </div>
-          
-          <CardContent className="space-y-5 p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border-2 border-primary/20 hover:scale-[1.02] transition-transform duration-300">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 font-semibold">
-                  <Hash className="w-4 h-4" />
-                  Número do Fardo
+
+              <div className="relative">
+                <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl w-fit mb-3 shadow-lg">
+                  <Hash className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-2xl font-bold text-primary" data-testid="text-numero">
-                  {bale.numero}
+                <CardTitle className="text-xl text-white font-bold">
+                  Informações Básicas
+                </CardTitle>
+              </div>
+            </div>
+
+            <CardContent className="space-y-5 p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 bg-gradient-to-br from-green-100 to-green-50 rounded-xl border-2 border-green-300 hover:scale-[1.02] hover:border-yellow-400 transition-all duration-300 shadow-md">
+                  <div className="flex items-center gap-2 text-sm text-green-700 mb-2 font-semibold">
+                    <div className="p-1.5 bg-green-500 rounded-lg">
+                      <Hash className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    Número do Fardo
+                  </div>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent" data-testid="text-numero">
+                    {bale.numero}
+                  </p>
+                </div>
+                <div className="p-4 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-xl border-2 border-yellow-300 hover:scale-[1.02] hover:border-green-400 transition-all duration-300 shadow-md">
+                  <div className="flex items-center gap-2 text-sm text-yellow-700 mb-2 font-semibold">
+                    <div className="p-1.5 bg-yellow-500 rounded-lg">
+                      <Wheat className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    Talhão
+                  </div>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-yellow-700 to-yellow-600 bg-clip-text text-transparent" data-testid="text-talhao">
+                    {bale.talhao}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gradient-to-br from-green-50 to-yellow-50 rounded-xl border-2 border-green-300 hover:border-yellow-400 transition-colors shadow-md">
+                <div className="flex items-center gap-2 text-sm text-green-700 mb-3 font-semibold">
+                  <div className="p-1.5 bg-gradient-to-r from-green-500 to-yellow-500 rounded-lg shadow-md">
+                    <QrCode className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  ID / QR Code
+                </div>
+                <p className="font-mono text-sm bg-white p-3 rounded-lg break-all border-2 border-green-200" data-testid="text-qrcode">
+                  {bale.id}
                 </p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border-2 border-primary/20 hover:scale-[1.02] transition-transform duration-300">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 font-semibold">
-                  <Wheat className="w-4 h-4" />
-                  Talhão
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t-2 border-green-200">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200">
+                  <div className="flex items-center gap-2 text-xs text-green-700 mb-1.5 font-semibold">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Criado em
+                  </div>
+                  <p className="text-sm font-bold text-green-800">
+                    {format(new Date(bale.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
                 </div>
-                <p className="text-2xl font-bold text-primary" data-testid="text-talhao">
-                  {bale.talhao}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border-2 border-green-200 dark:border-green-800">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 font-semibold">
-                <QrCode className="w-4 h-4 text-green-600" />
-                ID / QR Code
-              </div>
-              <p className="font-mono text-sm bg-white dark:bg-background p-3 rounded-lg break-all border" data-testid="text-qrcode">
-                {bale.id}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t-2">
-              <div className="p-3 rounded-xl bg-muted/50">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5 font-semibold">
-                  <Calendar className="w-3.5 h-3.5" />
-                  Criado em
+                <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100/50 border border-yellow-200">
+                  <div className="flex items-center gap-2 text-xs text-yellow-700 mb-1.5 font-semibold">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Última Atualização
+                  </div>
+                  <p className="text-sm font-bold text-yellow-800">
+                    {format(new Date(bale.updatedAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
                 </div>
-                <p className="text-sm font-bold">
-                  {format(new Date(bale.createdAt), "dd/MM/yyyy 'às' HH:mm", {
-                    locale: ptBR,
-                  })}
-                </p>
               </div>
-              <div className="p-3 rounded-xl bg-muted/50">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5 font-semibold">
-                  <Calendar className="w-3.5 h-3.5" />
-                  Última Atualização
+            </CardContent>
+          </Card>
+
+          {/* Histórico de Rastreabilidade com Usuários */}
+          <Card className="shadow-xl border-2 border-green-200 rounded-2xl overflow-hidden animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+            <div className="bg-gradient-to-r from-green-500 via-green-600 to-yellow-500 p-6 pb-8 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-20 h-20 bg-yellow-300 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+              </div>
+
+              <div className="relative">
+                <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl w-fit mb-3 shadow-lg">
+                  <Users className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-sm font-bold">
-                  {format(new Date(bale.updatedAt), "dd/MM/yyyy 'às' HH:mm", {
-                    locale: ptBR,
-                  })}
-                </p>
+                <CardTitle className="text-xl text-white font-bold flex items-center gap-2">
+                  Histórico de Rastreabilidade
+                </CardTitle>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Histórico de Rastreabilidade com Usuários */}
-        <Card className="shadow-xl border-2 rounded-2xl overflow-hidden animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 pb-8 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            </div>
-            
-            <div className="relative">
-              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl w-fit mb-3">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <CardTitle className="text-xl text-white font-bold flex items-center gap-2">
-                Histórico de Rastreabilidade
-              </CardTitle>
-            </div>
-          </div>
-          
-          <CardContent className="p-6">
-            <BaleTimeline bale={bale} getUserDisplayName={getUserDisplayName} />
-          </CardContent>
-        </Card>
-      </main>
+            <CardContent className="p-6">
+              <BaleTimeline bale={bale} getUserDisplayName={getUserDisplayName} />
+            </CardContent>
+          </Card>
+        </main>
 
-      {/* Footer */}
-      <Footer />
+        {/* Footer */}
+        <Footer />
 
-      {/* Dialog de Confirmação de Exclusão */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        {/* Dialog de Confirmação de Exclusão */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="rounded-2xl border-2">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive text-xl font-bold">
@@ -319,7 +347,8 @@ export default function BaleDetails() {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        </AlertDialog>
+      </div>
+    </>
   );
 }

@@ -153,44 +153,21 @@ export default function SettingsPage() {
       <NavSidebar />
       <div className={cn("mobile-page transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
         {/* Header modernizado */}
-        <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
+        <header className="mobile-header bg-background/95 backdrop-blur-md border-b shadow-sm lg:sticky top-0 z-50">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <img 
-                src={logoProgresso} 
-                alt="Grupo Progresso" 
-                className="h-10 sm:h-12 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
-              />
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
-                  Configurações
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Administrador: {user?.username}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation("/dashboard")}
-                data-testid="button-back-dashboard"
-                className="shrink-0 hover:scale-105 transition-transform duration-300"
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                data-testid="button-logout"
-                className="shrink-0 hover:scale-105 transition-transform duration-300"
-              >
-                <LogOut className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Sair</span>
-              </Button>
+          <div className="flex items-center gap-3 py-3">
+            <img
+              src={logoProgresso}
+              alt="Grupo Progresso"
+              className="h-10 sm:h-12 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
+            />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
+                Configurações
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                Administrador: {user?.username}
+              </p>
             </div>
           </div>
         </div>

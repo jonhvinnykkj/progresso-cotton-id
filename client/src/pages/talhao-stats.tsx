@@ -27,6 +27,7 @@ import {
 import { Footer } from "@/components/footer";
 import { NavSidebar, useSidebar } from "@/components/nav-sidebar";
 import { cn } from "@/lib/utils";
+import logoProgresso from "/favicon.png";
 import {
   BarChart,
   Bar,
@@ -45,7 +46,6 @@ import {
   AreaChart,
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
-import logoProgresso from "/favicon.png";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -233,25 +233,25 @@ export default function TalhaoStats() {
         <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8 overflow-x-hidden">
           {/* Header modernizado com gradiente verde/amarelo */}
           <div className="mb-6 sm:mb-8 animate-fade-in-up">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="shrink-0">
                   <img
                     src={logoProgresso}
                     alt="Grupo Progresso"
-                    className="h-8 w-8 sm:h-10 sm:w-10 brightness-0 invert"
+                    className="h-10 w-10 sm:h-14 sm:w-14 object-contain"
                   />
                 </div>
-                <div>
-                  <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent leading-tight">
                     Estatísticas por Talhão
                   </h1>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                     Análise detalhada da produção por talhão de algodão
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -264,9 +264,9 @@ export default function TalhaoStats() {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="shrink-0 transition-all hover:scale-105 duration-300 rounded-xl border-2 border-green-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950 font-bold text-green-700 hover:text-red-600"
+                  className="shrink-0 transition-all hover:scale-105 duration-300 rounded-xl border-2 border-green-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950 font-bold text-green-700 hover:text-red-600 h-9 sm:h-10"
                 >
-                  Sair
+                  <span className="text-xs sm:text-sm">Sair</span>
                 </Button>
               </div>
             </div>
