@@ -4,6 +4,7 @@ import type { Bale, UpdateBaleStatus } from "@shared/schema";
 import { offlineStorage } from "./offline-storage";
 import { queryClient, apiRequest } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { getAuthHeaders } from "./api-client";
 
 export function useOfflineBales() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -52,7 +53,9 @@ export function useOfflineBales() {
       try {
         // Try to fetch from API
         console.log("🌐 Online - buscando dados da API...");
-        const response = await fetch("/api/bales");
+        const response = await fetch("/api/bales", {
+          headers: getAuthHeaders(),
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

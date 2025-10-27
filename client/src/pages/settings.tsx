@@ -28,6 +28,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { getAuthHeaders } from "@/lib/api-client";
 import { Footer } from "@/components/footer";
 import { Settings, LogOut, Save, Loader2, Trash2, AlertTriangle } from "lucide-react";
 import logoProgresso from "/favicon.png";
@@ -68,7 +69,10 @@ export default function SettingsPage() {
     mutationFn: async (data: SafraSettingsForm) => {
       const response = await fetch("/api/settings/default-safra", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify({ value: data.safra }),
       });
 

@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, UserPlus, Users, Edit } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getAuthHeaders } from "@/lib/api-client";
 
 type UserRole = "admin" | "campo" | "transporte" | "algodoeira";
 
@@ -93,6 +94,7 @@ export default function UserManagement() {
     queryKey: ["users"],
     queryFn: async () => {
       const response = await fetch("/api/users", {
+        headers: getAuthHeaders(),
         credentials: "include",
       });
       if (!response.ok) {
@@ -107,7 +109,10 @@ export default function UserManagement() {
     mutationFn: async (userData: { username: string; displayName: string; password: string; role: UserRole; roles: UserRole[] }) => {
       const response = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         credentials: "include",
         body: JSON.stringify(userData),
       });
@@ -144,7 +149,10 @@ export default function UserManagement() {
     mutationFn: async ({ userId, roles }: { userId: string; roles: UserRole[] }) => {
       const response = await fetch(`/api/users/${userId}/roles`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         credentials: "include",
         body: JSON.stringify({ roles }),
       });
@@ -177,6 +185,7 @@ export default function UserManagement() {
     mutationFn: async (userId: string) => {
       const response = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
         credentials: "include",
       });
       if (!response.ok) {

@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { getAuthHeaders } from "@/lib/api-client";
 
 export default function BaleDetails() {
   const [, params] = useRoute("/bale/:id");
@@ -26,7 +27,9 @@ export default function BaleDetails() {
   const { data: bale, isLoading } = useQuery<Bale>({
     queryKey: ["/api/bales", baleId],
     queryFn: async () => {
-      const response = await fetch(`/api/bales/${encodeURIComponent(baleId!)}`);
+      const response = await fetch(`/api/bales/${encodeURIComponent(baleId!)}`, {
+        headers: getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error("Fardo não encontrado");
       }
@@ -40,6 +43,7 @@ export default function BaleDetails() {
     queryKey: ["/api/users"],
     queryFn: async () => {
       const response = await fetch("/api/users", {
+        headers: getAuthHeaders(),
         credentials: "include",
       });
       if (!response.ok) {
@@ -61,6 +65,7 @@ export default function BaleDetails() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/bales/${encodeURIComponent(id)}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
         credentials: "include",
       });
       if (!response.ok) {

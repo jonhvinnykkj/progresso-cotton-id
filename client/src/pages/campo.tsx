@@ -31,6 +31,7 @@ import type { Bale } from "@shared/schema";
 import { TALHOES_INFO } from "@shared/talhoes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Footer } from "@/components/footer";
+import { getAuthHeaders } from "@/lib/api-client";
 
 // Componente para buscar etiquetas
 function EtiquetasTab({ defaultSafra }: { defaultSafra: string }) {
@@ -459,7 +460,10 @@ export default function Campo() {
 
       const response = await fetch("/api/bales", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -519,7 +523,10 @@ export default function Campo() {
 
       const response = await fetch("/api/bales/batch", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify(payload),
       });
 

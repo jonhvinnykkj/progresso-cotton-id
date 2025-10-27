@@ -19,6 +19,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineBales } from "@/lib/use-offline-bales";
 import { Footer } from "@/components/footer";
+import { getAuthHeaders } from "@/lib/api-client";
 import {
   ScanLine,
   Truck,
@@ -81,7 +82,9 @@ export default function Transporte() {
       // Tenta buscar direto na API como fallback
       try {
         const encodedId = encodeURIComponent(normalizedId);
-        const response = await fetch(`/api/bales/${encodedId}`);
+        const response = await fetch(`/api/bales/${encodedId}`, {
+          headers: getAuthHeaders(),
+        });
         if (response.ok) {
           const apiBale = await response.json();
           console.log('✅ Fardo encontrado direto na API:', apiBale);

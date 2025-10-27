@@ -7,7 +7,7 @@ export function getAccessToken(): string | null {
   return localStorage.getItem("cotton_access_token");
 }
 
-// Get auth headers
+// Get auth headers (exported for use in other files)
 export function getAuthHeaders(): HeadersInit {
   const token = getAccessToken();
   if (!token) {

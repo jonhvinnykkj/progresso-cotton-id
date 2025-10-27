@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { getAuthHeaders } from '@/lib/api-client';
 
 export interface TalhaoStats {
   talhao: string;
@@ -22,7 +23,9 @@ export interface TalhaoStatsMap {
 }
 
 async function fetchTalhaoStats(safra: string): Promise<TalhaoStatsMap> {
-  const response = await fetch(`/api/bales/stats-by-talhao?safra=${safra}`);
+  const response = await fetch(`/api/bales/stats-by-talhao?safra=${safra}`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch talhao stats');
   }
