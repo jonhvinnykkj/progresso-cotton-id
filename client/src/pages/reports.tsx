@@ -140,7 +140,7 @@ export default function ReportsPage() {
 
   async function downloadReport(type: "pdf" | "excel") {
     setIsGenerating(true);
-    
+
     try {
       const params = new URLSearchParams();
       if (filters.startDate) params.append("startDate", filters.startDate);
@@ -148,16 +148,20 @@ export default function ReportsPage() {
       if (filters.status.length > 0) params.append("status", filters.status.join(","));
       if (filters.talhao.length > 0) params.append("talhao", filters.talhao.join(","));
       if (filters.safra) params.append("safra", filters.safra);
-      
+
       // Opções do relatório
       params.append("includeCharts", reportOptions.includeCharts.toString());
       params.append("includeTimeline", reportOptions.includeTimeline.toString());
       params.append("groupByTalhao", reportOptions.groupByTalhao.toString());
       params.append("groupBySafra", reportOptions.groupBySafra.toString());
       params.append("detailedView", reportOptions.detailedView.toString());
-      
+
+      // Get auth token from localStorage
+      const token = localStorage.getItem("cotton_access_token");
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
       const endpoint = type === "pdf" ? "/api/reports/pdf" : "/api/reports/excel";
-      const response = await fetch(`${endpoint}?${params.toString()}`);
+      const response = await fetch(`${endpoint}?${params.toString()}`, { headers });
       
       if (!response.ok) {
         throw new Error("Erro ao gerar relatório");
