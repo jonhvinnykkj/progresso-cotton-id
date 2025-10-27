@@ -55,19 +55,19 @@ function Router() {
       </Route>
       
       <Route path="/campo">
-        <ProtectedRoute component={Campo} allowedRoles={["campo", "admin"]} />
+        <ProtectedRoute component={Campo} allowedRoles={["campo", "admin", "superadmin"]} />
       </Route>
-      
+
       <Route path="/etiqueta">
-        <ProtectedRoute component={Etiqueta} allowedRoles={["campo", "admin"]} />
+        <ProtectedRoute component={Etiqueta} allowedRoles={["campo", "admin", "superadmin"]} />
       </Route>
-      
+
       <Route path="/transporte">
-        <ProtectedRoute component={Transporte} allowedRoles={["transporte", "admin"]} />
+        <ProtectedRoute component={Transporte} allowedRoles={["transporte", "admin", "superadmin"]} />
       </Route>
-      
+
       <Route path="/algodoeira">
-        <ProtectedRoute component={Algodoeira} allowedRoles={["algodoeira", "admin"]} />
+        <ProtectedRoute component={Algodoeira} allowedRoles={["algodoeira", "admin", "superadmin"]} />
       </Route>
       
       <Route path="/bale/:id">
