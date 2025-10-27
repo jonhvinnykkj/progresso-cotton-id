@@ -224,97 +224,110 @@ export default function TalhaoStats() {
     : "0";
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
+    <div className="flex min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
       <NavSidebar />
-      
+
       <div className="flex-1 lg:ml-64 flex flex-col overflow-x-hidden">
         <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8 overflow-x-hidden">
-          {/* Header modernizado */}
+          {/* Header modernizado com gradiente verde/amarelo */}
           <div className="mb-6 sm:mb-8 animate-fade-in-up">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                <img 
-                  src={logoProgresso} 
-                  alt="Grupo Progresso" 
-                  className="h-8 w-8 sm:h-10 sm:w-10 transition-transform hover:scale-110 duration-300"
-                />
-                Estatísticas por Talhão
-              </h1>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <img
+                    src={logoProgresso}
+                    alt="Grupo Progresso"
+                    className="h-8 w-8 sm:h-10 sm:w-10 brightness-0 invert"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
+                    Estatísticas por Talhão
+                  </h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    Análise detalhada da produção por talhão de algodão
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setLocation("/dashboard")}
-                  className="hidden sm:flex transition-all hover:scale-110 duration-300"
+                  className="hidden sm:flex transition-all hover:scale-105 duration-300 rounded-xl border-2 border-green-300 hover:border-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-950 font-bold text-green-700 hover:text-yellow-700"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
                   Voltar
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="shrink-0 transition-all hover:scale-110 duration-300"
+                  className="shrink-0 transition-all hover:scale-105 duration-300 rounded-xl border-2 border-green-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950 font-bold text-green-700 hover:text-red-600"
                 >
-                  <LogOut className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Sair</span>
+                  Sair
                 </Button>
               </div>
             </div>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Análise detalhada da produção por talhão de algodão
-            </p>
           </div>
 
           <div className="space-y-6">
-            {/* Card de Produtividade - DESTAQUE */}
-            <Card className="bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl border-0 rounded-2xl overflow-hidden animate-fade-in-up">
+            {/* Card de Produtividade - DESTAQUE moderno */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 via-green-600 to-yellow-500 text-white shadow-2xl border-0 rounded-3xl animate-fade-in-up">
+              {/* Decoração de fundo */}
               <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-300 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
               </div>
               <CardContent className="pt-8 pb-8 relative">
-                <div className="text-center space-y-3">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl w-fit mx-auto">
+                <div className="text-center space-y-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl w-fit mx-auto shadow-lg">
                     <TrendingUp className="w-8 h-8 text-white" />
                   </div>
-                  <p className="text-sm font-semibold text-emerald-50 uppercase tracking-wide">Produtividade Média Total</p>
-                  <div className="flex items-baseline justify-center gap-2">
-                    <p className="text-6xl sm:text-7xl font-bold">{avgArrobasPorHectare}</p>
-                    <p className="text-3xl font-bold text-emerald-50">@/ha</p>
+                  <p className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">Produtividade Média Total</p>
+                  <div className="flex items-baseline justify-center gap-3">
+                    <p className="text-6xl sm:text-7xl font-bold drop-shadow-lg">{avgArrobasPorHectare}</p>
+                    <p className="text-3xl sm:text-4xl font-bold text-white/90">@/ha</p>
                   </div>
-                <div className="flex items-center justify-center gap-4 text-sm text-emerald-50 font-semibold">
-                  <span className="flex items-center gap-1">
-                    <Layers className="w-4 h-4" />
-                    {totalHectares} ha
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Package className="w-4 h-4" />
-                    {avgFardosPorHectare} fardos/ha
-                  </span>
+                  <div className="flex items-center justify-center gap-6 text-sm sm:text-base text-white font-bold bg-white/10 backdrop-blur-sm rounded-2xl py-3 px-6 w-fit mx-auto border border-white/20">
+                    <span className="flex items-center gap-2">
+                      <div className="p-1.5 bg-white/20 rounded-lg">
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      {totalHectares} ha
+                    </span>
+                    <span className="text-white/50">•</span>
+                    <span className="flex items-center gap-2">
+                      <div className="p-1.5 bg-white/20 rounded-lg">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      {avgFardosPorHectare} f/ha
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* KPIs Cards - Métricas Principais */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-              <CardContent className="pt-6">
+          {/* KPIs Cards - Métricas Principais com design verde/amarelo */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <Card className="group relative overflow-hidden shadow-lg border-2 border-green-100 hover:border-yellow-300 rounded-2xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-yellow-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="pt-6 relative">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground font-semibold">Total de Fardos</p>
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Package className="w-4 h-4 text-primary" />
+                    <p className="text-xs text-green-700 font-bold">Total de Fardos</p>
+                    <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <Package className="w-4 h-4 text-white" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-primary">
+                  <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
                     <AnimatedCounter value={globalStats?.total || 0} />
                   </p>
-                  <p className="text-xs text-muted-foreground font-medium">
-                    {totalHectares} ha • {avgFardosPorHectare} fardos/ha
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-12 rounded-full bg-green-300 group-hover:bg-yellow-400 transition-colors"></div>
+                    <p className="text-xs text-green-700 font-semibold">
+                      {totalHectares} ha • {avgFardosPorHectare} f/ha
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

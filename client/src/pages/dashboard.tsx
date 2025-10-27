@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { BaleCard } from "@/components/bale-card";
 import { NavSidebar } from "@/components/nav-sidebar";
 import { Footer } from "@/components/footer";
-import { BackButton } from "@/components/back-button";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useAuth } from "@/lib/auth-context";
 import type { Bale, BaleStatus } from "@shared/schema";
@@ -20,7 +19,6 @@ import {
   BarChart3,
   TrendingUp,
   CalendarDays,
-  LogOut,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logoProgresso from "/favicon.png";
@@ -139,15 +137,13 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <BackButton className="hidden sm:flex rounded-xl" />
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="shrink-0 transition-all hover:scale-105 duration-300 rounded-xl border-2 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950"
+                  className="shrink-0 transition-all hover:scale-105 duration-300 rounded-xl border-2 border-green-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950 font-bold text-green-700 hover:text-red-600"
                 >
-                  <LogOut className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Sair</span>
+                  Sair
                 </Button>
               </div>
             </div>
