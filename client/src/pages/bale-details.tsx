@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { BaleTimeline } from "@/components/bale-timeline";
 import type { Bale } from "@shared/schema";
-import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users, Trash2 } from "lucide-react";
+import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users, Trash2, Package } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Footer } from "@/components/footer";
