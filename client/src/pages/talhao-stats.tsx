@@ -540,26 +540,27 @@ export default function TalhaoStats() {
                 return (
                   <Card
                     key={stat.talhao}
-                    className="bg-card shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                    className="group relative overflow-hidden bg-card shadow-lg border-2 border-green-100 hover:border-yellow-300 rounded-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
                     data-testid={`card-talhao-${stat.talhao}`}
                     onClick={() => setSelectedTalhao(stat.talhao)}
                   >
-                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 to-yellow-50/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3 relative">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0">
-                          <Wheat className="w-5 h-5 text-primary" />
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                          <Wheat className="w-6 h-6 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <CardTitle className="text-lg font-bold truncate" data-testid={`text-talhao-name-${stat.talhao}`}>{stat.talhao}</CardTitle>
-                            <Info className="w-4 h-4 text-primary/60 shrink-0 hover:text-primary transition-colors" />
+                            <CardTitle className="text-lg font-bold truncate bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent" data-testid={`text-talhao-name-${stat.talhao}`}>{stat.talhao}</CardTitle>
+                            <Info className="w-4 h-4 text-yellow-600 shrink-0 hover:text-yellow-500 transition-colors" />
                           </div>
-                          <p className="text-sm text-muted-foreground font-medium" data-testid={`text-talhao-subtitle-${stat.talhao}`}>
+                          <p className="text-sm text-green-700 font-bold" data-testid={`text-talhao-subtitle-${stat.talhao}`}>
                             {getTalhaoInfo(stat.talhao)?.hectares || '0'} ha • {stat.total} {stat.total === 1 ? "fardo" : "fardos"} • {produtividade} f/ha
                           </p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="shrink-0 border-2 px-3 py-1.5 rounded-lg font-bold" data-testid={`badge-total-${stat.talhao}`}>
+                      <Badge variant="outline" className="shrink-0 border-2 border-green-300 group-hover:border-yellow-400 px-3 py-1.5 rounded-xl font-bold bg-white group-hover:bg-gradient-to-r group-hover:from-green-50 group-hover:to-yellow-50 text-green-700 transition-all" data-testid={`badge-total-${stat.talhao}`}>
                         <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
                         <span data-testid={`text-badge-total-${stat.talhao}`}>{stat.total}</span>
                       </Badge>
@@ -1184,75 +1185,75 @@ export default function TalhaoStats() {
           </div>
       </main>
 
-      {/* Modal de Detalhes do Talhão */}
+      {/* Modal de Detalhes do Talhão - Modernizado */}
       <Dialog open={!!selectedTalhao} onOpenChange={() => setSelectedTalhao(null)}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[9999] rounded-2xl border-2">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto z-[9999] rounded-3xl border-4 border-yellow-400 shadow-2xl bg-gradient-to-b from-white to-green-50/30">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base sm:text-xl font-bold">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <DialogTitle className="flex items-center gap-3 text-base sm:text-2xl font-bold">
+              <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              Talhão {selectedTalhao}
+              <span className="bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">Talhão {selectedTalhao}</span>
             </DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm font-medium">
+            <DialogDescription className="text-xs sm:text-sm font-bold text-green-700 ml-14">
               Informações detalhadas e métricas de produtividade
             </DialogDescription>
           </DialogHeader>
 
           {selectedTalhaoData && selectedTalhaoInfo && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Informações Gerais */}
+              {/* Informações Gerais - Modernizadas */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 rounded-xl">
+                <Card className="bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-2xl shadow-md hover:shadow-lg transition-all hover:scale-105">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <div className="p-1.5 bg-primary/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
-                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl w-fit mx-auto mb-1 sm:mb-2 shadow-md">
+                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Área</p>
-                      <p className="text-xl sm:text-2xl font-bold text-primary">{selectedTalhaoInfo.hectares}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">hectares</p>
+                      <p className="text-[10px] sm:text-xs text-green-700 font-bold">Área</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">{selectedTalhaoInfo.hectares}</p>
+                      <p className="text-[10px] sm:text-xs text-green-600">hectares</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl">
+                <Card className="bg-gradient-to-br from-yellow-100 to-yellow-50 border-2 border-yellow-300 rounded-2xl shadow-md hover:shadow-lg transition-all hover:scale-105">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <div className="p-1.5 bg-yellow-500/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
-                        <Package className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-500" />
+                      <div className="p-2 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl w-fit mx-auto mb-1 sm:mb-2 shadow-md">
+                        <Package className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Total Fardos</p>
-                      <p className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-500">{selectedTalhaoData.total}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">fardos</p>
+                      <p className="text-[10px] sm:text-xs text-yellow-700 font-bold">Total Fardos</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-yellow-700 to-yellow-600 bg-clip-text text-transparent">{selectedTalhaoData.total}</p>
+                      <p className="text-[10px] sm:text-xs text-yellow-600">fardos</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl">
+                <Card className="bg-gradient-to-br from-green-100 to-yellow-50 border-2 border-green-300 rounded-2xl shadow-md hover:shadow-lg transition-all hover:scale-105">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <div className="p-1.5 bg-emerald-500/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
-                        <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-500" />
+                      <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-xl w-fit mx-auto mb-1 sm:mb-2 shadow-md">
+                        <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Produtividade</p>
-                      <p className="text-base sm:text-xl font-bold text-emerald-600 dark:text-emerald-500">{produtividadeArrobas} @/ha</p>
-                      <p className="text-xs sm:text-sm text-emerald-600/70 dark:text-emerald-500/70">{fardosPorHectare} f/ha</p>
+                      <p className="text-[10px] sm:text-xs text-green-700 font-bold">Produtividade</p>
+                      <p className="text-base sm:text-xl font-bold bg-gradient-to-r from-green-700 to-yellow-600 bg-clip-text text-transparent">{produtividadeArrobas} @/ha</p>
+                      <p className="text-xs sm:text-sm text-green-600 font-semibold">{fardosPorHectare} f/ha</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-2 border-green-200 dark:border-green-800 rounded-xl">
+                <Card className="bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-2xl shadow-md hover:shadow-lg transition-all hover:scale-105">
                   <CardContent className="pt-4 sm:pt-6 pb-3 sm:pb-4">
                     <div className="text-center space-y-0.5 sm:space-y-1">
-                      <div className="p-1.5 bg-green-500/20 rounded-lg w-fit mx-auto mb-1 sm:mb-2">
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-500" />
+                      <div className="p-2 bg-gradient-to-br from-green-600 to-green-700 rounded-xl w-fit mx-auto mb-1 sm:mb-2 shadow-md">
+                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">Concluídos</p>
-                      <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-500">{selectedTalhaoData.beneficiado}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">
-                        {selectedTalhaoData.total > 0 
-                          ? ((selectedTalhaoData.beneficiado / selectedTalhaoData.total) * 100).toFixed(0) 
+                      <p className="text-[10px] sm:text-xs text-green-700 font-bold">Concluídos</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">{selectedTalhaoData.beneficiado}</p>
+                      <p className="text-[10px] sm:text-xs text-green-600 font-semibold">
+                        {selectedTalhaoData.total > 0
+                          ? ((selectedTalhaoData.beneficiado / selectedTalhaoData.total) * 100).toFixed(0)
                           : 0}%
                       </p>
                     </div>
