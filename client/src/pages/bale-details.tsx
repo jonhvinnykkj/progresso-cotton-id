@@ -150,50 +150,34 @@ export default function BaleDetails() {
         <header className="bg-gradient-to-r from-green-50 via-yellow-50/30 to-green-50 dark:from-gray-900 dark:to-gray-800 border-b-2 border-green-200 dark:border-gray-700 shadow-md">
           <div className="container mx-auto px-4 py-6 max-w-3xl">
             <div className="flex flex-col gap-4">
-              {/* Top row: Logo + Title + Back button */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                    <img
-                      src={logoProgresso}
-                      alt="Grupo Progresso"
-                      className="h-7 w-7 sm:h-9 sm:w-9 transition-transform hover:scale-110 duration-300"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
-                        Detalhes do Fardo
-                      </h1>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-shadow">
-                        <Package className="w-3.5 h-3.5" />
-                        Campo
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-medium mt-1">
-                      Rastreabilidade completa
-                    </p>
-                  </div>
+              {/* Top row: Logo + Title */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <img
+                    src={logoProgresso}
+                    alt="Grupo Progresso"
+                    className="h-7 w-7 sm:h-9 sm:w-9 transition-transform hover:scale-110 duration-300"
+                  />
                 </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation("/dashboard")}
-                  className="shrink-0 hover:scale-105 transition-transform duration-300 border-2 border-green-300 hover:border-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-950 rounded-xl font-bold text-green-700 hover:text-yellow-700"
-                  data-testid="button-back"
-                >
-                  <ArrowLeft className="w-4 h-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Voltar</span>
-                </Button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
+                      Detalhes do Fardo
+                    </h1>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-shadow">
+                      <Package className="w-3.5 h-3.5" />
+                      Campo
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-medium mt-1">
+                    Rastreabilidade completa
+                  </p>
+                </div>
               </div>
 
               {/* Bottom row: Status + Actions */}
               <div className="flex items-center justify-between gap-3 pt-3 border-t border-green-100 dark:border-gray-700">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-green-700 dark:text-green-400">Status Atual:</span>
-                  <StatusBadge status={bale.status} size="lg" />
-                </div>
+                <StatusBadge status={bale.status} size="lg" />
 
                 {selectedRole === "superadmin" && (
                   <Button
