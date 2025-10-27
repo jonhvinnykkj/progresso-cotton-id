@@ -332,142 +332,157 @@ export default function TalhaoStats() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-              <CardContent className="pt-6">
+            <Card className="group relative overflow-hidden shadow-lg border-2 border-green-100 hover:border-yellow-300 rounded-2xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-yellow-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="pt-6 relative">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground font-semibold">Criados Hoje</p>
-                    <div className="p-2 bg-blue-100 dark:bg-blue-950 rounded-lg">
-                      <Calendar className="w-4 h-4 text-blue-600" />
+                    <p className="text-xs text-green-700 font-bold">Criados Hoje</p>
+                    <div className="p-2 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <Calendar className="w-4 h-4 text-white" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-blue-600">
+                  <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent">
                     <AnimatedCounter value={balesToday} />
                   </p>
-                  <p className="text-xs text-muted-foreground font-medium">
-                    <AnimatedCounter value={balesThisWeek} /> esta semana
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-12 rounded-full bg-yellow-300 group-hover:bg-green-400 transition-colors"></div>
+                    <p className="text-xs text-green-700 font-semibold">
+                      <AnimatedCounter value={balesThisWeek} /> esta semana
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-              <CardContent className="pt-6">
+            <Card className="group relative overflow-hidden shadow-lg border-2 border-green-100 hover:border-yellow-300 rounded-2xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-yellow-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="pt-6 relative">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground font-semibold">Média/Talhão</p>
-                    <div className="p-2 bg-purple-100 dark:bg-purple-950 rounded-lg">
-                      <Activity className="w-4 h-4 text-purple-600" />
+                    <p className="text-xs text-green-700 font-bold">Média/Talhão</p>
+                    <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <Activity className="w-4 h-4 text-white" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-purple-600">
+                  <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
                     <AnimatedCounter value={avgBalesPerTalhao} decimals={0} />
                   </p>
-                  <p className="text-xs text-muted-foreground font-medium">
-                    fardos por talhão
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-12 rounded-full bg-green-300 group-hover:bg-yellow-400 transition-colors"></div>
+                    <p className="text-xs text-green-700 font-semibold">
+                      fardos por talhão
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-2 rounded-xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-              <CardContent className="pt-6">
+            <Card className="group relative overflow-hidden shadow-lg border-2 border-green-100 hover:border-yellow-300 rounded-2xl hover:scale-[1.02] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-yellow-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="pt-6 relative">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground font-semibold">Progresso</p>
-                    <div className="p-2 bg-bale-beneficiado/10 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
+                    <p className="text-xs text-green-700 font-bold">Progresso</p>
+                    <div className="p-2 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-bale-beneficiado">
+                  <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
                     <AnimatedCounter value={parseFloat(progressPercent)} decimals={1} />%
                   </p>
-                  <p className="text-xs text-muted-foreground font-medium">
-                    <AnimatedCounter value={globalStats?.beneficiado || 0} /> beneficiados
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-12 rounded-full bg-green-300 group-hover:bg-yellow-400 transition-colors"></div>
+                    <p className="text-xs text-green-700 font-semibold">
+                      <AnimatedCounter value={globalStats?.beneficiado || 0} /> beneficiados
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Summary Card com Status */}
-          <Card className="brand-gradient text-white shadow-xl rounded-2xl border-0 overflow-hidden animate-fade-in-up" style={{ animationDelay: "0.25s" }} data-testid="card-summary">
+          {/* Summary Card com Status - Moderno com gradiente verde/amarelo */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 via-green-600 to-yellow-500 text-white shadow-2xl rounded-3xl border-0 animate-fade-in-up" style={{ animationDelay: "0.25s" }} data-testid="card-summary">
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-300 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
             </div>
             <CardHeader className="pb-4 relative">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                   <BarChart3 className="w-5 h-5 text-white" />
                 </div>
-                <CardTitle className="text-lg font-bold">
+                <CardTitle className="text-lg sm:text-xl font-bold">
                   Distribuição por Status
                 </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg w-fit mx-auto mb-2">
-                    <Package className="w-6 h-6 text-white" />
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
+                <div className="group">
+                  <div className="p-3 bg-white/15 backdrop-blur-sm rounded-2xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform border border-white/20">
+                    <Package className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <p className="text-xs text-white/90 font-semibold mb-1">No Campo</p>
-                  <p className="text-3xl font-bold mb-2">
+                  <p className="text-xs sm:text-sm text-white font-bold mb-2">No Campo</p>
+                  <p className="text-3xl sm:text-4xl font-bold mb-3 drop-shadow-lg">
                     <AnimatedCounter value={globalStats?.campo || 0} />
                   </p>
-                  <Progress value={globalStats?.total ? (globalStats.campo / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
+                  <Progress value={globalStats?.total ? (globalStats.campo / globalStats.total) * 100 : 0} className="h-2.5 bg-white/20 [&>div]:bg-white rounded-full shadow-md" />
                 </div>
-                <div>
-                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg w-fit mx-auto mb-2">
-                    <Truck className="w-6 h-6 text-white" />
+                <div className="group">
+                  <div className="p-3 bg-white/15 backdrop-blur-sm rounded-2xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform border border-white/20">
+                    <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <p className="text-xs text-white/90 font-semibold mb-1">No Pátio</p>
-                  <p className="text-3xl font-bold mb-2">
+                  <p className="text-xs sm:text-sm text-white font-bold mb-2">No Pátio</p>
+                  <p className="text-3xl sm:text-4xl font-bold mb-3 drop-shadow-lg">
                     <AnimatedCounter value={globalStats?.patio || 0} />
                   </p>
-                  <Progress value={globalStats?.total ? (globalStats.patio / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
+                  <Progress value={globalStats?.total ? (globalStats.patio / globalStats.total) * 100 : 0} className="h-2.5 bg-white/20 [&>div]:bg-gradient-to-r [&>div]:from-white [&>div]:to-yellow-200 rounded-full shadow-md" />
                 </div>
-                <div>
-                  <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg w-fit mx-auto mb-2">
-                    <CheckCircle className="w-6 h-6 text-white" />
+                <div className="group">
+                  <div className="p-3 bg-white/15 backdrop-blur-sm rounded-2xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform border border-white/20">
+                    <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <p className="text-xs text-white/90 font-semibold mb-1">Beneficiados</p>
-                  <p className="text-3xl font-bold mb-2">
+                  <p className="text-xs sm:text-sm text-white font-bold mb-2">Beneficiados</p>
+                  <p className="text-3xl sm:text-4xl font-bold mb-3 drop-shadow-lg">
                     <AnimatedCounter value={globalStats?.beneficiado || 0} />
                   </p>
-                  <Progress value={globalStats?.total ? (globalStats.beneficiado / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
+                  <Progress value={globalStats?.total ? (globalStats.beneficiado / globalStats.total) * 100 : 0} className="h-2.5 bg-white/20 [&>div]:bg-white rounded-full shadow-md" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Tabs para diferentes visões */}
+          {/* Tabs para diferentes visões - Modernizado */}
           <Tabs defaultValue="talhao" className="w-full animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-            <TabsList className="grid w-full grid-cols-4 p-1 bg-muted/50 rounded-xl h-12">
-              <TabsTrigger value="talhao" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+            <TabsList className="grid w-full grid-cols-4 p-1.5 bg-gradient-to-r from-green-50 to-yellow-50 border-2 border-green-200 rounded-2xl h-14 shadow-md">
+              <TabsTrigger value="talhao" className="rounded-xl transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:border-2 data-[state=active]:border-yellow-400 font-bold text-green-700">
                 Por Talhão
               </TabsTrigger>
-              <TabsTrigger value="safra" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+              <TabsTrigger value="safra" className="rounded-xl transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:border-2 data-[state=active]:border-yellow-400 font-bold text-green-700">
                 Por Safra
               </TabsTrigger>
-              <TabsTrigger value="graficos" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+              <TabsTrigger value="graficos" className="rounded-xl transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:border-2 data-[state=active]:border-yellow-400 font-bold text-green-700">
                 Gráficos
               </TabsTrigger>
-              <TabsTrigger value="mapa" className="rounded-lg transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg font-semibold">
+              <TabsTrigger value="mapa" className="rounded-xl transition-all hover:scale-105 duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:border-2 data-[state=active]:border-yellow-400 font-bold text-green-700">
                 Mapa
               </TabsTrigger>
             </TabsList>
 
             {/* Tab: Por Talhão */}
             <TabsContent value="talhao" className="space-y-4 mt-4">
-              {/* Campo de busca */}
+              {/* Campo de busca - Modernizado */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl pointer-events-none shadow-md">
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
                 <Input
                   placeholder="Buscar talhão..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 h-12 rounded-xl border-2 hover:border-primary/50 transition-all text-base"
+                  className="pl-14 sm:pl-16 h-12 sm:h-14 rounded-2xl border-2 border-green-200 hover:border-yellow-400 focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base font-medium bg-white shadow-lg"
                   data-testid="input-search-talhao"
                 />
               </div>
