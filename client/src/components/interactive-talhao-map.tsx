@@ -970,42 +970,33 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
 
       {/* Fullscreen Map Dialog */}
       <Dialog open={fullscreenMap} onOpenChange={setFullscreenMap}>
-        <DialogContent className="max-w-[95vw] h-[95vh] p-0">
-          <DialogHeader className="p-6 pb-0">
+        <DialogContent className="max-w-[98vw] max-h-[98vh] h-[98vh] p-0 flex flex-col">
+          <DialogHeader className="px-4 py-3 border-b shrink-0">
             <DialogTitle className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  Mapa Interativo - Safra {safra}
-                  <Badge variant="outline">{filteredCottonFeatures.features.length} talhões</Badge>
-                </div>
+              <div className="flex items-center gap-3">
+                <span className="text-base font-semibold">Mapa Interativo - Safra {safra}</span>
+                <Badge variant="outline" className="text-xs">{filteredCottonFeatures.features.length} talhões</Badge>
                 {overallStats && (
-                  <p className="text-sm text-muted-foreground font-normal mt-1">
+                  <span className="text-xs text-muted-foreground">
                     {overallStats.totalFardos} fardos • {overallStats.produtividadeMedia.toFixed(2)} f/ha • {overallStats.totalArea.toFixed(0)} ha
-                  </p>
+                  </span>
                 )}
               </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 h-full p-6 pt-4 overflow-hidden">
+          <div className="flex-1 min-h-0 p-4">
             <MapContainer
               center={[-7.49, -44.20]}
-              zoom={12}
+              zoom={13}
               style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
               scrollWheelZoom={true}
             >
               <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              />
-              
-              {/* Cotton Talhões */}
-              <GeoJSON
-                data={filteredCottonFeatures}
-                style={getCottonStyle}
-                onEachFeature={onEachCottonFeature}
+                attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               />
 
-               {/* Other Cultures */}
+              {/* Other Cultures */}
               {showOtherCultures && (
                 <GeoJSON
                   data={otherTalhoes}
@@ -1013,6 +1004,30 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
                   onEachFeature={onEachOtherFeature}
                 />
               )}
+
+              {/* Cotton Talhões */}
+              <GeoJSON
+                key={`fullscreen-cotton-${viewMode}-${filterStatus}`}
+                data={filteredCottonFeatures}
+                style={getCottonStyle}
+                onEachFeature={onEachCottonFeature}
+              />
+
+              {/* Marcadores de Alerta */}
+              {showAlerts && talhoesComAlerta.map((alerta: any) => {
+                const feature = cottonTalhoes.features.find((f: any) => f.properties.nome === alerta.talhao);
+                if (!feature) return null;
+
+                const center = getPolygonCenter(feature.geometry.coordinates);
+
+                return (
+                  <Marker
+                    key={`fullscreen-alert-${alerta.talhao}`}
+                    position={center}
+                    icon={createAlertIcon()}
+                  />
+                );
+              })}
 
               {/* Labels */}
               {showLabels && filteredCottonFeatures.features.map((feature: any) => {
@@ -1022,27 +1037,9 @@ export function InteractiveTalhaoMap({ selectedTalhao, onTalhaoClick }: Interact
 
                 return (
                   <Marker
-                    key={`label-${talhao}`}
+                    key={`fullscreen-label-${talhao}`}
                     position={centroid}
-                    icon={L.divIcon({
-                      className: 'custom-label-icon',
-                      html: `
-                        <div style="
-                          background: white;
-                          padding: 4px 8px;
-                          border-radius: 4px;
-                          border: 2px solid ${stats?.status === 'concluido' ? '#16a34a' : stats?.status === 'em_colheita' ? '#eab308' : '#6b7280'};
-                          font-weight: bold;
-                          font-size: 11px;
-                          white-space: nowrap;
-                          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                        ">
-                          ${talhao}${stats?.totalFardos ? ` (${stats.totalFardos}f)` : ''}
-                        </div>
-                      `,
-                      iconSize: [0, 0],
-                      iconAnchor: [0, 0],
-                    })}
+                    icon={createLabelIcon(talhao)}
                   />
                 );
               })}
