@@ -45,15 +45,32 @@ const authLimiter = rateLimit({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Server-Sent Events endpoint for real-time updates
   app.get("/api/events", (req, res) => {
+    // Set SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+
+    // CORS headers for SSE
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
     res.flushHeaders();
 
     addClient(res);
 
     // Send initial connection message
     res.write('event: connected\ndata: {"message":"Connected to real-time updates"}\n\n');
+
+    // Send keepalive every 30 seconds to prevent connection timeout
+    const keepaliveInterval = setInterval(() => {
+      res.write(':keepalive\n\n');
+    }, 30000);
+
+    // Clean up on connection close
+    req.on('close', () => {
+      clearInterval(keepaliveInterval);
+    });
   });
 
   // Auth routes
