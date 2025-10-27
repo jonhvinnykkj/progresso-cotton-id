@@ -9,6 +9,7 @@ import {
   updateBaleStatusSchema,
   updateDefaultSafraSchema,
 } from "@shared/schema";
+import { addClient, notifyBaleChange } from "./events";
 
 // Estender Request do Express com métodos do Passport
 declare global {
@@ -28,6 +29,19 @@ import { z } from "zod";
 import { generatePDF, generateExcel } from "./reports";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Server-Sent Events endpoint for real-time updates
+  app.get("/api/events", (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    addClient(res);
+
+    // Send initial connection message
+    res.write('event: connected\ndata: {"message":"Connected to real-time updates"}\n\n');
+  });
+
   // Auth routes
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -242,6 +256,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalUserId = userId || "campo-user";
       const bale = await storage.createSingleBale(id, safra, talhao, numero, finalUserId);
 
+      // Notify all clients about the new bale
+      notifyBaleChange();
+
       res.status(201).json(bale);
     } catch (error) {
       console.error("Error creating bale:", error);
@@ -261,6 +278,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalUserId = userId || "campo-user";
 
       const bales = await storage.batchCreateBales(validatedData, finalUserId);
+
+      // Notify all clients about the new bales
+      notifyBaleChange();
 
       // Retornar informações sobre quantos foram criados vs quantos foram solicitados
       const response = {
@@ -298,6 +318,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status,
         finalUserId
       );
+
+      // Notify all clients about the status change
+      notifyBaleChange();
 
       res.json(bale);
     } catch (error) {

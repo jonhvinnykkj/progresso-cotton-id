@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AnimatedCounter } from "@/components/animated-counter";
 import { useAuth } from "@/lib/auth-context";
 import type { Bale } from "@shared/schema";
 import { TALHOES_INFO } from "@shared/talhoes";
@@ -90,6 +91,7 @@ export default function TalhaoStats() {
 
   const { data: talhaoStatsData, isLoading } = useQuery<Record<string, TalhaoStats>>({
     queryKey: ["/api/bales/stats-by-talhao"],
+    staleTime: 60000, // Stats são mais estáveis - 1 minuto
   });
 
   // Convert object to array
@@ -97,10 +99,12 @@ export default function TalhaoStats() {
 
   const { data: safraStats = [] } = useQuery<SafraStats[]>({
     queryKey: ["/api/bales/stats-by-safra"],
+    staleTime: 60000,
   });
 
   const { data: allBales = [] } = useQuery<Bale[]>({
     queryKey: ["/api/bales"],
+    staleTime: 30000,
   });
 
   const { data: globalStats } = useQuery<{
@@ -110,6 +114,7 @@ export default function TalhaoStats() {
     total: number;
   }>({
     queryKey: ["/api/bales/stats"],
+    staleTime: 30000,
   });
 
   const handleLogout = () => {
@@ -304,7 +309,9 @@ export default function TalhaoStats() {
                       <Package className="w-4 h-4 text-primary" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-primary">{globalStats?.total || 0}</p>
+                  <p className="text-3xl font-bold text-primary">
+                    <AnimatedCounter value={globalStats?.total || 0} />
+                  </p>
                   <p className="text-xs text-muted-foreground font-medium">
                     {totalHectares} ha • {avgFardosPorHectare} fardos/ha
                   </p>
@@ -321,9 +328,11 @@ export default function TalhaoStats() {
                       <Calendar className="w-4 h-4 text-blue-600" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-blue-600">{balesToday}</p>
+                  <p className="text-3xl font-bold text-blue-600">
+                    <AnimatedCounter value={balesToday} />
+                  </p>
                   <p className="text-xs text-muted-foreground font-medium">
-                    {balesThisWeek} esta semana
+                    <AnimatedCounter value={balesThisWeek} /> esta semana
                   </p>
                 </div>
               </CardContent>
@@ -338,7 +347,9 @@ export default function TalhaoStats() {
                       <Activity className="w-4 h-4 text-purple-600" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-purple-600">{avgBalesPerTalhao.toFixed(0)}</p>
+                  <p className="text-3xl font-bold text-purple-600">
+                    <AnimatedCounter value={avgBalesPerTalhao} decimals={0} />
+                  </p>
                   <p className="text-xs text-muted-foreground font-medium">
                     fardos por talhão
                   </p>
@@ -355,9 +366,11 @@ export default function TalhaoStats() {
                       <CheckCircle className="w-4 h-4 text-bale-beneficiado" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-bale-beneficiado">{progressPercent}%</p>
+                  <p className="text-3xl font-bold text-bale-beneficiado">
+                    <AnimatedCounter value={parseFloat(progressPercent)} decimals={1} />%
+                  </p>
                   <p className="text-xs text-muted-foreground font-medium">
-                    {globalStats?.beneficiado || 0} beneficiados
+                    <AnimatedCounter value={globalStats?.beneficiado || 0} /> beneficiados
                   </p>
                 </div>
               </CardContent>
@@ -386,7 +399,9 @@ export default function TalhaoStats() {
                     <Package className="w-6 h-6 text-white" />
                   </div>
                   <p className="text-xs text-white/90 font-semibold mb-1">No Campo</p>
-                  <p className="text-3xl font-bold mb-2">{globalStats?.campo || 0}</p>
+                  <p className="text-3xl font-bold mb-2">
+                    <AnimatedCounter value={globalStats?.campo || 0} />
+                  </p>
                   <Progress value={globalStats?.total ? (globalStats.campo / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
                 </div>
                 <div>
@@ -394,7 +409,9 @@ export default function TalhaoStats() {
                     <Truck className="w-6 h-6 text-white" />
                   </div>
                   <p className="text-xs text-white/90 font-semibold mb-1">No Pátio</p>
-                  <p className="text-3xl font-bold mb-2">{globalStats?.patio || 0}</p>
+                  <p className="text-3xl font-bold mb-2">
+                    <AnimatedCounter value={globalStats?.patio || 0} />
+                  </p>
                   <Progress value={globalStats?.total ? (globalStats.patio / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
                 </div>
                 <div>
@@ -402,7 +419,9 @@ export default function TalhaoStats() {
                     <CheckCircle className="w-6 h-6 text-white" />
                   </div>
                   <p className="text-xs text-white/90 font-semibold mb-1">Beneficiados</p>
-                  <p className="text-3xl font-bold mb-2">{globalStats?.beneficiado || 0}</p>
+                  <p className="text-3xl font-bold mb-2">
+                    <AnimatedCounter value={globalStats?.beneficiado || 0} />
+                  </p>
                   <Progress value={globalStats?.total ? (globalStats.beneficiado / globalStats.total) * 100 : 0} className="h-2 bg-white/20 [&>div]:bg-white rounded-full" />
                 </div>
               </div>

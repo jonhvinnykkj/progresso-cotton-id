@@ -8,6 +8,7 @@ import { BaleCard } from "@/components/bale-card";
 import { NavSidebar } from "@/components/nav-sidebar";
 import { Footer } from "@/components/footer";
 import { BackButton } from "@/components/back-button";
+import { AnimatedCounter } from "@/components/animated-counter";
 import { useAuth } from "@/lib/auth-context";
 import type { Bale, BaleStatus } from "@shared/schema";
 import {
@@ -32,6 +33,7 @@ export default function Dashboard() {
 
   const { data: bales = [], isLoading } = useQuery<Bale[]>({
     queryKey: ["/api/bales"],
+    staleTime: 30000, // Dados considerados frescos por 30s
   });
 
   const { data: stats } = useQuery<{
@@ -41,6 +43,7 @@ export default function Dashboard() {
     total: number;
   }>({
     queryKey: ["/api/bales/stats"],
+    staleTime: 30000,
   });
 
   const filteredBales = bales.filter((bale) => {
@@ -156,22 +159,30 @@ export default function Dashboard() {
                   <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
                     <Package className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
                     <p className="text-xs text-white/80 mb-1">Total de Fardos</p>
-                    <p className="text-2xl sm:text-3xl font-bold">{stats?.total || 0}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">
+                      <AnimatedCounter value={stats?.total || 0} />
+                    </p>
                   </div>
                   <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
                     <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
                     <p className="text-xs text-white/80 mb-1">Talhões Ativos</p>
-                    <p className="text-2xl sm:text-3xl font-bold">{uniqueTalhoesCount}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">
+                      <AnimatedCounter value={uniqueTalhoesCount} />
+                    </p>
                   </div>
                   <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
                     <CalendarDays className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
                     <p className="text-xs text-white/80 mb-1">Criados Hoje</p>
-                    <p className="text-2xl sm:text-3xl font-bold">{balesToday}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">
+                      <AnimatedCounter value={balesToday} />
+                    </p>
                   </div>
                   <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
                     <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
                     <p className="text-xs text-white/80 mb-1">% Beneficiados</p>
-                    <p className="text-2xl sm:text-3xl font-bold">{progressPercent}%</p>
+                    <p className="text-2xl sm:text-3xl font-bold">
+                      <AnimatedCounter value={parseFloat(progressPercent)} decimals={1} />%
+                    </p>
                   </div>
                 </div>
                 
@@ -218,7 +229,7 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent className="space-y-1">
                       <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                        {card.count}
+                        <AnimatedCounter value={card.count} />
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {card.count === 1 ? "fardo" : "fardos"}

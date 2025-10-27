@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "./lib/auth-context";
+import { useRealtime } from "./hooks/use-realtime";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
@@ -32,6 +33,16 @@ function ProtectedRoute({ component: Component, allowedRoles }: {
   }
 
   return <Component />;
+}
+
+// Component to enable real-time updates only when authenticated
+function RealtimeProvider() {
+  const { isAuthenticated } = useAuth();
+  
+  // Always call the hook, but pass authentication status
+  useRealtime(isAuthenticated);
+  
+  return null;
 }
 
 function Router() {
@@ -89,6 +100,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
+          <RealtimeProvider />
           <Router />
         </AuthProvider>
         <Toaster />
