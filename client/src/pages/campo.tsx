@@ -401,7 +401,10 @@ const singleCreateSchema = z.object({
   numero: z.string().min(1, "Número é obrigatório").regex(/^\d{5}$/, "Número deve ter 5 dígitos"),
 });
 
-type BatchCreateForm = z.infer<typeof batchCreateSchema>;
+type BatchCreateForm = {
+  talhao: string;
+  quantidade: number | "";
+};
 type SingleCreateForm = z.infer<typeof singleCreateSchema>;
 
 export default function Campo() {
@@ -423,7 +426,7 @@ export default function Campo() {
     resolver: zodResolver(batchCreateSchema),
     defaultValues: {
       talhao: "",
-      quantidade: undefined,
+      quantidade: "", // Inicia vazio, será convertido para 1 no preprocess
     },
   });
 
@@ -566,7 +569,7 @@ export default function Campo() {
       }
 
       // Resetar apenas quantidade (deixar vazio)
-      form.setValue("quantidade", undefined);
+      form.setValue("quantidade", "");
 
     } catch (error) {
       console.error("Erro ao criar fardos:", error);
@@ -784,8 +787,8 @@ export default function Campo() {
                             max="1000"
                             placeholder="Digite a quantidade (Ex: 50)"
                             {...field}
-                            value={field.value || ""}
-                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                            value={field.value === "" ? "" : (field.value || "")}
+                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : "")}
                             disabled={isCreating}
                             data-testid="input-quantidade"
                             className="h-12 rounded-xl border-2 hover:border-primary/50 transition-all focus:scale-[1.01] duration-300 text-base"
