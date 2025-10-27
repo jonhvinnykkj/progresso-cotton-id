@@ -150,11 +150,11 @@ export default function BaleDetails() {
         <header className="lg:sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4 mb-3">
-              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg">
                 <img
                   src={logoProgresso}
                   alt="Grupo Progresso"
-                  className="h-8 w-8 brightness-0 invert"
+                  className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
                 />
               </div>
               <Button

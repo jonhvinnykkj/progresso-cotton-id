@@ -262,9 +262,12 @@ export function NavSidebar() {
       </div>
     </aside>
 
-      {/* Mobile Bottom Navigation - Estilo Instagram */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-        <div className="flex items-center justify-around h-16 px-2">
+      {/* Mobile Bottom Navigation - Moderno com gradientes */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-white via-white to-white/95 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900/95 backdrop-blur-lg border-t-2 border-green-200/50 dark:border-gray-700 shadow-[0_-4px_20px_rgba(34,197,94,0.15)]">
+        {/* Barra de destaque superior */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500 via-yellow-500 to-green-500"></div>
+
+        <div className="flex items-center justify-around h-16 px-1">
           {/* Apenas os itens administrativos/gerenciais */}
           {[
             { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -274,31 +277,42 @@ export function NavSidebar() {
             { title: "Configurações", href: "/settings", icon: Settings, roles: ["superadmin"] },
           ]
             .filter((item) => !item.roles || (selectedRole && item.roles.includes(selectedRole)))
-            .map((item) => {
+            .map((item, index) => {
               const Icon = item.icon;
               const isActive = location === item.href;
-              
+
               return (
                 <button
                   key={item.href}
                   onClick={() => setLocation(item.href)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-all duration-200",
-                    isActive 
-                      ? "text-green-600 dark:text-green-400" 
-                      : "text-gray-600 dark:text-gray-400 active:scale-95"
+                    "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 active:scale-95",
+                    isActive
+                      ? "text-white scale-105"
+                      : "text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
                   )}
+                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <Icon 
+                  {/* Background gradiente para item ativo */}
+                  {isActive && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-green-600 to-yellow-500 rounded-2xl shadow-lg shadow-green-500/30 animate-fade-in"></div>
+                  )}
+
+                  {/* Pill de destaque para item ativo */}
+                  {isActive && (
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full shadow-md animate-fade-in"></div>
+                  )}
+
+                  <Icon
                     className={cn(
-                      "h-6 w-6 transition-all",
-                      isActive && "scale-110"
-                    )} 
+                      "h-5 w-5 transition-all relative z-10",
+                      isActive ? "scale-110 drop-shadow-md" : "scale-100"
+                    )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
                   <span className={cn(
-                    "text-[10px] font-medium",
-                    isActive && "font-semibold"
+                    "text-[9px] font-medium relative z-10 transition-all",
+                    isActive ? "font-bold tracking-wide" : "font-normal"
                   )}>
                     {item.title}
                   </span>

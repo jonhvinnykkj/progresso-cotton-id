@@ -122,11 +122,11 @@ export default function Dashboard() {
           <div className="mb-6 sm:mb-8 animate-fade-in-up">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg">
                   <img
                     src={logoProgresso}
                     alt="Grupo Progresso"
-                    className="h-8 w-8 sm:h-10 sm:w-10 brightness-0 invert"
+                    className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
                   />
                 </div>
                 <div>

@@ -151,11 +151,13 @@ export default function Algodoeira() {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between gap-3 py-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <img 
-                src={logoProgresso} 
-                alt="Grupo Progresso" 
-                className="h-10 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
-              />
+              <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg shrink-0">
+                <img
+                  src={logoProgresso}
+                  alt="Grupo Progresso"
+                  className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
+                />
+              </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
                   Beneficiamento

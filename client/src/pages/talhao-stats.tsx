@@ -235,11 +235,11 @@ export default function TalhaoStats() {
           <div className="mb-6 sm:mb-8 animate-fade-in-up">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="shrink-0">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg shrink-0">
                   <img
                     src={logoProgresso}
                     alt="Grupo Progresso"
-                    className="h-10 w-10 sm:h-14 sm:w-14 object-contain"
+                    className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
                   />
                 </div>
                 <div className="min-w-0">

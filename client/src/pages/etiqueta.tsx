@@ -243,11 +243,13 @@ export default function Etiqueta() {
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
-                <img 
-                  src={logoProgresso} 
-                  alt="Grupo Progresso" 
-                  className="h-10 sm:h-12 w-auto shrink-0 transition-transform hover:scale-110 duration-300"
-                />
+                <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg shrink-0">
+                  <img
+                    src={logoProgresso}
+                    alt="Grupo Progresso"
+                    className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <h1 className="text-lg sm:text-xl font-bold truncate bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
                     Etiquetas dos Fardos
