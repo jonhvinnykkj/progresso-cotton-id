@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/status-badge";
 import { BaleTimeline } from "@/components/bale-timeline";
 import type { Bale } from "@shared/schema";
 import { ArrowLeft, Hash, Wheat, QrCode, Calendar, Loader2, User, Users, Trash2, Package } from "lucide-react";
@@ -179,11 +178,9 @@ export default function BaleDetails() {
                 </div>
               </div>
 
-              {/* Bottom row: Status + Actions */}
-              <div className="flex items-center justify-between gap-3 pt-3 border-t border-green-100 dark:border-gray-700">
-                <StatusBadge status={bale.status} size="lg" />
-
-                {selectedRole === "superadmin" && (
+              {/* Bottom row: Actions */}
+              {selectedRole === "superadmin" && (
+                <div className="flex justify-end pt-3 border-t border-green-100 dark:border-gray-700">
                   <Button
                     variant="outline"
                     size="sm"
@@ -193,8 +190,8 @@ export default function BaleDetails() {
                     <Trash2 className="w-4 h-4 mr-1.5" />
                     Excluir Fardo
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
