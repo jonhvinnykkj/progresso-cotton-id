@@ -147,51 +147,53 @@ export default function BaleDetails() {
     <>
       <NavSidebar />
       <div className={cn("min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800 transition-all duration-300", collapsed ? "lg:ml-20" : "lg:ml-64")}>
-        <header className="lg:sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b shadow-sm">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg">
-                <img
-                  src={logoProgresso}
-                  alt="Grupo Progresso"
-                  className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
-                />
+        <header className="bg-background/95 backdrop-blur-md border-b shadow-sm">
+          <div className="container mx-auto px-4 py-4 max-w-3xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-2xl shadow-lg">
+                  <img
+                    src={logoProgresso}
+                    alt="Grupo Progresso"
+                    className="h-6 w-6 sm:h-8 sm:w-8 transition-transform hover:scale-110 duration-300"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
+                    Detalhes do Fardo
+                  </h1>
+                  <p className="text-xs sm:text-sm text-green-700 font-medium">
+                    Rastreabilidade completa
+                  </p>
+                </div>
               </div>
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/dashboard")}
-                className="hover:scale-105 transition-transform duration-300 border-2 border-green-200 hover:border-yellow-400 rounded-xl"
-                data-testid="button-back"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-yellow-600 bg-clip-text text-transparent">
-                  Detalhes do Fardo
-                </h1>
-                <p className="text-sm text-green-700 font-semibold mt-1">
-                  Rastreabilidade completa
-                </p>
-              </div>
-            <div className="flex items-center gap-2">
-              <StatusBadge status={bale.status} size="lg" />
-              {selectedRole === "superadmin" && (
+
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="h-10 rounded-xl hover:scale-105 transition-all duration-300 font-semibold shadow-lg"
+                  onClick={() => setLocation("/dashboard")}
+                  className="hover:scale-105 transition-transform duration-300 border-2 border-green-300 hover:border-yellow-400 rounded-xl font-semibold"
+                  data-testid="button-back"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Excluir
+                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  Voltar
                 </Button>
-              )}
+                <StatusBadge status={bale.status} size="lg" />
+                {selectedRole === "superadmin" && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="h-9 rounded-xl hover:scale-105 transition-all duration-300 font-semibold shadow-lg"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1.5" />
+                    Excluir
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
         </header>
 
         <main className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
