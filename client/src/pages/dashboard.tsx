@@ -112,89 +112,113 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex min-h-screen bg-gradient-to-br from-green-50/30 via-yellow-50/20 to-green-50/40 dark:from-gray-900 dark:to-gray-800">
       <NavSidebar />
-      
+
       <div className="flex-1 lg:ml-64 flex flex-col">
         {/* Conteúdo principal */}
         <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl pb-20 lg:pb-8">
-          {/* Header com título e estatísticas rápidas */}
+          {/* Header com título e estatísticas rápidas - Design moderno */}
           <div className="mb-6 sm:mb-8 animate-fade-in-up">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                <img 
-                  src={logoProgresso} 
-                  alt="Grupo Progresso" 
-                  className="h-8 w-8 sm:h-10 sm:w-10 transition-transform hover:scale-110 duration-300"
-                />
-                Dashboard
-              </h1>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <img
+                    src={logoProgresso}
+                    alt="Grupo Progresso"
+                    className="h-8 w-8 sm:h-10 sm:w-10 brightness-0 invert"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
+                    Dashboard
+                  </h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    Visão geral da produção de algodão
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
-                <BackButton className="hidden sm:flex" />
+                <BackButton className="hidden sm:flex rounded-xl" />
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="shrink-0 transition-all hover:scale-110 duration-300"
+                  className="shrink-0 transition-all hover:scale-105 duration-300 rounded-xl border-2 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950"
                 >
                   <LogOut className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Sair</span>
                 </Button>
               </div>
             </div>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Visão geral da produção de algodão
-            </p>
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-            {/* Resumo Geral da Safra - Agora vem primeiro */}
-            <Card className="brand-gradient text-white shadow-xl animate-fade-in-up border-0" style={{ animationDelay: '0.1s' }}>
-              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-4">
-                <CardTitle className="text-base sm:text-lg font-bold">Resumo Geral da Safra</CardTitle>
-                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+            {/* Resumo Geral da Safra - Card hero com design moderno */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 via-green-600 to-yellow-500 text-white shadow-2xl animate-fade-in-up border-0 rounded-3xl" style={{ animationDelay: '0.1s' }}>
+              {/* Decoração de fundo */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-300 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+              </div>
+
+              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-4 relative">
+                <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  Resumo Geral da Safra
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                  <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <Package className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
-                    <p className="text-xs text-white/80 mb-1">Total de Fardos</p>
-                    <p className="text-2xl sm:text-3xl font-bold">
+              <CardContent className="relative">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="group transition-all hover:scale-105 duration-300 text-center p-4 sm:p-6 bg-white/15 hover:bg-white/25 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div className="p-3 bg-white/20 rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <Package className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                    <p className="text-xs sm:text-sm text-white/90 mb-2 font-medium">Total de Fardos</p>
+                    <p className="text-3xl sm:text-4xl font-bold">
                       <AnimatedCounter value={stats?.total || 0} />
                     </p>
                   </div>
-                  <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
-                    <p className="text-xs text-white/80 mb-1">Talhões Ativos</p>
-                    <p className="text-2xl sm:text-3xl font-bold">
+                  <div className="group transition-all hover:scale-105 duration-300 text-center p-4 sm:p-6 bg-white/15 hover:bg-white/25 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div className="p-3 bg-white/20 rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                    <p className="text-xs sm:text-sm text-white/90 mb-2 font-medium">Talhões Ativos</p>
+                    <p className="text-3xl sm:text-4xl font-bold">
                       <AnimatedCounter value={uniqueTalhoesCount} />
                     </p>
                   </div>
-                  <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <CalendarDays className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
-                    <p className="text-xs text-white/80 mb-1">Criados Hoje</p>
-                    <p className="text-2xl sm:text-3xl font-bold">
+                  <div className="group transition-all hover:scale-105 duration-300 text-center p-4 sm:p-6 bg-white/15 hover:bg-white/25 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div className="p-3 bg-white/20 rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <CalendarDays className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                    <p className="text-xs sm:text-sm text-white/90 mb-2 font-medium">Criados Hoje</p>
+                    <p className="text-3xl sm:text-4xl font-bold">
                       <AnimatedCounter value={balesToday} />
                     </p>
                   </div>
-                  <div className="transition-transform hover:scale-110 duration-300 text-center p-3 sm:p-4 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-80" />
-                    <p className="text-xs text-white/80 mb-1">% Beneficiados</p>
-                    <p className="text-2xl sm:text-3xl font-bold">
+                  <div className="group transition-all hover:scale-105 duration-300 text-center p-4 sm:p-6 bg-white/15 hover:bg-white/25 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div className="p-3 bg-white/20 rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                    <p className="text-xs sm:text-sm text-white/90 mb-2 font-medium">% Beneficiados</p>
+                    <p className="text-3xl sm:text-4xl font-bold">
                       <AnimatedCounter value={parseFloat(progressPercent)} decimals={1} />%
                     </p>
                   </div>
                 </div>
-                
-                {/* Barra de progresso */}
-                <div className="mt-6">
-                  <div className="flex justify-between text-xs mb-2">
+
+                {/* Barra de progresso moderna */}
+                <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                  <div className="flex justify-between text-sm mb-3 font-medium">
                     <span>Progresso de Beneficiamento</span>
-                    <span>{stats?.beneficiado || 0} de {stats?.total || 0}</span>
+                    <span className="bg-white/20 px-3 py-1 rounded-full">{stats?.beneficiado || 0} de {stats?.total || 0}</span>
                   </div>
-                  <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
-                    <div 
-                      className="bg-white h-full rounded-full transition-all duration-1000 shadow-lg"
+                  <div className="relative w-full bg-white/20 rounded-full h-4 overflow-hidden">
+                    <div
+                      className="absolute inset-0 bg-gradient-to-r from-white via-yellow-200 to-white h-full rounded-full transition-all duration-1000 shadow-lg"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
@@ -202,82 +226,105 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Stats Cards - Grid responsivo com melhor visual */}
+            {/* Stats Cards - Grid responsivo com design moderno verde/amarelo */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">{statusCards.map((card, index) => {
                 const Icon = card.icon;
+                const isSelected = statusFilter === card.status;
                 return (
                   <Card
                     key={card.status}
-                    className={`hover-elevate cursor-pointer shadow-lg smooth-transition animate-fade-in-up border-2 ${
-                      statusFilter === card.status 
-                        ? "ring-2 ring-green-500 border-green-300" 
-                        : "border-transparent hover:border-green-200"
+                    className={`group relative overflow-hidden cursor-pointer shadow-lg smooth-transition animate-fade-in-up rounded-2xl transition-all duration-300 ${
+                      isSelected
+                        ? "ring-4 ring-yellow-400 border-2 border-green-500 scale-[1.02]"
+                        : "border-2 border-green-100 hover:border-yellow-300 hover:scale-[1.02] hover:shadow-xl"
                     }`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    style={{ animationDelay: `${(index + 3) * 0.1}s` }}
                     onClick={() =>
                       setStatusFilter(statusFilter === card.status ? "all" : card.status)
                     }
                     data-testid={`card-stats-${card.status}`}
                   >
-                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {/* Gradient decorativo no fundo */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-yellow-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3 relative">
+                      <CardTitle className="text-sm sm:text-base font-bold text-green-800 dark:text-green-300">
                         {card.label}
                       </CardTitle>
-                      <div className={`w-12 h-12 rounded-xl ${card.bgColor} flex items-center justify-center shrink-0 transition-transform hover:scale-110 duration-300 shadow-md`}>
-                        <Icon className={`w-6 h-6 ${card.color}`} />
+                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${
+                        isSelected
+                          ? 'from-yellow-400 to-yellow-500 shadow-yellow-300/50'
+                          : 'from-green-500 to-green-600 group-hover:from-yellow-400 group-hover:to-yellow-500'
+                      } flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 shadow-lg group-hover:shadow-xl border-2 border-white`}>
+                        <Icon className="w-7 h-7 text-white" />
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-1">
-                      <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    <CardContent className="space-y-2 relative">
+                      <div className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
                         <AnimatedCounter value={card.count} />
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {card.count === 1 ? "fardo" : "fardos"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-1 w-12 rounded-full ${isSelected ? 'bg-yellow-400' : 'bg-green-300 group-hover:bg-yellow-400'} transition-colors duration-300`}></div>
+                        <p className="text-xs sm:text-sm text-green-700 font-semibold">
+                          {card.count === 1 ? "fardo" : "fardos"}
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                 );
               })}
             </div>
 
-            {/* Filtros e busca com melhor design */}
-            <div className="space-y-3 sm:space-y-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            {/* Filtros e busca com design verde/amarelo moderno */}
+            <div className="space-y-3 sm:space-y-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <div className="relative">
-                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground pointer-events-none" />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl pointer-events-none">
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
                 <Input
                   placeholder="Buscar por ID, número, talhão..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 sm:pl-12 h-10 sm:h-12 text-sm sm:text-base shadow-sm transition-all focus:scale-[1.01] focus:shadow-md duration-300 border-2"
+                  className="pl-14 sm:pl-16 h-12 sm:h-14 text-sm sm:text-base shadow-lg transition-all focus:scale-[1.01] focus:shadow-xl duration-300 border-2 border-green-200 focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 rounded-2xl bg-white font-medium"
                   data-testid="input-search"
                 />
               </div>
 
-              <div className="flex gap-2 flex-wrap items-center">
-                <span className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                  Filtrar:
-                </span>
-                <Badge
-                  variant={statusFilter === "all" ? "default" : "outline"}
-                  className="cursor-pointer hover-elevate px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm transition-all hover:scale-105 duration-300"
-                  onClick={() => setStatusFilter("all")}
-                  data-testid="filter-all"
-                >
-                  Todos ({bales.length})
-                </Badge>
-                {statusCards.map((card) => (
+              <Card className="p-4 bg-gradient-to-r from-green-50/80 to-yellow-50/60 border-2 border-green-200 rounded-2xl shadow-md">
+                <div className="flex gap-2 flex-wrap items-center">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border-2 border-green-300 shadow-sm">
+                    <Filter className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-bold text-green-800">Filtrar:</span>
+                  </div>
                   <Badge
-                    key={card.status}
-                    variant={statusFilter === card.status ? "default" : "outline"}
-                    className="cursor-pointer hover-elevate px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm transition-all hover:scale-105 duration-300"
-                    onClick={() => setStatusFilter(card.status)}
-                    data-testid={`filter-${card.status}`}
+                    variant={statusFilter === "all" ? "default" : "outline"}
+                    className={`cursor-pointer px-4 py-2 text-xs sm:text-sm transition-all hover:scale-105 duration-300 rounded-xl font-bold border-2 ${
+                      statusFilter === "all"
+                        ? "bg-gradient-to-r from-green-600 to-green-700 text-white border-yellow-400 shadow-lg hover:shadow-xl"
+                        : "border-green-300 bg-white hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 text-green-700"
+                    }`}
+                    onClick={() => setStatusFilter("all")}
+                    data-testid="filter-all"
                   >
-                    {card.label} ({card.count})
+                    Todos ({bales.length})
                   </Badge>
-                ))}
-              </div>
+                  {statusCards.map((card) => (
+                    <Badge
+                      key={card.status}
+                      variant={statusFilter === card.status ? "default" : "outline"}
+                      className={`cursor-pointer px-4 py-2 text-xs sm:text-sm transition-all hover:scale-105 duration-300 rounded-xl font-bold border-2 ${
+                        statusFilter === card.status
+                          ? "bg-gradient-to-r from-green-600 to-green-700 text-white border-yellow-400 shadow-lg hover:shadow-xl"
+                          : "border-green-300 bg-white hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 text-green-700"
+                      }`}
+                      onClick={() => setStatusFilter(card.status)}
+                      data-testid={`filter-${card.status}`}
+                    >
+                      {card.label} ({card.count})
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
             </div>
 
             {/* Lista de Fardos com melhor espaçamento */}
@@ -297,16 +344,19 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : filteredBales.length === 0 ? (
-              <Card className="p-8 sm:p-12 animate-fade-in-up shadow-lg">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center animate-bounce-gentle">
-                    <Package className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
+              <Card className="p-8 sm:p-12 animate-fade-in-up shadow-2xl border-2 border-green-200 rounded-3xl bg-gradient-to-br from-white via-green-50/30 to-yellow-50/20">
+                <div className="text-center space-y-6">
+                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-600 rounded-full animate-pulse opacity-20"></div>
+                    <div className="absolute inset-2 bg-gradient-to-br from-green-500 to-yellow-500 rounded-full flex items-center justify-center shadow-xl">
+                      <Package className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
                       Nenhum fardo encontrado
                     </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                    <p className="text-sm sm:text-base text-green-700 mt-3 font-medium">
                       {searchQuery || statusFilter !== "all"
                         ? "Tente ajustar os filtros de busca"
                         : "Cadastre o primeiro fardo no sistema"}
