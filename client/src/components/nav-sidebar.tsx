@@ -1,8 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+// Create context for sidebar state
+const SidebarContext = createContext<{ collapsed: boolean }>({ collapsed: false });
+
+export function useSidebar() {
+  return useContext(SidebarContext);
+}
 import {
   LayoutDashboard,
   Package,
@@ -112,12 +119,12 @@ export function NavSidebar() {
   );
 
   return (
-    <>
+    <SidebarContext.Provider value={{ collapsed }}>
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden lg:block fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out bg-gradient-to-b from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800 border-r border-green-100 dark:border-gray-700 shadow-lg",
-          collapsed ? "w-16" : "w-64"
+          "hidden lg:block fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out bg-gradient-to-b from-green-50 to-yellow-50/30 dark:from-gray-900 dark:to-gray-800 border-r-2 border-green-200 dark:border-gray-700 shadow-xl",
+          collapsed ? "w-20" : "w-64"
         )}
       >
       <div className="flex h-full flex-col">
@@ -300,6 +307,6 @@ export function NavSidebar() {
             })}
         </div>
       </nav>
-    </>
+    </SidebarContext.Provider>
   );
 }

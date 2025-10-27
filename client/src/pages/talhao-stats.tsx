@@ -734,28 +734,32 @@ export default function TalhaoStats() {
               )}
             </TabsContent>
 
-            {/* Tab: Gráficos Interativos */}
+            {/* Tab: Gráficos Interativos - Modernizado */}
             <TabsContent value="graficos" className="space-y-6 mt-4">
-              {/* Filtros */}
-              <Card className="shadow-lg border-2 rounded-xl overflow-hidden">
+              {/* Filtros - Modernizado */}
+              <Card className="shadow-lg border-2 border-green-200 rounded-2xl overflow-hidden bg-gradient-to-r from-green-50/80 to-yellow-50/60">
                 <CardContent className="pt-6 pb-6 space-y-4">
                   {/* Título dos Filtros */}
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-primary/10 rounded-lg">
-                      <Filter className="w-4 h-4 text-primary" />
+                    <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md">
+                      <Filter className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm font-bold">Filtros:</span>
+                    <span className="text-sm font-bold text-green-800">Filtros:</span>
                   </div>
-                  
+
                   {/* Filtros de Tempo */}
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Período</label>
+                    <label className="text-xs font-bold text-green-700 uppercase tracking-wider">Período</label>
                     <div className="grid grid-cols-3 gap-2">
                       <Button
                         size="sm"
                         variant={timeFilter === "7d" ? "default" : "outline"}
                         onClick={() => setTimeFilter("7d")}
-                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          timeFilter === "7d"
+                            ? "bg-gradient-to-r from-green-600 to-green-700 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 text-green-700"
+                        }`}
                       >
                         7 dias
                       </Button>
@@ -763,7 +767,11 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "30d" ? "default" : "outline"}
                         onClick={() => setTimeFilter("30d")}
-                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          timeFilter === "30d"
+                            ? "bg-gradient-to-r from-green-600 to-green-700 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 text-green-700"
+                        }`}
                       >
                         30 dias
                       </Button>
@@ -771,7 +779,11 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={timeFilter === "all" ? "default" : "outline"}
                         onClick={() => setTimeFilter("all")}
-                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          timeFilter === "all"
+                            ? "bg-gradient-to-r from-green-600 to-green-700 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 text-green-700"
+                        }`}
                       >
                         Todos
                       </Button>
@@ -780,13 +792,17 @@ export default function TalhaoStats() {
 
                   {/* Filtros de Status */}
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
+                    <label className="text-xs font-bold text-green-700 uppercase tracking-wider">Status</label>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         size="sm"
                         variant={chartFilter === "all" ? "default" : "outline"}
                         onClick={() => setChartFilter("all")}
-                        className="rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          chartFilter === "all"
+                            ? "bg-gradient-to-r from-green-600 to-green-700 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 text-green-700"
+                        }`}
                       >
                         Todos
                       </Button>
@@ -794,7 +810,11 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "campo" ? "default" : "outline"}
                         onClick={() => setChartFilter("campo")}
-                        className={chartFilter === "campo" ? "bg-bale-campo hover:bg-bale-campo/90 rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2" : "rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"}
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          chartFilter === "campo"
+                            ? "bg-bale-campo hover:bg-bale-campo/90 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-green-50 text-green-700"
+                        }`}
                       >
                         Campo
                       </Button>
@@ -802,7 +822,11 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "patio" ? "default" : "outline"}
                         onClick={() => setChartFilter("patio")}
-                        className={chartFilter === "patio" ? "bg-bale-patio hover:bg-bale-patio/90 rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2" : "rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"}
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          chartFilter === "patio"
+                            ? "bg-bale-patio hover:bg-bale-patio/90 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-green-50 text-green-700"
+                        }`}
                       >
                         Pátio
                       </Button>
@@ -810,7 +834,11 @@ export default function TalhaoStats() {
                         size="sm"
                         variant={chartFilter === "beneficiado" ? "default" : "outline"}
                         onClick={() => setChartFilter("beneficiado")}
-                        className={chartFilter === "beneficiado" ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90 rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2" : "rounded-lg font-semibold text-[10px] sm:text-xs h-9 px-2"}
+                        className={`rounded-xl font-bold text-[10px] sm:text-xs h-10 px-3 transition-all ${
+                          chartFilter === "beneficiado"
+                            ? "bg-bale-beneficiado hover:bg-bale-beneficiado/90 text-white border-2 border-yellow-400 shadow-lg"
+                            : "border-2 border-green-300 hover:border-yellow-400 hover:bg-green-50 text-green-700"
+                        }`}
                       >
                         Beneficiado
                       </Button>
@@ -819,14 +847,14 @@ export default function TalhaoStats() {
                 </CardContent>
               </Card>
 
-              {/* Gráfico de Produção por Talhão */}
-              <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white relative overflow-hidden">
+              {/* Gráfico de Produção por Talhão - Modernizado */}
+              <Card className="shadow-xl border-2 border-green-200 rounded-3xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-green-500 via-green-600 to-yellow-500 text-white relative overflow-hidden">
                   <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                   </div>
                   <CardTitle className="flex items-center gap-2 relative text-base sm:text-lg">
-                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                       <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     Produção por Talhão
@@ -1158,20 +1186,21 @@ export default function TalhaoStats() {
               </Card>
             </TabsContent>
 
-            {/* Tab: Mapa */}
+            {/* Tab: Mapa - Modernizado */}
             <TabsContent value="mapa" className="mt-4">
-              <Card className="shadow-xl border-2 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white relative overflow-hidden">
+              <Card className="shadow-2xl border-2 border-green-200 rounded-3xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-green-500 via-green-600 to-yellow-500 text-white relative overflow-hidden">
                   <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-300 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
                   </div>
-                  <CardTitle className="flex items-center gap-2 relative">
-                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                  <CardTitle className="flex items-center gap-2 relative text-lg sm:text-xl font-bold">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                       <MapPin className="w-5 h-5" />
                     </div>
                     Mapa Interativo dos Talhões
                   </CardTitle>
-                  <p className="text-sm text-white/90 relative">Clique em um talhão para ver detalhes</p>
+                  <p className="text-sm text-white font-semibold relative mt-1">Clique em um talhão para ver detalhes</p>
                 </CardHeader>
                 <CardContent className="p-0">
                   <InteractiveTalhaoMap 
