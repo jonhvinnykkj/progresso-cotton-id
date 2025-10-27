@@ -11,6 +11,10 @@ console.log("✅ Environment variables validated successfully");
 
 const app = express();
 
+// Trust proxy - Required for Railway and other reverse proxies
+// This enables Express to trust X-Forwarded-* headers
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
