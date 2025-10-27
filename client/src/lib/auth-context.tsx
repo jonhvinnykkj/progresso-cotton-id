@@ -96,23 +96,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
-      
-      // Clear localStorage (keep user session)
+
+      // Clear localStorage (keep user session and tokens)
       const currentUser = localStorage.getItem("cotton_user");
+      const currentRole = localStorage.getItem("cotton_selected_role");
+      const currentAccessToken = localStorage.getItem("cotton_access_token");
+      const currentRefreshToken = localStorage.getItem("cotton_refresh_token");
+
       localStorage.clear();
+
       if (currentUser) {
         localStorage.setItem("cotton_user", currentUser);
       }
-      
+      if (currentRole) {
+        localStorage.setItem("cotton_selected_role", currentRole);
+      }
+      if (currentAccessToken) {
+        localStorage.setItem("cotton_access_token", currentAccessToken);
+      }
+      if (currentRefreshToken) {
+        localStorage.setItem("cotton_refresh_token", currentRefreshToken);
+      }
+
       // Clear sessionStorage
       sessionStorage.clear();
-      
+
       // Unregister service worker
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map(reg => reg.unregister()));
       }
-      
+
       // Hard reload
       window.location.reload();
     } catch (error) {
