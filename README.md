@@ -68,6 +68,7 @@ npm run dev:server
 - `npm run preview` - Preview do build de produção
 - `npm run check` - Verificação de tipos TypeScript
 - `npm run db:push` - Atualiza schema do banco
+- `npm run db:migrate-passwords` - **[IMPORTANTE]** Migra senhas existentes para bcrypt (executar uma vez após atualização)
 
 ### Estrutura do Projeto
 
@@ -115,9 +116,35 @@ O projeto está configurado para desenvolvimento local com:
 
 O projeto usa Drizzle ORM com PostgreSQL. Configure sua `DATABASE_URL` no arquivo `.env` e execute `npm run db:push` para criar as tabelas.
 
+## 🔒 Segurança
+
+O projeto implementa as seguintes medidas de segurança:
+
+- ✅ **Autenticação JWT** com access e refresh tokens
+- ✅ **Hash de senhas** com bcrypt (10 salt rounds)
+- ✅ **Rate limiting** nas rotas de autenticação (5 tentativas/15min)
+- ✅ **Helmet.js** para headers de segurança HTTP
+- ✅ **CORS** configurável
+- ✅ **Autorização baseada em papéis** (RBAC)
+- ✅ **Validação de variáveis de ambiente**
+
+**IMPORTANTE:** Se você está atualizando de uma versão anterior, execute:
+```bash
+npm run db:migrate-passwords
+```
+
+Este comando converte senhas de texto plano para bcrypt hash. Execute **apenas uma vez**.
+
+Para mais informações, consulte [SECURITY.md](SECURITY.md).
+
 ### Deploy
 
-Para deploy em produção, use:
+Para deploy em produção:
+
+1. Configure as variáveis de ambiente (especialmente `JWT_SECRET`)
+2. Execute a migração de senhas se necessário
+3. Faça o build e inicie:
+
 ```bash
 npm run build
 npm start

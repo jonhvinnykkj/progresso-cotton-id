@@ -13,6 +13,7 @@ import { nanoid } from "nanoid";
 import { db } from "./db";
 import { users as usersTable, bales as balesTable, settings as settingsTable, talhaoCounters as talhaoCountersTable } from "@shared/schema";
 import { eq, sql, inArray } from "drizzle-orm";
+import { hashPassword } from "./auth";
 
 export interface IStorage {
   // User methods
@@ -75,10 +76,13 @@ export class PostgresStorage implements IStorage {
   }
 
   async createUser(insertUser: Omit<InsertUser, 'roles'> & { createdBy?: string; roles: string[] | UserRole[] }): Promise<User> {
+    // Hash password before storing
+    const hashedPassword = await hashPassword(insertUser.password);
+
     const result = await db.insert(usersTable).values({
       username: insertUser.username,
       displayName: insertUser.displayName,
-      password: insertUser.password,
+      password: hashedPassword,
       roles: JSON.stringify(insertUser.roles),
       createdBy: insertUser.createdBy,
     }).returning();

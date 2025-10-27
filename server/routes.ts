@@ -1,7 +1,6 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import type { User as SchemaUser } from "@shared/schema";
 import {
   loginSchema,
   createUserSchema,
@@ -10,23 +9,38 @@ import {
   updateDefaultSafraSchema,
 } from "@shared/schema";
 import { addClient, notifyBaleChange } from "./events";
+import {
+  verifyPassword,
+  generateAccessToken,
+  generateRefreshToken,
+  authenticateToken,
+  authorizeRoles,
+} from "./auth";
+import rateLimit from "express-rate-limit";
 
-// Estender Request do Express com métodos do Passport
-declare global {
-  namespace Express {
-    // Usar o tipo User do schema
-    type User = SchemaUser;
-  }
+// Extend Express Request with JWT payload
+interface JWTPayload {
+  userId: string;
+  username: string;
+  roles: string[];
 }
 
 declare module "express-serve-static-core" {
   interface Request {
-    isAuthenticated(): boolean;
-    user?: Express.User;
+    user?: JWTPayload;
   }
 }
 import { z } from "zod";
 import { generatePDF, generateExcel } from "./reports";
+
+// Rate limiter for authentication routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 requests per window
+  message: "Muitas tentativas de login. Tente novamente em 15 minutos.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Server-Sent Events endpoint for real-time updates
@@ -43,17 +57,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", authLimiter, async (req, res) => {
     try {
       const { username, password } = loginSchema.parse(req.body);
 
       const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
+
+      if (!user) {
         return res.status(401).json({
           error: "Credenciais inválidas",
         });
       }
+
+      // Verify password using bcrypt
+      const isPasswordValid = await verifyPassword(password, user.password);
+
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          error: "Credenciais inválidas",
+        });
+      }
+
+      // Generate tokens
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
 
       const { password: _, ...userWithoutPassword } = user;
 
@@ -63,6 +90,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         ...userWithoutPassword,
         availableRoles, // Adiciona array de papéis disponíveis
+        accessToken,
+        refreshToken,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -78,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management routes (superadmin only)
-  app.get("/api/users", async (req, res) => {
+  app.get("/api/users", authenticateToken, authorizeRoles("superadmin"), async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       // Remove passwords from response
@@ -92,10 +121,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", authenticateToken, authorizeRoles("superadmin"), async (req, res) => {
     try {
       const userData = createUserSchema.parse(req.body);
-      const creatorId = req.body.createdBy; // ID do super admin que está criando
+      const creatorId = req.user?.userId || req.body.createdBy; // ID do super admin que está criando (do JWT)
 
       const newUser = await storage.createUser({
         username: userData.username,
@@ -121,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/users/:id/roles", async (req, res) => {
+  app.patch("/api/users/:id/roles", authenticateToken, authorizeRoles("superadmin"), async (req, res) => {
     try {
       const { id } = req.params;
       const { roles } = req.body;
@@ -143,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete user (superadmin only)
-  app.delete("/api/users/:id", async (req, res) => {
+  app.delete("/api/users/:id", authenticateToken, authorizeRoles("superadmin"), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -160,9 +189,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bale routes
-  
-  // Get bale statistics
-  app.get("/api/bales/stats", async (req, res) => {
+
+  // Get bale statistics (requires authentication)
+  app.get("/api/bales/stats", authenticateToken, async (req, res) => {
     try {
       const stats = await storage.getBaleStats();
       res.json(stats);
@@ -175,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get bale stats by talhao
-  app.get("/api/bales/stats-by-talhao", async (req, res) => {
+  app.get("/api/bales/stats-by-talhao", authenticateToken, async (req, res) => {
     try {
       const stats = await storage.getBaleStatsByTalhao();
       res.json(stats);
@@ -188,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get bale stats by safra
-  app.get("/api/bales/stats-by-safra", async (req, res) => {
+  app.get("/api/bales/stats-by-safra", authenticateToken, async (req, res) => {
     try {
       const stats = await storage.getStatsBySafra();
       res.json(stats);
@@ -201,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all bales
-  app.get("/api/bales", async (req, res) => {
+  app.get("/api/bales", authenticateToken, async (req, res) => {
     try {
       const bales = await storage.getAllBales();
       res.json(bales);
@@ -214,10 +243,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get bale by ID
-  app.get("/api/bales/:id", async (req, res) => {
+  app.get("/api/bales/:id", authenticateToken, async (req, res) => {
     try {
       const bale = await storage.getBale(req.params.id);
-      
+
       if (!bale) {
         return res.status(404).json({
           error: "Fardo não encontrado",
@@ -233,10 +262,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create single bale
-  app.post("/api/bales", async (req, res) => {
+  // Create single bale (requires campo, admin or superadmin role)
+  app.post("/api/bales", authenticateToken, authorizeRoles("campo", "admin", "superadmin"), async (req, res) => {
     try {
-      const { id, safra, talhao, numero, userId } = req.body;
+      const { id, safra, talhao, numero } = req.body;
 
       if (!id || !safra || !talhao || !numero) {
         return res.status(400).json({
@@ -252,9 +281,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create single bale with userId from request or fallback
-      const finalUserId = userId || "campo-user";
-      const bale = await storage.createSingleBale(id, safra, talhao, numero, finalUserId);
+      // Use userId from JWT token
+      const userId = req.user?.userId || "unknown-user";
+      const bale = await storage.createSingleBale(id, safra, talhao, numero, userId);
 
       // Notify all clients about the new bale
       notifyBaleChange();
@@ -268,16 +297,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create bales in batch (NEW)
-  app.post("/api/bales/batch", async (req, res) => {
+  // Create bales in batch (requires campo, admin or superadmin role)
+  app.post("/api/bales/batch", authenticateToken, authorizeRoles("campo", "admin", "superadmin"), async (req, res) => {
     try {
-      const { userId, ...data } = req.body;
-      const validatedData = batchCreateBalesSchema.parse(data);
+      const validatedData = batchCreateBalesSchema.parse(req.body);
 
-      // Use userId from request or fallback to generic user
-      const finalUserId = userId || "campo-user";
+      // Use userId from JWT token
+      const userId = req.user?.userId || "unknown-user";
 
-      const bales = await storage.batchCreateBales(validatedData, finalUserId);
+      const bales = await storage.batchCreateBales(validatedData, userId);
 
       // Notify all clients about the new bales
       notifyBaleChange();
@@ -305,18 +333,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update bale status (SEM GPS)
-  app.patch("/api/bales/:id/status", async (req, res) => {
+  // Update bale status (requires transporte for patio, algodoeira for beneficiado)
+  app.patch("/api/bales/:id/status", authenticateToken, async (req, res) => {
     try {
-      const { status, userId } = updateBaleStatusSchema.parse(req.body);
+      const { status } = updateBaleStatusSchema.parse(req.body);
 
-      // Use userId from request or fallback to status-user
-      const finalUserId = userId || `${status}-user`;
+      // Check role authorization based on status
+      const userRoles = req.user?.roles || [];
+
+      if (status === "patio" && !userRoles.includes("transporte") && !userRoles.includes("admin") && !userRoles.includes("superadmin")) {
+        return res.status(403).json({
+          error: "Apenas usuários com papel 'transporte', 'admin' ou 'superadmin' podem mover fardos para o pátio",
+        });
+      }
+
+      if (status === "beneficiado" && !userRoles.includes("algodoeira") && !userRoles.includes("admin") && !userRoles.includes("superadmin")) {
+        return res.status(403).json({
+          error: "Apenas usuários com papel 'algodoeira', 'admin' ou 'superadmin' podem beneficiar fardos",
+        });
+      }
+
+      // Use userId from JWT token
+      const userId = req.user?.userId || "unknown-user";
 
       const bale = await storage.updateBaleStatus(
         req.params.id,
         status,
-        finalUserId
+        userId
       );
 
       // Notify all clients about the status change
@@ -345,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete all bales (superadmin only) - DEVE VIR ANTES DO DELETE BY ID
-  app.delete("/api/bales/all", async (req, res) => {
+  app.delete("/api/bales/all", authenticateToken, authorizeRoles("superadmin"), async (req, res) => {
     try {
       console.log("=== DELETE /api/bales/all ===");
       console.log("Body:", req.body);
@@ -380,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete single bale (admin or superadmin only)
-  app.delete("/api/bales/:id", async (req, res) => {
+  app.delete("/api/bales/:id", authenticateToken, authorizeRoles("admin", "superadmin"), async (req, res) => {
     try {
       const { id } = req.params;
       console.log(`Deleting bale: ${id}`);
@@ -397,10 +440,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Settings endpoints
-  app.get("/api/settings/default-safra", async (req, res) => {
+  app.get("/api/settings/default-safra", authenticateToken, async (req, res) => {
     try {
       const setting = await storage.getSetting("default_safra");
-      
+
       if (!setting) {
         return res.json({ value: "" });
       }
@@ -414,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/settings/default-safra", async (req, res) => {
+  app.put("/api/settings/default-safra", authenticateToken, authorizeRoles("admin", "superadmin"), async (req, res) => {
     try {
       const { value } = updateDefaultSafraSchema.parse(req.body);
 
@@ -436,8 +479,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reports endpoints
-  app.get("/api/reports/pdf", async (req, res) => {
+  // Reports endpoints (requires authentication)
+  app.get("/api/reports/pdf", authenticateToken, async (req, res) => {
     try {
       const bales = await storage.getAllBales();
       
@@ -461,7 +504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/excel", async (req, res) => {
+  app.get("/api/reports/excel", authenticateToken, async (req, res) => {
     try {
       const bales = await storage.getAllBales();
       

@@ -4,11 +4,14 @@ import type { User, UserRole } from "@shared/schema";
 interface AuthContextType {
   user: User | null;
   selectedRole: UserRole | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   setSelectedRole: (role: UserRole) => void;
-  login: (user: User, selectedRole?: UserRole) => void;
+  login: (user: User, accessToken: string, refreshToken: string, selectedRole?: UserRole) => void;
   logout: () => void;
   isAuthenticated: boolean;
   clearCacheAndReload: () => Promise<void>;
+  getAuthHeaders: () => HeadersInit;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,13 +19,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRoleState] = useState<UserRole | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("cotton_user");
     const storedRole = localStorage.getItem("cotton_selected_role");
-    if (storedUser) {
+    const storedAccessToken = localStorage.getItem("cotton_access_token");
+    const storedRefreshToken = localStorage.getItem("cotton_refresh_token");
+
+    if (storedUser && storedAccessToken) {
       try {
         setUser(JSON.parse(storedUser));
+        setAccessToken(storedAccessToken);
+        setRefreshToken(storedRefreshToken);
+
         if (storedRole) {
           setSelectedRoleState(storedRole as UserRole);
         }
@@ -30,14 +41,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("cotton_user");
         localStorage.removeItem("cotton_selected_role");
+        localStorage.removeItem("cotton_access_token");
+        localStorage.removeItem("cotton_refresh_token");
       }
     }
   }, []);
 
-  const login = (newUser: User, role?: UserRole) => {
+  const login = (newUser: User, newAccessToken: string, newRefreshToken: string, role?: UserRole) => {
     setUser(newUser);
+    setAccessToken(newAccessToken);
+    setRefreshToken(newRefreshToken);
+
     localStorage.setItem("cotton_user", JSON.stringify(newUser));
-    
+    localStorage.setItem("cotton_access_token", newAccessToken);
+    localStorage.setItem("cotton_refresh_token", newRefreshToken);
+
     if (role) {
       setSelectedRoleState(role);
       localStorage.setItem("cotton_selected_role", role);
@@ -52,8 +70,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     setSelectedRoleState(null);
+    setAccessToken(null);
+    setRefreshToken(null);
+
     localStorage.removeItem("cotton_user");
     localStorage.removeItem("cotton_selected_role");
+    localStorage.removeItem("cotton_access_token");
+    localStorage.removeItem("cotton_refresh_token");
+  };
+
+  const getAuthHeaders = (): HeadersInit => {
+    if (!accessToken) {
+      return {};
+    }
+
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    };
   };
 
   const clearCacheAndReload = async () => {
@@ -94,11 +127,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         selectedRole,
+        accessToken,
+        refreshToken,
         setSelectedRole,
         login,
         logout,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!accessToken,
         clearCacheAndReload,
+        getAuthHeaders,
       }}
     >
       {children}

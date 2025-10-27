@@ -160,12 +160,12 @@ export default function Login() {
         throw new Error("Credenciais inválidas");
       }
 
-      const user = await response.json();
+      const userData = await response.json();
 
       // Sempre mostrar dialog de seleção de papel
-      if (user.availableRoles && user.availableRoles.length > 0) {
-        setPendingUser(user);
-        setAvailableRoles(user.availableRoles);
+      if (userData.availableRoles && userData.availableRoles.length > 0) {
+        setPendingUser(userData);
+        setAvailableRoles(userData.availableRoles);
         setShowRoleSelector(true);
         setIsLoading(false);
         return;
@@ -193,8 +193,11 @@ export default function Login() {
     }
   };
 
-  const completeLogin = (user: any, role: UserRole) => {
-    login(user, role);
+  const completeLogin = (userData: any, role: UserRole) => {
+    // Extract tokens from userData
+    const { accessToken, refreshToken, ...user } = userData;
+
+    login(user, accessToken, refreshToken, role);
 
     toast({
       variant: "success",
