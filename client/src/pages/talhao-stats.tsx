@@ -561,63 +561,84 @@ export default function TalhaoStats() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {/* Campo */}
-                      <div className="space-y-2" data-testid={`stats-campo-${stat.talhao}`}>
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-bale-campo/10 rounded-lg">
-                              <Package className="w-4 h-4 text-bale-campo" data-testid={`icon-campo-${stat.talhao}`} />
+                      <div className="space-y-2.5 p-3 bg-gradient-to-r from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-900/10 rounded-xl border border-yellow-200 dark:border-yellow-800" data-testid={`stats-campo-${stat.talhao}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-md">
+                              <Package className="w-4 h-4 text-white" data-testid={`icon-campo-${stat.talhao}`} />
                             </div>
-                            <span className="font-semibold">Campo</span>
+                            <span className="font-bold text-sm text-yellow-900 dark:text-yellow-100">Campo</span>
                           </div>
-                          <span className="font-bold text-foreground" data-testid={`text-campo-count-${stat.talhao}`}>
-                            {stat.campo} <span className="text-muted-foreground font-medium">({progressCampo.toFixed(0)}%)</span>
-                          </span>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-2xl text-yellow-700 dark:text-yellow-300" data-testid={`text-campo-count-${stat.talhao}`}>
+                              {stat.campo}
+                            </span>
+                            <span className="text-sm font-bold text-yellow-600 dark:text-yellow-400">
+                              ({progressCampo.toFixed(0)}%)
+                            </span>
+                          </div>
                         </div>
-                        <Progress 
-                          value={progressCampo} 
-                          className="h-2.5 rounded-full"
-                          data-testid={`progress-campo-${stat.talhao}`}
-                        />
+                        <div className="relative h-3 bg-yellow-200/50 dark:bg-yellow-900/30 rounded-full overflow-hidden">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full shadow-sm transition-all duration-700 ease-out"
+                            style={{ width: `${progressCampo}%` }}
+                            data-testid={`progress-campo-${stat.talhao}`}
+                          />
+                        </div>
                       </div>
 
                       {/* Pátio */}
-                      <div className="space-y-2" data-testid={`stats-patio-${stat.talhao}`}>
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-bale-patio/10 rounded-lg">
-                              <Truck className="w-4 h-4 text-bale-patio" data-testid={`icon-patio-${stat.talhao}`} />
+                      <div className="space-y-2.5 p-3 bg-gradient-to-r from-green-50 to-emerald-100/50 dark:from-green-950/20 dark:to-emerald-900/10 rounded-xl border border-green-200 dark:border-green-800" data-testid={`stats-patio-${stat.talhao}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
+                              <Truck className="w-4 h-4 text-white" data-testid={`icon-patio-${stat.talhao}`} />
                             </div>
-                            <span className="font-semibold">Pátio</span>
+                            <span className="font-bold text-sm text-green-900 dark:text-green-100">Pátio</span>
                           </div>
-                          <span className="font-bold text-foreground" data-testid={`text-patio-count-${stat.talhao}`}>
-                            {stat.patio} <span className="text-muted-foreground font-medium">({progressPatio.toFixed(0)}%)</span>
-                          </span>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-2xl text-green-700 dark:text-green-300" data-testid={`text-patio-count-${stat.talhao}`}>
+                              {stat.patio}
+                            </span>
+                            <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                              ({progressPatio.toFixed(0)}%)
+                            </span>
+                          </div>
                         </div>
-                        <Progress 
-                          value={progressPatio} 
-                          className="h-2.5 rounded-full [&>div]:bg-bale-patio"
-                          data-testid={`progress-patio-${stat.talhao}`}
-                        />
+                        <div className="relative h-3 bg-green-200/50 dark:bg-green-900/30 rounded-full overflow-hidden">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 rounded-full shadow-sm transition-all duration-700 ease-out"
+                            style={{ width: `${progressPatio}%` }}
+                            data-testid={`progress-patio-${stat.talhao}`}
+                          />
+                        </div>
                       </div>
 
                       {/* Beneficiado */}
-                      <div className="space-y-2" data-testid={`stats-beneficiado-${stat.talhao}`}>
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-bale-beneficiado/10 rounded-lg">
-                              <CheckCircle className="w-4 h-4 text-bale-beneficiado" data-testid={`icon-beneficiado-${stat.talhao}`} />
+                      <div className="space-y-2.5 p-3 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 rounded-xl border border-green-300 dark:border-green-700" data-testid={`stats-beneficiado-${stat.talhao}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-green-700 to-green-800 rounded-xl shadow-md">
+                              <CheckCircle className="w-4 h-4 text-white" data-testid={`icon-beneficiado-${stat.talhao}`} />
                             </div>
-                            <span className="font-semibold">Beneficiado</span>
+                            <span className="font-bold text-sm text-green-900 dark:text-green-100">Beneficiado</span>
                           </div>
-                          <span className="font-bold text-foreground" data-testid={`text-beneficiado-count-${stat.talhao}`}>
-                            {stat.beneficiado} <span className="text-muted-foreground font-medium">({progressBeneficiado.toFixed(0)}%)</span>
-                          </span>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-2xl text-green-800 dark:text-green-200" data-testid={`text-beneficiado-count-${stat.talhao}`}>
+                              {stat.beneficiado}
+                            </span>
+                            <span className="text-sm font-bold text-green-700 dark:text-green-300">
+                              ({progressBeneficiado.toFixed(0)}%)
+                            </span>
+                          </div>
                         </div>
-                        <Progress 
-                          value={progressBeneficiado} 
-                          className="h-2.5 rounded-full [&>div]:bg-bale-beneficiado"
-                          data-testid={`progress-beneficiado-${stat.talhao}`}
-                        />
+                        <div className="relative h-3 bg-green-200/50 dark:bg-green-900/40 rounded-full overflow-hidden">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-600 via-green-700 to-green-800 rounded-full shadow-sm transition-all duration-700 ease-out"
+                            style={{ width: `${progressBeneficiado}%` }}
+                            data-testid={`progress-beneficiado-${stat.talhao}`}
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

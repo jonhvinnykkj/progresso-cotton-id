@@ -34,13 +34,14 @@ import {
   WifiOff,
   Wifi,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import logoProgresso from "/favicon.png";
 
 export default function Transporte() {
   const [, setLocation] = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, selectedRole } = useAuth();
   const { toast } = useToast();
   const [showScanner, setShowScanner] = useState(false);
   const [showManualInput, setShowManualInput] = useState(false);
@@ -207,15 +208,28 @@ export default function Transporte() {
                 </div>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              data-testid="button-logout"
-              className="h-9 shrink-0 hover:scale-105 transition-transform duration-300"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {(selectedRole === "admin" || selectedRole === "superadmin") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/dashboard")}
+                  className="shrink-0 transition-all hover:scale-105 duration-300 border-2 border-green-300 hover:border-yellow-400 hover:bg-yellow-50 rounded-xl font-semibold"
+                >
+                  <ArrowLeft className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Voltar</span>
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                data-testid="button-logout"
+                className="h-9 shrink-0 hover:scale-105 transition-transform duration-300"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>

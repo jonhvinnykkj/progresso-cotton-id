@@ -164,9 +164,13 @@ export default function BaleDetails() {
                     <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 via-green-500 to-yellow-600 bg-clip-text text-transparent">
                       Detalhes do Fardo
                     </h1>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-shadow">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-shadow ${
+                      bale.status === 'campo' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
+                      bale.status === 'patio' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                      'bg-gradient-to-r from-green-700 to-green-800'
+                    }`}>
                       <Package className="w-3.5 h-3.5" />
-                      Campo
+                      {bale.status.charAt(0).toUpperCase() + bale.status.slice(1)}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-medium mt-1">

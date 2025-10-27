@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus, Wheat, Hash, Calendar, Zap, Lightbulb, Tag, MapPin, Printer, Search, Filter } from "lucide-react";
+import { Package, LogOut, QrCode, Loader2, CheckCircle, Plus, Wheat, Hash, Calendar, Zap, Lightbulb, Tag, MapPin, Printer, Search, Filter, ArrowLeft } from "lucide-react";
 import logoProgresso from "/favicon.png";
 import { z } from "zod";
 import type { Bale } from "@shared/schema";
@@ -403,7 +403,7 @@ type SingleCreateForm = z.infer<typeof singleCreateSchema>;
 
 export default function Campo() {
   const [, setLocation] = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, selectedRole } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
@@ -611,16 +611,29 @@ export default function Campo() {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              data-testid="button-logout"
-              className="shrink-0 transition-all hover:scale-110 duration-300"
-            >
-              <LogOut className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Sair</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              {(selectedRole === "admin" || selectedRole === "superadmin") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/dashboard")}
+                  className="shrink-0 transition-all hover:scale-105 duration-300 border-2 border-green-300 hover:border-yellow-400 hover:bg-yellow-50 rounded-xl font-semibold"
+                >
+                  <ArrowLeft className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Voltar</span>
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                data-testid="button-logout"
+                className="shrink-0 transition-all hover:scale-110 duration-300"
+              >
+                <LogOut className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Sair</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
